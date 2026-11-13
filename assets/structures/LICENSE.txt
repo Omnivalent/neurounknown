@@ -1,0 +1,1 @@
+Structure files are AlphaFold DB predictions (https://alphafold.ebi.ac.uk), copyright EMBL-EBI / Google DeepMind, licensed under CC BY 4.0. Jumper et al., Nature 2021; Varadi et al., Nucleic Acids Res 2024. These are computational predictions, not experimental structures.
