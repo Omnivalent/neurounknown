@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,27 +7,25 @@
 <meta name="description" content="A reproducible computational screen for poorly characterised, disease-relevant human neuronal proteins. Computational hypotheses only — no discovery claims.">
 <style>
 :root{
- --bg:#ffffff; --panel:#f6f8fb; --panel2:#eef2f9; --ink:#1f2933; --muted:#5b6472;
- --accent:#1e3a8a; --accent2:#2563eb; --line:#dbe1ea;
- --low:#16a34a; --mod:#d97706; --high:#dc2626; --unknown:#6b7280; --warn:#b45309;
+ /* palette matched to the NeuroUnknown PDF reports */
+ --bg:#ffffff; --panel:#f3f4f6; --panel2:#eef2ff; --ink:#1f2933; --muted:#6b7280;
+ --accent:#1e3a8a; --accent2:#1d4ed8; --line:#d1d5db;
+ --violet:#6d28d9; --violet-soft:#ede9fe;
+ --note:#fef9c3; --note-line:#a16207; --ok:#f0fdf4; --ok-line:#166534;
+ --low:#16a34a; --mod:#f59e0b; --high:#dc2626; --unknown:#9ca3af; --warn:#a16207;
  --maxw:980px;
 }
 :root[data-theme="dark"]{
- --bg:#0e1420; --panel:#151d2b; --panel2:#1b2636; --ink:#e7edf5; --muted:#9aa6b8;
- --accent:#9db7ff; --accent2:#7aa2ff; --line:#27334a;
- --low:#34d399; --mod:#fbbf24; --high:#f87171; --unknown:#9ca3af; --warn:#fbbf24;
-}
-@media (prefers-color-scheme:dark){
- :root[data-theme="auto"]{
-  --bg:#0e1420; --panel:#151d2b; --panel2:#1b2636; --ink:#e7edf5; --muted:#9aa6b8;
-  --accent:#9db7ff; --accent2:#7aa2ff; --line:#27334a;
-  --low:#34d399; --mod:#fbbf24; --high:#f87171; --unknown:#9ca3af; --warn:#fbbf24;
- }
+ --bg:#0f172a; --panel:#1e293b; --panel2:#1e2a4a; --ink:#e5e7eb; --muted:#9ca3af;
+ --accent:#a5b4fc; --accent2:#93c5fd; --line:#334155;
+ --violet:#c4b5fd; --violet-soft:#2e1065;
+ --note:#3a3410; --note-line:#facc15; --ok:#052e16; --ok-line:#4ade80;
+ --low:#22c55e; --mod:#fbbf24; --high:#f87171; --unknown:#9ca3af; --warn:#facc15;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);
- font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+ font:16px/1.65 "DejaVu Sans",Verdana,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
  -webkit-font-smoothing:antialiased}
 a{color:var(--accent2);text-decoration:none}
 a:hover{text-decoration:underline}
@@ -46,7 +44,7 @@ header nav a:hover{color:var(--ink);text-decoration:none}
  header nav{order:3;width:100%;margin-left:0;gap:14px;padding-bottom:4px}
  .theme-btn{margin-left:auto}
 }
-.hero{padding:64px 0 28px;background:linear-gradient(180deg,var(--panel),transparent)}
+.hero{padding:64px 0 28px;background:linear-gradient(180deg,var(--panel2),transparent)}
 .hero h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0 0 12px;color:var(--accent)}
 .hero p.lead{font-size:clamp(16px,2.4vw,20px);color:var(--muted);max-width:720px;margin:0 0 20px}
 .hero .btns{display:flex;gap:12px;flex-wrap:wrap}
@@ -54,23 +52,23 @@ header nav a:hover{color:var(--ink);text-decoration:none}
  font-weight:600;font-size:15px}
 .btn:hover{text-decoration:none;filter:brightness(1.07)}
 .btn.ghost{background:transparent;color:var(--accent2);border:1px solid var(--accent2)}
-.caution{border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--bg));
+.caution{border:1px solid var(--accent);background:var(--panel2);
  border-radius:12px;padding:16px 18px;margin:22px 0;color:var(--ink)}
-.caution b{color:var(--warn)}
+.caution b{color:var(--accent)}
 section{padding:40px 0;border-top:1px solid var(--line)}
 section h2{font-size:clamp(22px,3.4vw,30px);color:var(--accent);margin:0 0 6px}
-section .kicker{color:var(--accent2);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
+section .kicker{color:var(--violet);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
 section p{max-width:760px}
 .grid{display:grid;gap:18px}
 .cards3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
 .card h3{margin:0 0 6px;font-size:17px}
 .card .big{font-size:30px;font-weight:800;color:var(--accent)}
-figure{margin:22px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+figure{margin:22px 0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
 figure img{max-width:100%;height:auto;border-radius:6px}
 figure figcaption{color:var(--muted);font-size:13px;text-align:left;margin-top:10px;font-style:italic}
 .steps{list-style:none;padding:0;margin:14px 0;display:grid;gap:10px}
-.steps li{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent2);
+.steps li{background:var(--violet-soft);border:1px solid var(--line);border-left:4px solid var(--violet);
  border-radius:8px;padding:10px 14px}
 .steps li b{color:var(--accent)}
 table.data{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:14px;display:block;overflow-x:auto}
@@ -88,11 +86,31 @@ td.hyp{min-width:260px}
 .filters button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;
  padding:5px 12px;font-size:13px;cursor:pointer}
 .filters button.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-.lead-box{background:var(--panel2);border:1px solid var(--accent2);border-radius:14px;padding:22px;margin-top:8px}
+.lead-box{background:var(--panel2);border:1px solid var(--accent);border-radius:14px;padding:22px;margin-top:8px}
+.genebar{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 10px}
+.genebar button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;
+ padding:5px 11px;font-size:13px;cursor:pointer}
+.genebar button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mol-grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px}
+@media(max-width:820px){.mol-grid{grid-template-columns:1fr}}
+#mol{position:relative;width:100%;height:480px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);touch-action:none}
+@media(max-width:820px){#mol{height:380px}}
+#molmsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;text-align:center;padding:20px;pointer-events:none}
+.molinfo{background:var(--panel2);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;font-size:14px}
+.molinfo h3{margin:0 0 4px;color:var(--accent);font-size:20px}
+.molinfo dl{margin:8px 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px}
+.molinfo dt{color:var(--muted)} .molinfo dd{margin:0}
+.ctrls{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ctrls button,.ctrls select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:5px 9px;font-size:13px;cursor:pointer}
+.ctrls label{font-size:13px;display:flex;align-items:center;gap:5px;margin-top:6px}
+.plddt{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.plddt i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-2px}
+.note{background:var(--note);border:1px solid var(--note-line);border-radius:12px;padding:16px 18px;margin:18px 0}
+.note b{color:var(--note-line)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:720px){.two{grid-template-columns:1fr}}
 .dl{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
-.dl a{flex:1 1 260px;display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.dl a{flex:1 1 260px;display:block;background:var(--ok);border:1px solid var(--ok-line);border-radius:12px;padding:16px}
 .dl a:hover{border-color:var(--accent2);text-decoration:none}
 .dl b{color:var(--accent);font-size:16px}
 .dl span{color:var(--muted);font-size:13px;display:block;margin-top:4px}
@@ -109,10 +127,11 @@ footer.site a{color:var(--muted);text-decoration:underline}
   <a href="#candidates">Candidates</a>
   <a href="#lead">Lead</a>
   <a href="#c11orf87">C11orf87</a>
+  <a href="#structures">3D</a>
   <a href="#biology">Biology</a>
   <a href="#downloads">Downloads</a>
  </nav>
- <button class="theme-btn" id="themeBtn" title="Toggle light/dark">◐</button>
+ <button class="theme-btn" id="themeBtn" title="Toggle light/dark">Dark mode</button>
 </div></header>
 
 <div class="hero"><div class="wrap">
@@ -319,6 +338,57 @@ footer.site a{color:var(--muted);text-decoration:underline}
  </div>
 </section>
 
+<section id="structures">
+ <p class="kicker">Interactive</p>
+ <h2>3D structures (predicted)</h2>
+ <p>Pick a protein. <b>Drag</b> to rotate, <b>scroll or pinch</b> to zoom, <b>right-drag</b> (or two-finger drag) to move it.
+ These are <b>AlphaFold predictions</b>, not experimentally solved structures. Colour shows how confident the prediction
+ is: blue parts are probably shaped like this; orange parts are floppy or uncertain.</p>
+ <div class="genebar" id="genebar"></div>
+ <div class="mol-grid">
+  <div id="mol"><div id="molmsg">Loading 3D viewer…</div></div>
+  <aside class="molinfo" id="molinfo">
+   <h3 id="mi-gene">–</h3>
+   <dl>
+    <dt>UniProt</dt><dd id="mi-uni">–</dd>
+    <dt>Length</dt><dd id="mi-len">–</dd>
+    <dt>Mean pLDDT</dt><dd id="mi-pl">–</dd>
+    <dt>Track</dt><dd id="mi-track">–</dd>
+    <dt>Competition</dt><dd id="mi-comp">–</dd>
+   </dl>
+   <div class="ctrls">
+    <button id="b-zin" title="Zoom in">Zoom +</button>
+    <button id="b-zout" title="Zoom out">Zoom −</button>
+    <button id="b-reset">Reset</button>
+    <button id="b-spin">Spin</button>
+   </div>
+   <div class="ctrls">
+    <select id="s-style" aria-label="Style">
+     <option value="cartoon">Cartoon</option>
+     <option value="surface">Surface</option>
+     <option value="stick">Sticks</option>
+    </select>
+    <select id="s-color" aria-label="Colour">
+     <option value="plddt">Colour: confidence</option>
+     <option value="rainbow">Colour: start → end</option>
+    </select>
+   </div>
+   <div class="ctrls"><label id="tm-wrap"><input type="checkbox" id="c-tm"> Highlight our predicted membrane segments</label></div>
+   <p class="small" id="mi-note" style="margin:8px 0 0"></p>
+  </aside>
+ </div>
+ <div class="plddt">
+  <span><i style="background:#0053D6"></i>Very high (&gt;90)</span>
+  <span><i style="background:#65CBF3"></i>Confident (70–90)</span>
+  <span><i style="background:#FFDB13"></i>Low (50–70)</span>
+  <span><i style="background:#FF7D45"></i>Very low (&lt;50)</span>
+  <span><i style="background:#7c3aed"></i>Our predicted membrane segment</span>
+ </div>
+ <p class="small">Structures: AlphaFold DB (Jumper et al., Nature 2021; Varadi et al., Nucleic Acids Res 2024), CC BY 4.0.
+ Viewer: 3Dmol.js (Rego &amp; Koes, Bioinformatics 2015), BSD licence.
+ Low-confidence regions should not be read as real shapes; many of these proteins are predicted to be partly disordered.</p>
+</section>
+
 <section id="biology">
  <p class="kicker">Illustrated</p>
  <h2>The biology</h2>
@@ -348,6 +418,10 @@ footer.site a{color:var(--muted);text-decoration:underline}
  </ul>
 </section>
 
+<div class="note"><b>In one line:</b> out of ~19,000 human genes, a careful, honest filter points to a
+ handful of overlooked brain proteins worth a real experiment, and TMEM222 is first in line. Nothing here is a
+ discovery: these are the best-justified next experiments, chosen from public data.</div>
+
 <section id="downloads">
  <p class="kicker">Read more</p>
  <h2>Full reports</h2>
@@ -374,12 +448,11 @@ footer.site a{color:var(--muted);text-decoration:underline}
 <script>
 (function(){
  var r=document.documentElement, b=document.getElementById('themeBtn');
- try{var s=localStorage.getItem('nu-theme'); if(s) r.setAttribute('data-theme',s);}catch(e){}
+ try{var s=localStorage.getItem('nu-theme'); if(s){ r.setAttribute('data-theme',s); if(s==='dark') b.textContent='Light mode'; }}catch(e){}
  b.addEventListener('click',function(){
   var cur=r.getAttribute('data-theme');
-  var mql=window.matchMedia('(prefers-color-scheme:dark)').matches;
-  var now=(cur==='dark')?'light':(cur==='light')?'dark':(mql?'light':'dark');
-  r.setAttribute('data-theme',now);
+  var now=(cur==='dark')?'light':'dark';
+  r.setAttribute('data-theme',now); b.textContent=now==='dark'?'Light mode':'Dark mode';
   try{localStorage.setItem('nu-theme',now);}catch(e){}
  });
  var tb=document.getElementById('candTable'), fs=document.getElementById('filters');
@@ -393,6 +466,86 @@ footer.site a{color:var(--muted);text-decoration:underline}
    row.style.display = show?'':'none';
   });
  });
+})();
+</script>
+<script src="assets/js/3Dmol-min.js" defer></script>
+<script>
+(function(){
+ var DATA = [{"gene": "TMEM222", "uniprot": "Q9H0R3", "file": "assets/structures/TMEM222.pdb", "version": 6, "plddt": 84.81, "len": 208, "tm": [[179, 208]], "track": "Mendelian mechanism", "comp": "low"}, {"gene": "C11orf87", "uniprot": "Q6NUJ2", "file": "assets/structures/C11orf87.pdb", "version": 6, "plddt": 57.84, "len": 197, "tm": [[53, 86]], "track": "Discovery (unstudied protein)", "comp": "low"}, {"gene": "TMEM240", "uniprot": "Q5SV17", "file": "assets/structures/TMEM240.pdb", "version": 6, "plddt": 58.75, "len": 173, "tm": [[3, 31], [87, 113]], "track": "Mendelian mechanism (follow-up)", "comp": "mod"}, {"gene": "SYT14", "uniprot": "Q8NB59", "file": "assets/structures/SYT14.pdb", "version": 6, "plddt": 65.06, "len": 574, "tm": [[20, 53], [506, 524]], "track": "Mendelian mechanism", "comp": "high"}, {"gene": "TCEAL1", "uniprot": "Q15170", "file": "assets/structures/TCEAL1.pdb", "version": 6, "plddt": 67.06, "len": 159, "tm": [], "track": "Mendelian mechanism", "comp": "mod"}, {"gene": "LMBRD2", "uniprot": "Q68DH5", "file": "assets/structures/LMBRD2.pdb", "version": 6, "plddt": 76.75, "len": 695, "tm": [[1, 25], [31, 62], [152, 177], [184, 210], [380, 423], [429, 457], [521, 553]], "track": "Mendelian mechanism", "comp": "low"}, {"gene": "MCTP1", "uniprot": "Q6DN14", "file": "assets/structures/MCTP1.pdb", "version": 6, "plddt": 64.69, "len": 999, "tm": [[578, 597], [807, 844], [908, 945]], "track": "Discovery (conserved mechanism test)", "comp": "mod"}, {"gene": "SLC35F4", "uniprot": "A4IF30", "file": "assets/structures/SLC35F4.pdb", "version": 6, "plddt": 66.94, "len": 485, "tm": [[118, 143], [242, 288], [329, 353], [365, 403], [412, 440]], "track": "Discovery (unstudied protein)", "comp": "mod"}, {"gene": "TMEM178B", "uniprot": "H3BS89", "file": "assets/structures/TMEM178B.pdb", "version": 6, "plddt": 75.44, "len": 294, "tm": [[5, 30], [169, 228]], "track": "Discovery (unstudied protein)", "comp": "low"}, {"gene": "HS6ST3", "uniprot": "Q8IZP7", "file": "assets/structures/HS6ST3.pdb", "version": 6, "plddt": 80.38, "len": 471, "tm": [[5, 27]], "track": "Locus - needs gene assignment", "comp": "unknown"}, {"gene": "PRR16", "uniprot": "Q569H4", "file": "assets/structures/PRR16.pdb", "version": 6, "plddt": 63.12, "len": 304, "tm": [], "track": "Locus - needs gene assignment", "comp": "unknown"}, {"gene": "ZNF385D", "uniprot": "Q9H6B1", "file": "assets/structures/ZNF385D.pdb", "version": 6, "plddt": 61.97, "len": 395, "tm": [], "track": "Locus - needs gene assignment", "comp": "unknown"}, {"gene": "TMEM151A", "uniprot": "Q8N4L1", "file": "assets/structures/TMEM151A.pdb", "version": 6, "plddt": 72.0, "len": 468, "tm": [[43, 65], [97, 117]], "track": "Mendelian mechanism (competition)", "comp": "high"}, {"gene": "GPR149", "uniprot": "Q86SP6", "file": "assets/structures/GPR149.pdb", "version": 6, "plddt": 53.97, "len": 731, "tm": [[30, 60], [147, 172], [182, 218], [310, 332], [345, 364]], "track": "Locus - needs gene assignment", "comp": "high"}];
+ var viewer=null, cur=null, spinning=false, model=null, started=false;
+ var el=document.getElementById('mol'), msg=document.getElementById('molmsg');
+ function plddtColor(a){ var b=a.b; return b>90?'#0053D6':b>70?'#65CBF3':b>50?'#FFDB13':'#FF7D45'; }
+ function bg(){ return document.documentElement.getAttribute('data-theme')==='dark'?'#0f172a':'#ffffff'; }
+ function tmOk(d){ return d.tm && d.tm.length && d.len && cur && cur.nres===d.len; }
+ function style(){
+  if(!viewer||!model) return;
+  var st=document.getElementById('s-style').value, col=document.getElementById('s-color').value;
+  var c = col==='plddt' ? {colorfunc:plddtColor} : {color:'spectrum'};
+  viewer.removeAllSurfaces(); viewer.setStyle({},{});
+  if(st==='cartoon') viewer.setStyle({},{cartoon:c});
+  else if(st==='stick') viewer.setStyle({},{stick:Object.assign({radius:0.18},c)});
+  else { viewer.setStyle({},{cartoon:Object.assign({opacity:0.35},c)});
+         viewer.addSurface($3Dmol.SurfaceType.VDW, Object.assign({opacity:0.92},c)); }
+  var d=cur&&cur.d;
+  if(d && document.getElementById('c-tm').checked && tmOk(d)){
+   d.tm.forEach(function(seg){
+    var sel={resi:(seg[0]+1)+'-'+seg[1]};
+    if(st==='stick') viewer.setStyle(sel,{stick:{radius:0.22,color:'#7c3aed'}});
+    else viewer.setStyle(sel,{cartoon:{color:'#7c3aed'}});
+   });
+  }
+  viewer.render();
+ }
+ function info(d,nres){
+  document.getElementById('mi-gene').textContent=d.gene;
+  document.getElementById('mi-uni').innerHTML='<a href="https://alphafold.ebi.ac.uk/entry/'+d.uniprot+'">'+d.uniprot+'</a>';
+  document.getElementById('mi-len').textContent=(nres||'–')+' residues';
+  document.getElementById('mi-pl').textContent=d.plddt!=null?Number(d.plddt).toFixed(1):'–';
+  document.getElementById('mi-track').textContent=d.track||'–';
+  document.getElementById('mi-comp').textContent=({low:'low',mod:'moderate',high:'high',unknown:'unknown'})[d.comp]||'–';
+  var ok = d.tm && d.tm.length && d.len===nres;
+  document.getElementById('c-tm').disabled=!ok;
+  document.getElementById('tm-wrap').style.opacity=ok?1:0.5;
+  document.getElementById('mi-note').textContent = !d.tm||!d.tm.length ? 'Our hydropathy scan predicts no membrane-spanning segment for this protein.'
+    : ok ? 'Purple overlay = segments from our own hydropathy scan (a rough prediction).'
+         : 'Overlay off: the AlphaFold model and our sequence differ in length, so positions would not line up.';
+ }
+ function load(d){
+  [].forEach.call(document.querySelectorAll('#genebar button'),function(b){b.classList.toggle('active',b.textContent===d.gene);});
+  msg.style.display='flex'; msg.textContent='Loading '+d.gene+'…';
+  fetch(d.file).then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); }).then(function(txt){
+   viewer.clear(); model=viewer.addModel(txt,'pdb');
+   var nres=new Set(model.selectedAtoms({}).map(function(a){return a.resi;})).size;
+   cur={d:d,nres:nres}; info(d,nres); style(); viewer.zoomTo(); viewer.render(); msg.style.display='none';
+   try{ history.replaceState(null,'','#structures'); }catch(e){}
+  }).catch(function(){ msg.style.display='flex';
+   msg.textContent='Could not load the structure file. Open this page from the website (not as a local file), or view it on AlphaFold DB.'; });
+ }
+ function start(){
+  if(started) return; started=true;
+  if(!window.$3Dmol){ msg.textContent='3D viewer could not load in this browser.'; return; }
+  viewer=$3Dmol.createViewer(el,{backgroundColor:bg(),antialias:true});
+  var bar=document.getElementById('genebar');
+  DATA.forEach(function(d){ var b=document.createElement('button'); b.textContent=d.gene; b.onclick=function(){load(d);}; bar.appendChild(b); });
+  document.getElementById('b-zin').onclick=function(){ viewer.zoom(1.25,300); };
+  document.getElementById('b-zout').onclick=function(){ viewer.zoom(0.8,300); };
+  document.getElementById('b-reset').onclick=function(){ viewer.zoomTo(); viewer.render(); };
+  document.getElementById('b-spin').onclick=function(){ spinning=!spinning; viewer.spin(spinning?'y':false); this.textContent=spinning?'Stop':'Spin'; };
+  document.getElementById('s-style').onchange=style;
+  document.getElementById('s-color').onchange=style;
+  document.getElementById('c-tm').onchange=style;
+  new MutationObserver(function(){ if(viewer){ viewer.setBackgroundColor(bg()); viewer.render(); } })
+   .observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  window.addEventListener('resize',function(){ viewer.resize(); viewer.render(); });
+  load(DATA[0]);
+ }
+ function ready(){
+  if('IntersectionObserver' in window){
+   var io=new IntersectionObserver(function(es){ if(es.some(function(e){return e.isIntersecting;})){ io.disconnect(); start(); } },{rootMargin:'300px'});
+   io.observe(el);
+  } else start();
+ }
+ if(document.readyState==='complete') ready(); else window.addEventListener('load',ready);
 })();
 </script>
 </body>

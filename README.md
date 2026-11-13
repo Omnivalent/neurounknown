@@ -14,5 +14,7 @@ proteins that are brain-specific, linked to disease, and almost unstudied.
 - `index.html` — the single-page site (inline CSS/JS, no external dependencies)
 - `assets/figures/` — schematic illustrations and analysis figures
 - `assets/reports/` — plain-language summary and detailed technical report (PDF)
+- `assets/structures/` — AlphaFold DB predicted structures (CC BY 4.0; see LICENSE.txt there)
+- `assets/js/3Dmol-min.js` — 3Dmol.js viewer (BSD licence, see 3Dmol-LICENSE.txt)
 
 Literature sources: PubMed / PubMed Central (NCBI), accessed 5–6 November 2026.
