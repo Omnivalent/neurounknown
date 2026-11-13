@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeuroUnknown — overlooked brain proteins</title>
+<meta name="description" content="A reproducible computational screen for poorly characterised, disease-relevant human neuronal proteins. Computational hypotheses only — no discovery claims.">
+<style>
+:root{
+ --bg:#ffffff; --panel:#f6f8fb; --panel2:#eef2f9; --ink:#1f2933; --muted:#5b6472;
+ --accent:#1e3a8a; --accent2:#2563eb; --line:#dbe1ea;
+ --low:#16a34a; --mod:#d97706; --high:#dc2626; --unknown:#6b7280; --warn:#b45309;
+ --maxw:980px;
+}
+:root[data-theme="dark"]{
+ --bg:#0e1420; --panel:#151d2b; --panel2:#1b2636; --ink:#e7edf5; --muted:#9aa6b8;
+ --accent:#9db7ff; --accent2:#7aa2ff; --line:#27334a;
+ --low:#34d399; --mod:#fbbf24; --high:#f87171; --unknown:#9ca3af; --warn:#fbbf24;
+}
+@media (prefers-color-scheme:dark){
+ :root[data-theme="auto"]{
+  --bg:#0e1420; --panel:#151d2b; --panel2:#1b2636; --ink:#e7edf5; --muted:#9aa6b8;
+  --accent:#9db7ff; --accent2:#7aa2ff; --line:#27334a;
+  --low:#34d399; --mod:#fbbf24; --high:#f87171; --unknown:#9ca3af; --warn:#fbbf24;
+ }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+ -webkit-font-smoothing:antialiased}
+a{color:var(--accent2);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+header.site{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);
+ backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;align-items:center;gap:16px;height:56px}
+header .brand{font-weight:700;color:var(--accent);letter-spacing:.2px}
+header nav{display:flex;gap:16px;margin-left:auto;flex-wrap:wrap}
+header nav a{color:var(--muted);font-size:14px}
+header nav a:hover{color:var(--ink);text-decoration:none}
+.theme-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
+ padding:5px 9px;cursor:pointer;font-size:13px}
+@media(max-width:640px){
+ header.site .wrap{height:auto;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;gap:8px 14px}
+ header nav{order:3;width:100%;margin-left:0;gap:14px;padding-bottom:4px}
+ .theme-btn{margin-left:auto}
+}
+.hero{padding:64px 0 28px;background:linear-gradient(180deg,var(--panel),transparent)}
+.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0 0 12px;color:var(--accent)}
+.hero p.lead{font-size:clamp(16px,2.4vw,20px);color:var(--muted);max-width:720px;margin:0 0 20px}
+.hero .btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;background:var(--accent2);color:#fff;padding:11px 18px;border-radius:10px;
+ font-weight:600;font-size:15px}
+.btn:hover{text-decoration:none;filter:brightness(1.07)}
+.btn.ghost{background:transparent;color:var(--accent2);border:1px solid var(--accent2)}
+.caution{border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--bg));
+ border-radius:12px;padding:16px 18px;margin:22px 0;color:var(--ink)}
+.caution b{color:var(--warn)}
+section{padding:40px 0;border-top:1px solid var(--line)}
+section h2{font-size:clamp(22px,3.4vw,30px);color:var(--accent);margin:0 0 6px}
+section .kicker{color:var(--accent2);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
+section p{max-width:760px}
+.grid{display:grid;gap:18px}
+.cards3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{margin:0 0 6px;font-size:17px}
+.card .big{font-size:30px;font-weight:800;color:var(--accent)}
+figure{margin:22px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+figure img{max-width:100%;height:auto;border-radius:6px}
+figure figcaption{color:var(--muted);font-size:13px;text-align:left;margin-top:10px;font-style:italic}
+.steps{list-style:none;padding:0;margin:14px 0;display:grid;gap:10px}
+.steps li{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent2);
+ border-radius:8px;padding:10px 14px}
+.steps li b{color:var(--accent)}
+table.data{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:14px;display:block;overflow-x:auto}
+table.data th,table.data td{border:1px solid var(--line);padding:8px 9px;text-align:left;vertical-align:top}
+table.data th{background:var(--accent);color:#fff;position:sticky;top:0}
+table.data tr:nth-child(even) td{background:var(--panel)}
+td.gene{white-space:nowrap}
+td.hyp{min-width:260px}
+.wave{font-size:11px;color:var(--muted)}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;color:#fff}
+.chip.low{background:var(--low)} .chip.mod{background:var(--mod)}
+.chip.high{background:var(--high)} .chip.unknown{background:var(--unknown)}
+.chip.lead{background:var(--accent2)} .chip.bkp{background:#64748b}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.filters button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;
+ padding:5px 12px;font-size:13px;cursor:pointer}
+.filters button.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.lead-box{background:var(--panel2);border:1px solid var(--accent2);border-radius:14px;padding:22px;margin-top:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:720px){.two{grid-template-columns:1fr}}
+.dl{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+.dl a{flex:1 1 260px;display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.dl a:hover{border-color:var(--accent2);text-decoration:none}
+.dl b{color:var(--accent);font-size:16px}
+.dl span{color:var(--muted);font-size:13px;display:block;margin-top:4px}
+footer.site{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--muted);font-size:13px}
+footer.site a{color:var(--muted);text-decoration:underline}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap">
+ <span class="brand">NeuroUnknown</span>
+ <nav>
+  <a href="#screen">The screen</a>
+  <a href="#candidates">Candidates</a>
+  <a href="#lead">Lead</a>
+  <a href="#c11orf87">C11orf87</a>
+  <a href="#biology">Biology</a>
+  <a href="#downloads">Downloads</a>
+ </nav>
+ <button class="theme-btn" id="themeBtn" title="Toggle light/dark">◐</button>
+</div></header>
+
+<div class="hero"><div class="wrap">
+ <h1>Hunting for overlooked brain proteins</h1>
+ <p class="lead">A reproducible computational screen across all ~19,000 human genes for proteins that are
+ brain-specific, disease-relevant, and almost unstudied — the places where one good experiment could
+ teach us something genuinely new.</p>
+ <div class="btns">
+  <a class="btn" href="#candidates">See the candidates</a>
+  <a class="btn ghost" href="#downloads">Download the reports</a>
+ </div>
+ <div class="caution">
+  <b>No discovery claims.</b> Everything here is a computational hypothesis or a summary of published
+  literature. No mechanism has been demonstrated and there are no wet-lab data. Evidence types are kept
+  separate throughout: a GWAS locus is not a causal gene, co-expression is not physical interaction, and a
+  high-throughput screen hit is not a validated finding.
+ </div>
+</div></div>
+
+<main class="wrap">
+
+<section id="overview">
+ <p class="kicker">In one paragraph</p>
+ <h2>What this is</h2>
+ <p>Scientists have studied some human proteins intensely and barely touched others. We built a pipeline to
+ find proteins that are (1) used mainly in the brain, (2) already linked to a disease, and yet (3) almost
+ unstudied. We then checked every candidate against the world's medical literature (PubMed, searched 5 and
+ re-run 6 November 2026 — identical results, no new papers). One protein, <b>TMEM222</b>, is the strongest
+ first bet.</p>
+ <div class="grid cards3" style="margin-top:18px">
+  <div class="card"><div class="big">19,299</div><h3>genes scored</h3><p class="small">Every human protein-coding gene, on neuronal specificity, disease evidence and how little is known.</p></div>
+  <div class="card"><div class="big">14</div><h3>candidates</h3><p class="small">8 core + 6 second-wave proteins, across six disease areas.</p></div>
+  <div class="card"><div class="big">1</div><h3>lead</h3><p class="small">TMEM222 — disease-linked, barely studied, and the key experiment is undone.</p></div>
+ </div>
+</section>
+
+<section id="screen">
+ <p class="kicker">Method</p>
+ <h2>How the screen worked</h2>
+ <p>We started with every human gene and narrowed down in steps, like panning for gold. At each step we asked
+ three plain questions: is it a brain specialist, is it tied to illness, and is it still a mystery?</p>
+ <figure><img src="assets/figures/fig_funnel.png" alt="Funnel from 19,299 genes to one lead candidate">
+  <figcaption>From the whole genome to one lead candidate. Each step removes genes that do not fit.</figcaption></figure>
+ <p>Not every clue is equally strong. We kept the evidence types apart and never let a weak clue stand in for a
+ strong one.</p>
+ <figure><img src="assets/figures/fig_evidence_ladder.png" alt="Strength-of-evidence ladder">
+  <figcaption>The strength-of-evidence ladder used throughout the project.</figcaption></figure>
+</section>
+
+<section id="candidates">
+ <p class="kicker">Results</p>
+ <h2>The 14 candidates</h2>
+ <p>Working hypotheses only. "Competition" is how crowded the research question is, from a PubMed audit of all
+ aliases. Use the filters to focus.</p>
+ <div class="filters" id="filters">
+  <button data-f="all" class="active">All</button>
+  <button data-f="low">Competition: low</button>
+  <button data-f="mod">moderate</button>
+  <button data-f="high">high</button>
+  <button data-f="Core 8">Core 8</button>
+  <button data-f="Wave 2">Wave 2</button>
+ </div>
+ <table class="data" id="candTable">
+  <thead><tr><th>Gene</th><th>Track</th><th>Disease link (evidence type)</th><th>Working hypothesis (untested)</th><th>Competition</th></tr></thead>
+  <tbody>
+<tr data-comp="low" data-wave="Core 8">
+  <td class="gene"><b>C11orf87</b><br><span class="wave">Core 8</span></td>
+  <td>Discovery (unstudied protein)</td>
+  <td>psychiatric (reported schizophrenia locus; unverified - do not call it a…</td>
+  <td class="hyp">C11orf87 is a Golgi/post-Golgi membrane protein required for efficient surface delivery of a subset of neuronal membrane proteins. Our replication does not support CACNG8/AMPA…</td>
+  <td><span class="chip low">low</span></td>
+</tr>
+<tr data-comp="high" data-wave="Core 8">
+  <td class="gene"><b>TMEM151A</b> <span class="chip bkp">backup</span><br><span class="wave">Core 8</span></td>
+  <td>Mendelian mechanism (competition)</td>
+  <td>movement disorder (paroxysmal kinesigenic dyskinesia)</td>
+  <td class="hyp">TMEM151A acts in both neurons and oligodendrocytes, and PKD reflects the combined loss in a circuit (e.g. impaired axonal conduction plus neuronal excitability) rather than a…</td>
+  <td><span class="chip high">high</span></td>
+</tr>
+<tr data-comp="mod" data-wave="Core 8">
+  <td class="gene"><b>TMEM240</b><br><span class="wave">Core 8</span></td>
+  <td>Mendelian mechanism (follow-up)</td>
+  <td>cerebellar ataxia (SCA21) with cognitive impairment</td>
+  <td class="hyp">Follow-up to Seki 2018: the normal (loss-of-function) role of TMEM240 at cerebellar afferent terminals depends on C-terminal interactions; testing knockout plus WT/mutant…</td>
+  <td><span class="chip mod">moderate</span></td>
+</tr>
+<tr data-comp="high" data-wave="Core 8">
+  <td class="gene"><b>SYT14</b><br><span class="wave">Core 8</span></td>
+  <td>Mendelian mechanism</td>
+  <td>autosomal recessive cerebellar ataxia (SCAR11); neurodevelopment</td>
+  <td class="hyp">SYT14 supports a Ca2+-independent membrane-fusion or membrane-retrieval step in Purkinje-cell somatodendritic compartments (not fast synaptic release), and its loss impairs…</td>
+  <td><span class="chip high">high</span></td>
+</tr>
+<tr data-comp="low" data-wave="Core 8">
+  <td class="gene"><b>TMEM222</b> <span class="chip lead">lead</span><br><span class="wave">Core 8</span></td>
+  <td>Mendelian mechanism</td>
+  <td>neurodevelopmental disorder / intellectual disability</td>
+  <td class="hyp">TMEM222 is required for endosomal sorting/recycling of synaptic membrane proteins during synapse maturation; loss shifts cargo from recycling to degradation.</td>
+  <td><span class="chip low">low</span></td>
+</tr>
+<tr data-comp="low" data-wave="Core 8">
+  <td class="gene"><b>LMBRD2</b><br><span class="wave">Core 8</span></td>
+  <td>Mendelian mechanism</td>
+  <td>neurodevelopmental disorder with epilepsy/microcephaly</td>
+  <td class="hyp">LMBRD2 is a negative regulator of neuronal GPCR signalling (beyond beta2AR); recurrent de novo missense variants act as dominant gain- or loss-of-regulation, altering…</td>
+  <td><span class="chip low">low</span></td>
+</tr>
+<tr data-comp="unknown" data-wave="Core 8">
+  <td class="gene"><b>HS6ST3</b><br><span class="wave">Core 8</span></td>
+  <td>Locus - needs gene assignment</td>
+  <td>depression / mood (common-variant)</td>
+  <td class="hyp">Mood-associated variants reduce neuronal HS6ST3 expression, lowering 6-O-sulfation of synaptic heparan sulfate proteoglycans and weakening HS-dependent synaptic organiser binding.</td>
+  <td><span class="chip unknown">unknown</span></td>
+</tr>
+<tr data-comp="high" data-wave="Core 8">
+  <td class="gene"><b>GPR149</b> <span class="chip bkp">backup</span><br><span class="wave">Core 8</span></td>
+  <td>Locus - needs gene assignment</td>
+  <td>migraine (common-variant); orphan receptor</td>
+  <td class="hyp">GPR149 signalling in hypothalamic/forebrain neurons modulates migraine susceptibility; the migraine locus acts via GPR149 expression.</td>
+  <td><span class="chip high">high</span></td>
+</tr>
+<tr data-comp="unknown" data-wave="Wave 2">
+  <td class="gene"><b>PRR16</b><br><span class="wave">Wave 2</span></td>
+  <td>Locus - needs gene assignment</td>
+  <td>anxiety / depression (common-variant)</td>
+  <td class="hyp">Mood/anxiety risk variants lower neuronal PRR16 expression, and PRR16 controls neuronal mitochondrial mass/cell growth in deep-layer projection neurons.</td>
+  <td><span class="chip unknown">unknown</span></td>
+</tr>
+<tr data-comp="unknown" data-wave="Wave 2">
+  <td class="gene"><b>ZNF385D</b><br><span class="wave">Wave 2</span></td>
+  <td>Locus - needs gene assignment</td>
+  <td>migraine; reading/language (literature)</td>
+  <td class="hyp">ZNF385D is a neuronal RNA-binding protein whose reduced expression alters cortical excitability, linking migraine and language-related loci.</td>
+  <td><span class="chip unknown">unknown</span></td>
+</tr>
+<tr data-comp="low" data-wave="Wave 2">
+  <td class="gene"><b>TMEM178B</b><br><span class="wave">Wave 2</span></td>
+  <td>Discovery (unstudied protein)</td>
+  <td>none yet (LoF-constrained)</td>
+  <td class="hyp">TMEM178B, like its paralog, regulates ER/store-operated calcium handling, here in cortical projection neurons.</td>
+  <td><span class="chip low">low</span></td>
+</tr>
+<tr data-comp="mod" data-wave="Wave 2">
+  <td class="gene"><b>SLC35F4</b><br><span class="wave">Wave 2</span></td>
+  <td>Discovery (unstudied protein)</td>
+  <td>none yet (cerebellum-enriched)</td>
+  <td class="hyp">SLC35F4 imports FAD into the neuronal Golgi to support oxidative folding of secreted/surface neuronal proteins; loss reduces surface delivery of disulfide-rich cargo.</td>
+  <td><span class="chip mod">moderate</span></td>
+</tr>
+<tr data-comp="mod" data-wave="Wave 2">
+  <td class="gene"><b>MCTP1</b><br><span class="wave">Wave 2</span></td>
+  <td>Discovery (conserved mechanism test)</td>
+  <td>bipolar disorder (literature association)</td>
+  <td class="hyp">MCTP1 is required for presynaptic homeostatic plasticity in mammalian hippocampal neurons, as its fly homolog is.</td>
+  <td><span class="chip mod">moderate</span></td>
+</tr>
+<tr data-comp="mod" data-wave="Wave 2">
+  <td class="gene"><b>TCEAL1</b><br><span class="wave">Wave 2</span></td>
+  <td>Mendelian mechanism</td>
+  <td>X-linked neurodevelopmental disorder</td>
+  <td class="hyp">TCEAL1 is a transcriptional regulator whose loss alters neuronal maturation gene programmes.</td>
+  <td><span class="chip mod">moderate</span></td>
+</tr>
+  </tbody>
+ </table>
+ <figure><img src="assets/figures/fig_competition.png" alt="PubMed records per gene, by competition rating">
+  <figcaption>For each protein: the pale bar is how often it is mentioned in PubMed; the solid bar is how often
+  it is actually studied in depth. Green = the field is still open; red = others are already working on it.
+  Searched 5 and 6 November 2026.</figcaption></figure>
+</section>
+
+<section id="lead">
+ <p class="kicker">Front-runner</p>
+ <h2>TMEM222</h2>
+ <div class="lead-box">
+  <p>In 2021, doctors found that children who inherit two broken copies of the <b>TMEM222</b> gene have a
+  neurodevelopmental disorder — intellectual disability, speech delay, and in some cases seizures. That is
+  strong, patient-based evidence that the protein matters for the brain. Yet since that single discovery paper,
+  essentially no one has studied what the protein does. That combination is exactly what this project was built
+  to find.</p>
+  <p><b>Hypothesis:</b> TMEM222 helps neurons recycle their surface receptors — the antennae that catch incoming
+  signals. If it fails, those receptors may be sent for destruction instead of reused.</p>
+  <p class="small"><b>One catch we flagged:</b> the antibody used to detect the protein in the original study was
+  never fully proven specific. So the first lab step must be a detection tool proven to see TMEM222 and nothing
+  else (a knockout-validated antibody or an endogenous tag).</p>
+ </div>
+</section>
+
+<section id="c11orf87">
+ <p class="kicker">The starting candidate</p>
+ <h2>C11orf87 — and an honest negative result</h2>
+ <div class="two">
+  <div>
+   <p>The project began with <b>C11orf87</b>, a protein found almost only in neurons. An earlier idea linked it
+   to a specific receptor partner (CACNG8 / TARP-γ8). When we re-checked that link, it dissolved: the two only
+   looked connected because they live in the same cells, not because they work together.</p>
+   <p class="small">In GTEx bulk data the correlation falls from ρ 0.89 to 0.01 after adjusting for cell
+   composition; in single-nucleus data it is null within neuron types. This stopped us chasing a false lead.
+   C11orf87 is still an interesting mystery protein; its one firm clue (a 2012 secretion screen) needs its
+   original data re-checked, which we have not yet been able to reach.</p>
+  </div>
+  <figure style="margin:0"><img src="assets/figures/fig3_c11orf87_coexpression_replication.png" alt="C11orf87 co-expression collapses after adjustment">
+   <figcaption>The CACNG8 co-expression signal collapses after adjustment.</figcaption></figure>
+ </div>
+</section>
+
+<section id="biology">
+ <p class="kicker">Illustrated</p>
+ <h2>The biology</h2>
+ <p>These are schematic drawings made for this project. Filled markers show placements supported by a published
+ experiment; open markers show placements from a screen or prediction only. The architecture panels are drawn
+ from our own sequence predictions (a hydropathy scan for membrane-spanning segments; metapredict for disorder).
+ No experimental or AlphaFold 3-D structures are shown — those databases were not reachable from the analysis
+ environment.</p>
+ <figure><img src="assets/figures/fig_neuron.png" alt="A neuron with candidate proteins labelled">
+  <figcaption>A neuron, and where some candidate proteins are thought to work (not to scale).</figcaption></figure>
+ <figure><img src="assets/figures/fig_synapse.png" alt="Synapse close-up">
+  <figcaption>A synapse close-up. TMEM222 sits on the receiving side near the recycling compartments.</figcaption></figure>
+ <figure><img src="assets/figures/fig_protein_maps.png" alt="Linear architecture of the 14 candidate proteins">
+  <figcaption>Predicted architecture of all 14 candidates (blue: membrane-spanning; orange: disordered/flexible).</figcaption></figure>
+ <figure><img src="assets/figures/fig_membrane_cartoons.png" alt="Membrane cartoons of six candidates">
+  <figcaption>How six candidates are predicted to sit in a membrane. Which side is inside is not determined.</figcaption></figure>
+</section>
+
+<section id="missing">
+ <p class="kicker">Honesty</p>
+ <h2>What is still missing</h2>
+ <ul class="steps">
+  <li><b>Simpson 2012</b> per-gene RNAi data for C11orf87 (not in PubMed Central; supplementary spreadsheets needed).</li>
+  <li><b>Trubetskoy 2022</b> prioritised-gene tables (not in the accessible text).</li>
+  <li><b>Locus-to-gene / brain eQTL</b> evidence for the GWAS candidates (HS6ST3, PRR16, ZNF385D, GPR149).</li>
+  <li><b>Grants, theses and conference abstracts</b> — a TMEM222 competition check — which PubMed does not index.</li>
+ </ul>
+</section>
+
+<section id="downloads">
+ <p class="kicker">Read more</p>
+ <h2>Full reports</h2>
+ <div class="dl">
+  <a href="assets/reports/NeuroUnknown_public_summary.pdf">
+   <b>Plain-language summary (PDF)</b>
+   <span>8 pages, for a general audience. What we looked for, what we found, why TMEM222.</span></a>
+  <a href="assets/reports/NeuroUnknown_detailed_report.pdf">
+   <b>Detailed technical report (PDF)</b>
+   <span>16 pages. Methods, the full PubMed audit with DOIs, per-gene findings, the C11orf87 analysis.</span></a>
+ </div>
+</section>
+
+</main>
+
+<footer class="site"><div class="wrap">
+ <p>Sources: literature from PubMed and PubMed Central (NCBI), accessed 5–6 November 2026; expression and
+ structural figures from the project's own analyses of public data (GTEx v11, the Siletti 2023 human whole-brain
+ atlas, gnomAD v4.1, the Monarch knowledge graph, FinnGen R12). Full provenance and code are in the project
+ repository.</p>
+ <p>NeuroUnknown — computational hypotheses only, no discovery claims. Last updated 7 November 2026.</p>
+</div></footer>
+
+<script>
+(function(){
+ var r=document.documentElement, b=document.getElementById('themeBtn');
+ try{var s=localStorage.getItem('nu-theme'); if(s) r.setAttribute('data-theme',s);}catch(e){}
+ b.addEventListener('click',function(){
+  var cur=r.getAttribute('data-theme');
+  var mql=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  var now=(cur==='dark')?'light':(cur==='light')?'dark':(mql?'light':'dark');
+  r.setAttribute('data-theme',now);
+  try{localStorage.setItem('nu-theme',now);}catch(e){}
+ });
+ var tb=document.getElementById('candTable'), fs=document.getElementById('filters');
+ fs.addEventListener('click',function(ev){
+  var btn=ev.target.closest('button'); if(!btn) return;
+  [].forEach.call(fs.children,function(c){c.classList.remove('active');});
+  btn.classList.add('active');
+  var f=btn.getAttribute('data-f');
+  [].forEach.call(tb.tBodies[0].rows,function(row){
+   var show = f==='all' || row.getAttribute('data-comp')===f || row.getAttribute('data-wave')===f;
+   row.style.display = show?'':'none';
+  });
+ });
+})();
+</script>
+</body>
+</html>

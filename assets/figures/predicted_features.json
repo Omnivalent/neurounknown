@@ -1,0 +1,207 @@
+{
+ "TMEM222": {
+  "length": 208,
+  "tm_segments": [
+   [
+    179,
+    208
+   ]
+  ],
+  "frac_disordered": 0.231
+ },
+ "TCEAL1": {
+  "length": 159,
+  "tm_segments": [],
+  "frac_disordered": 0.811
+ },
+ "LMBRD2": {
+  "length": 695,
+  "tm_segments": [
+   [
+    1,
+    25
+   ],
+   [
+    31,
+    62
+   ],
+   [
+    152,
+    177
+   ],
+   [
+    184,
+    210
+   ],
+   [
+    380,
+    423
+   ],
+   [
+    429,
+    457
+   ],
+   [
+    521,
+    553
+   ]
+  ],
+  "frac_disordered": 0.201
+ },
+ "SYT14": {
+  "length": 574,
+  "tm_segments": [
+   [
+    20,
+    53
+   ],
+   [
+    506,
+    524
+   ]
+  ],
+  "frac_disordered": 0.472
+ },
+ "TMEM240": {
+  "length": 173,
+  "tm_segments": [
+   [
+    3,
+    31
+   ],
+   [
+    87,
+    113
+   ]
+  ],
+  "frac_disordered": 0.254
+ },
+ "C11orf87": {
+  "length": 197,
+  "tm_segments": [
+   [
+    53,
+    86
+   ]
+  ],
+  "frac_disordered": 0.756
+ },
+ "TMEM178B": {
+  "length": 294,
+  "tm_segments": [
+   [
+    5,
+    30
+   ],
+   [
+    169,
+    228
+   ]
+  ],
+  "frac_disordered": 0.119
+ },
+ "SLC35F4": {
+  "length": 485,
+  "tm_segments": [
+   [
+    118,
+    143
+   ],
+   [
+    242,
+    288
+   ],
+   [
+    329,
+    353
+   ],
+   [
+    365,
+    403
+   ],
+   [
+    412,
+    440
+   ]
+  ],
+  "frac_disordered": 0.299
+ },
+ "MCTP1": {
+  "length": 999,
+  "tm_segments": [
+   [
+    578,
+    597
+   ],
+   [
+    807,
+    844
+   ],
+   [
+    908,
+    945
+   ]
+  ],
+  "frac_disordered": 0.318
+ },
+ "HS6ST3": {
+  "length": 471,
+  "tm_segments": [
+   [
+    5,
+    27
+   ]
+  ],
+  "frac_disordered": 0.312
+ },
+ "PRR16": {
+  "length": 304,
+  "tm_segments": [],
+  "frac_disordered": 0.799
+ },
+ "ZNF385D": {
+  "length": 395,
+  "tm_segments": [],
+  "frac_disordered": 0.729
+ },
+ "TMEM151A": {
+  "length": 468,
+  "tm_segments": [
+   [
+    43,
+    65
+   ],
+   [
+    97,
+    117
+   ]
+  ],
+  "frac_disordered": 0.288
+ },
+ "GPR149": {
+  "length": 731,
+  "tm_segments": [
+   [
+    30,
+    60
+   ],
+   [
+    147,
+    172
+   ],
+   [
+    182,
+    218
+   ],
+   [
+    310,
+    332
+   ],
+   [
+    345,
+    364
+   ]
+  ],
+  "frac_disordered": 0.606
+ }
+}
