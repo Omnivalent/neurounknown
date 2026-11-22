@@ -29,15 +29,29 @@ th{background:var(--accent);color:#fff}tr:nth-child(even) td{background:var(--pa
 code{background:var(--panel);padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-word}
 footer.site{border-top:1px solid var(--line);padding:24px 0 50px;color:var(--muted);font-size:13px;margin-top:30px}
 </style>
-<script>(function(){var t=null;try{t=localStorage.getItem('nu-theme');}catch(e){}if(t!=='light'&&t!=='dark'){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}document.documentElement.setAttribute('data-theme',t);})();</script>
+<script>
+(function(){var d=document.documentElement,t=null,l=null;
+ try{t=localStorage.getItem('nu-theme');l=localStorage.getItem('nu-layout');}catch(e){}
+ if(t!=='light'&&t!=='dark'){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
+ d.setAttribute('data-theme',t);
+ if(l!=='phone'&&l!=='desktop') l='auto';
+ d.setAttribute('data-layout-pref',l);
+ var narrow=Math.min(screen.width||9999,window.innerWidth||9999)<=820;
+ var eff=l==='auto'?(narrow?'phone':'desktop'):l;
+ d.setAttribute('data-layout',eff);
+ if(l==='phone'&&!narrow) d.classList.add('frame');
+ if(l==='desktop'&&narrow){var m=document.querySelector('meta[name=viewport]'); if(m) m.setAttribute('content','width=1240');}
+})();
+</script>
 <meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
 <header class="site"><div class="wrap hdr">
- <a class="brand" href="index.html">Neuro<span>Unknown</span></a>
- <nav class="mainnav" aria-label="Site"><a href="index.html">Home</a><a href="findings.html">Findings</a><a href="library.html">Library</a><a href="reviews.html" aria-current="page">Reviews</a><a href="findings.html#downloads">Reports</a></nav>
- <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button>
+ <a class="brand" href="index.html#/"><i class="mark" aria-hidden="true"></i>Neuro<span>Unknown</span></a>
+ <nav class="mainnav" aria-label="Site"><a href="index.html#/" data-nav="Home">Home</a><a href="index.html#/atlas" data-nav="Atlas">Atlas</a><a href="index.html#/diseases" data-nav="Diseases">Diseases</a><a href="index.html#/self" data-nav="The Self">The Self</a><a href="index.html#/screen" data-nav="Our screen">Our screen</a><a href="findings.html" data-nav="Findings">Findings</a><a href="library.html" data-nav="Library">Library</a><a href="reviews.html" data-nav="Reviews" aria-current="page">Reviews</a></nav>
+ <div class="hdr-tools"><div class="layout-seg" role="group" aria-label="Page layout"><button type="button" data-layout-set="auto" title="Layout: auto" aria-label="Layout: auto"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button><button type="button" data-layout-set="phone" title="Layout: phone" aria-label="Layout: phone"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button><button type="button" data-layout-set="desktop" title="Layout: desktop" aria-label="Layout: desktop"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.6"/><path d="M8.5 20h7M12 16.5V20"/></svg></button></div><button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button></div>
 </div></header>
 <main class="wrap">
 <p class="kicker" style="margin-top:30px">Evidence checks</p>
@@ -107,19 +121,28 @@ Non-coding genes need a separate screen; our protein pipeline cannot rank them, 
 <footer class="site"><div class="wrap">NeuroUnknown is a computational screen. It reports hypotheses, not findings. Source: PubMed, accessed 22 November 2026.</div></footer>
 <script>
 (function(){
- var r=document.documentElement, b=document.getElementById('themeBtn'); if(!b) return;
- var MOON='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
- var SUN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+ var r=document.documentElement, b=document.getElementById('themeBtn');
+ var MOON='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+ var SUN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
  function cur(){ return r.getAttribute('data-theme')==='dark'?'dark':'light'; }
- function label(){ var d=cur()==='dark'; b.innerHTML=(d?SUN:MOON)+'<span class="tl">'+(d?'Light':'Dark')+'</span>';
-  b.setAttribute('aria-label',d?'Switch to light theme':'Switch to dark theme'); b.title=b.getAttribute('aria-label'); }
  function announce(){ try{ window.dispatchEvent(new CustomEvent('nu-theme',{detail:cur()})); }catch(e){} }
+ function label(){ if(!b) return; var d=cur()==='dark'; b.innerHTML=(d?SUN:MOON);
+  b.setAttribute('aria-label',d?'Switch to light theme':'Switch to dark theme'); b.title=b.getAttribute('aria-label'); }
  label();
- b.addEventListener('click',function(){ var n=cur()==='dark'?'light':'dark'; r.setAttribute('data-theme',n);
+ if(b) b.addEventListener('click',function(){ var n=cur()==='dark'?'light':'dark'; r.setAttribute('data-theme',n);
   try{localStorage.setItem('nu-theme',n);}catch(e){} label(); announce(); });
  try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(e){
   var s=null; try{s=localStorage.getItem('nu-theme');}catch(_){} if(s==='light'||s==='dark') return;
   r.setAttribute('data-theme',e.matches?'dark':'light'); label(); announce(); }); }catch(e){}
+ // layout switch
+ var segBtns=[].slice.call(document.querySelectorAll('[data-layout-set]'));
+ function markSeg(){ var p=r.getAttribute('data-layout-pref')||'auto'; segBtns.forEach(function(x){ x.setAttribute('aria-pressed',x.getAttribute('data-layout-set')===p?'true':'false'); }); }
+ markSeg();
+ segBtns.forEach(function(x){ x.addEventListener('click',function(){ var v=x.getAttribute('data-layout-set');
+  try{localStorage.setItem('nu-layout',v);}catch(e){} location.reload(); }); });
+ if((r.getAttribute('data-layout-pref')||'auto')==='auto'){ var lastEff=r.getAttribute('data-layout');
+  window.addEventListener('resize',function(){ var eff=window.innerWidth<=820?'phone':'desktop';
+   if(eff!==lastEff){ lastEff=eff; r.setAttribute('data-layout',eff); try{ window.dispatchEvent(new CustomEvent('nu-layout',{detail:eff})); }catch(e){} } }); }
 })();
 </script>
 </body></html>
