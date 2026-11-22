@@ -1,20 +1,23 @@
-# NeuroUnknown
+# NeuroUnknown findings website
 
-Website for **NeuroUnknown**, a reproducible computational screen across ~19,000 human genes for
-proteins that are brain-specific, linked to disease, and almost unstudied.
+Self-contained static site (one `index.html`, inline CSS/JS, local assets). No build step, no
+dependencies — it works opened directly in a browser or served by GitHub Pages.
 
-**Live site:** https://omnivalent.github.io/neurounknown/
+## Publish on GitHub Pages
+1. In the repo on GitHub: **Settings → Pages → Build and deployment → Source: "GitHub Actions"**.
+2. Push to `main` (or this working branch). The workflow `.github/workflows/neurounknown-pages.yml`
+   publishes this folder. The live URL appears in the workflow run and on the Pages settings page
+   (typically `https://<org>.github.io/blueprint/`).
 
-> **No discovery claims.** Everything here is a computational hypothesis or a summary of published
-> literature. No mechanism has been demonstrated and there are no wet-lab data. A GWAS locus is not a
-> causal gene, co-expression is not physical interaction, and a high-throughput screen hit is not a
-> validated finding.
+You can also trigger it manually from the **Actions** tab (**Run workflow**).
 
-## Contents
-- `index.html` — the single-page site (inline CSS/JS, no external dependencies)
-- `assets/figures/` — schematic illustrations and analysis figures
-- `assets/reports/` — plain-language summary and detailed technical report (PDF)
-- `assets/structures/` — AlphaFold DB predicted structures (CC BY 4.0; see LICENSE.txt there)
-- `assets/js/3Dmol-min.js` — 3Dmol.js viewer (BSD licence, see 3Dmol-LICENSE.txt)
+## Regenerate
+The page is generated from the curated portfolio so it stays in step with the data:
+```
+cd NeuroUnknown
+PYTHONPATH=src python3 -m neurounknown.build_website
+```
+This rewrites `website/index.html` from `novelty/portfolio_curation.json`. Figures and PDFs live in
+`website/assets/` (copied from `figures/` and `reports/`).
 
-Literature sources: PubMed / PubMed Central (NCBI), accessed 5–6 November 2026.
+Content is computational hypotheses only — no discovery claims.
