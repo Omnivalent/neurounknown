@@ -1,0 +1,30 @@
+name: Daily literature watch
+# 12:00 Central European Time every day. GitHub cron runs in UTC, so both 10:00 and 11:00 UTC are scheduled and the script
+# itself only proceeds when it is 12:xx in Europe/Berlin (this handles summer and winter time).
+on:
+  schedule:
+    - cron: "0 10 * * *"
+    - cron: "0 11 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run the literature watch
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then python3 tools/daily_update.py --force; else python3 tools/daily_update.py; fi
+      - name: Commit results
+        run: |
+          git config user.name "neurounknown-bot"
+          git config user.email "neurounknown-bot@users.noreply.github.com"
+          git add assets/data/updates.json assets/data/atlas.json
+          git diff --cached --quiet || (git commit -m "Daily literature watch $(date -u +%F)" && git push)

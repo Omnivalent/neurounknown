@@ -27,3 +27,22 @@ python3 src/neurounknown/build_landing.py
 Then copy `website/` into the public repository.
 
 Content is computational hypotheses only — no discovery claims.
+
+## 3D brain, gene atlas and daily literature watch (added 22 Nov 2026)
+
+- **3D brain** (`assets/js/brain3d.js`, `assets/brain3d/`): surface meshes built by `src/neurounknown/build_brain3d.py` from the
+  MNI152 template and the Harvard-Oxford cortical/subcortical atlases (FSL; free for non-commercial use, MNI template copyright
+  McConnell Brain Imaging Centre) and the AAL2 atlas for the cerebellum (GPL). Population-average anatomy, not one person's brain.
+  The substantia nigra is not in these atlases; its approximate MNI position is marked with dots. Rendered with three.js 0.160.0
+  (MIT, vendored in `assets/js/three/`). Without WebGL the page falls back to the schematic SVG map.
+- **Gene atlas** (`assets/data/genome.json`, built by `src/neurounknown/build_genome.py`): 19,203 of 19,299 protein-coding genes at
+  GENCODE v43 (GRCh38) positions; 96 have no matching position. Classes are computed (flagged / established / other link / none).
+  "When the gene is lost" combines OMIM/Orphanet/ClinGen links, gnomAD v4.1 LOEUF and MGI mouse phenotypes.
+- **Diseases**: split into neurological and psychiatric; each statement carries numbered references [n] that jump to a
+  reference list with PubMed and DOI links. Guidelines: APA 2020, WFSBP 2012, CANMAT/ISBD 2018, CANMAT 2023, ESCAP 2020,
+  European intersocietal AD recommendations 2024, lecanemab appropriate-use recommendations 2023, AAN 2021 (PD), EAN 2024 (ALS).
+- **Daily literature watch** (`tools/daily_update.py`, `.github/workflows/daily-update.yml`): every day at 12:00 Europe/Berlin
+  (and on demand via "Run workflow"), re-counts PubMed records for flagged and hand-checked genes with the pipeline's query,
+  removes a flag automatically when a gene passes 60 records (flags are never added automatically), lists new records for the
+  flagged genes and fixed topics, and writes `assets/data/updates.json`. A full rebuild from the private repository overwrites
+  `atlas.json`; the next daily run re-applies the counts.
