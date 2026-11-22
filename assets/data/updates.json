@@ -1,12 +1,29 @@
 {
- "checked": "2026-11-22T22:41+00:00",
- "checked_local": "22 Nov 2026, 23:39 CET",
- "queries": 224,
- "summary": "Re-counted PubMed records for 220 flagged or watched genes and searched 4 topics. 0 gene counts changed; 0 flag(s) removed; 0 new records listed.",
+ "checked": "2026-11-22T23:41+00:00",
+ "checked_local": "23 Nov 2026, 00:39 CET",
+ "queries": 226,
+ "summary": "Re-counted PubMed records for 220 flagged or watched genes and searched 5 topics. 0 gene counts changed; 0 flag(s) removed; 1 new records listed. 67 new PubMed records on our seven diseases in the last 24 hours.",
+ "genes_rechecked": 220,
+ "records_in_topics": 1,
+ "new_in_our_diseases_24h": 67,
  "count_changes": [],
  "unflagged": [],
- "new_papers": [],
+ "new_papers": [
+  {
+   "pmid": "43058178",
+   "topic": "Major journals",
+   "title": "A state-dependent glymphatic dimension in major depressive disorder: implications for treatment resistance.",
+   "journal": "Mol Psychiatry",
+   "date": "2026 Nov 19"
+  }
+ ],
  "history": [
+  {
+   "date": "2026-11-23",
+   "changes": 0,
+   "new": 1,
+   "diseases_24h": 67
+  },
   {
    "date": "2026-11-22",
    "changes": 0,
