@@ -6,7 +6,8 @@ What it does (Python standard library only, NCBI E-utilities, no API key, <= 3 r
 2. If a gene now exceeds the flag threshold (60 records), its flag is removed and a dated note is added. Flags are never
    added automatically: new flags need the full pipeline and a manual check.
 3. Lists new PubMed records (last 2 days by entry date) for the flagged genes and for fixed topics (self-disorders, sense of
-   agency in schizophrenia, and the catalog diseases' genetics), with titles from esummary.
+   agency in schizophrenia, the catalog diseases' genetics, and our seven diseases in major journals), with titles from
+   esummary, and counts all new records on our seven diseases in the last 24 hours (shown in the site's news ticker).
 4. Writes assets/data/updates.json (read by the home page) and updates atlas.json meta.
 Failures are recorded as NOT ACCESSED; nothing is imputed.
 Usage: python3 tools/daily_update.py [--force]   (without --force it exits unless it is 12:xx in Europe/Berlin)
@@ -32,6 +33,13 @@ TOPICS = {
     "Schizophrenia genetics": 'schizophren*[ti] AND (exome[tiab] OR "rare variant*"[tiab] OR GWAS[tiab])',
     "ALS genetics": '("amyotrophic lateral sclerosis"[ti]) AND (gene[ti] OR genetic*[ti] OR variant*[ti])',
 }
+DISEASE_TI = ('(schizophreni*[ti] OR psychosis[ti] OR bipolar[ti] OR depressi*[ti] OR autis*[ti] OR alzheimer*[ti] OR parkinson*[ti] '
+              'OR "amyotrophic lateral sclerosis"[ti] OR "motor neuron disease"[ti])')
+MAJOR = ('("Nature"[ta] OR "Science"[ta] OR "Cell"[ta] OR "N Engl J Med"[ta] OR "Lancet"[ta] OR "Lancet Neurol"[ta] OR "Lancet Psychiatry"[ta] '
+         'OR "JAMA"[ta] OR "JAMA Neurol"[ta] OR "JAMA Psychiatry"[ta] OR "Nat Med"[ta] OR "Nat Neurosci"[ta] OR "Neuron"[ta] OR "Nat Genet"[ta] '
+         'OR "Mol Psychiatry"[ta] OR "Am J Psychiatry"[ta] OR "Brain"[ta] OR "BMJ"[ta])')
+TOPICS["Major journals"] = DISEASE_TI + " AND " + MAJOR
+ALL_TOPICS = DISEASE_TI  # used only to count how many new records appeared in our diseases
 _last = [0.0]
 
 
@@ -57,10 +65,15 @@ def count(term):
     return int(m.group(1)) if m and "<ERROR" not in x else None
 
 
+SCANNED = [0]
+
+
 def recent(term, days=2, n=5):
     x = get("esearch.fcgi", term=term, reldate=days, datetype="edat", retmax=n, sort="pub_date", retmode="json")
     try:
-        return json.loads(x)["esearchresult"]["idlist"]
+        r = json.loads(x)["esearchresult"]
+        SCANNED[0] += int(r.get("count", 0))
+        return r["idlist"]
     except Exception:
         return None
 
@@ -109,8 +122,11 @@ def main():
         if old is not None and c > old:
             ids = recent(f'"{sym}"[tiab]', days=3, n=3) or []
             new += [dict(pmid=p, topic=sym) for p in ids]
+    x = get("esearch.fcgi", term=ALL_TOPICS, reldate=1, datetype="edat", rettype="count")
+    m_ = re.search(r"<Count>(\d+)</Count>", x or "")
+    new_in_diseases = int(m_.group(1)) if m_ else None
     for topic, term in TOPICS.items():
-        ids = recent(term)
+        ids = recent(term, n=8 if topic == "Major journals" else 5)
         if ids is None:
             failed.append(topic)
             continue
@@ -122,19 +138,24 @@ def main():
     meta = summaries([x["pmid"] for x in uniq][:40])
     for x in uniq:
         x.update(meta.get(x["pmid"], dict(title="(title NOT ACCESSED)", journal="", date="")))
+    uniq.sort(key=lambda x: x["topic"] != "Major journals")
     for d in atlas["diseases"]:
         d["n_over"] = sum(1 for r in d["genes"] if r.get("over"))
     n_q = len(genes) + len(TOPICS)
+    summary_extra = f" {new_in_diseases:,} new PubMed records on our seven diseases in the last 24 hours." if new_in_diseases is not None else ""
     atlas["meta"]["daily_check"] = dict(checked=now.isoformat(timespec="minutes"), genes_rechecked=len(genes) - len(failed), unflagged=unflagged)
     ATLAS.write_text(json.dumps(atlas, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
     summary = (f"Re-counted PubMed records for {len(genes) - len([f for f in failed if f in genes])} flagged or watched genes and searched {len(TOPICS)} topics. "
                f"{len(changes)} gene counts changed; {len(unflagged)} flag(s) removed; {len(uniq)} new records listed.")
+    summary += summary_extra
     if failed:
         summary += f" NOT ACCESSED: {', '.join(failed[:10])}."
     out = dict(checked=dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"),
-               checked_local=now.strftime("%d %b %Y, %H:%M %Z"), queries=n_q, summary=summary,
+               checked_local=now.strftime("%d %b %Y, %H:%M %Z"), queries=n_q + 1, summary=summary,
+               genes_rechecked=len(genes) - len([f for f in failed if f in genes]), records_in_topics=SCANNED[0],
+               new_in_our_diseases_24h=new_in_diseases,
                count_changes=changes, unflagged=unflagged, new_papers=uniq,
-               history=([dict(date=now.date().isoformat(), changes=len(changes), new=len(uniq))] + prev.get("history", []))[:60])
+               history=([dict(date=now.date().isoformat(), changes=len(changes), new=len(uniq), diseases_24h=new_in_diseases)] + prev.get("history", []))[:60])
     OUT.write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print(summary)
 

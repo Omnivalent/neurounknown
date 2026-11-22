@@ -46,3 +46,18 @@ Content is computational hypotheses only — no discovery claims.
   removes a flag automatically when a gene passes 60 records (flags are never added automatically), lists new records for the
   flagged genes and fixed topics, and writes `assets/data/updates.json`. A full rebuild from the private repository overwrites
   `atlas.json`; the next daily run re-applies the counts.
+
+## Version 2.0 (22 Nov 2026)
+
+- **3D atlas v2**: 52 structures (both hemispheres, 102 meshes) from the Neuromorphometrics labels in MNI space (MICCAI 2012
+  Grand Challenge data, distributed with SPM12; CC BY-NC). Substantia nigra, subthalamic nucleus, ventral tegmental area and red
+  nucleus are approximate ellipsoids (no atlas boundary). 13 textbook systems (limbic, nigrostriatal, basal ganglia loop,
+  mesolimbic, default mode, salience, agency, motor, language, memory, executive, visual, auditory). Definitions in
+  `src/neurounknown/brain_structures.py`. This replaces the Harvard-Oxford/AAL meshes of version 1.
+- **Diseases**: three groups (neurological, psychiatric, neurodevelopmental). Each disease has a guideline-based treatment
+  pathway and a synapse diagram with numbered pins for where each drug acts (`src/neurounknown/treatments.py`).
+- **Gene atlas**: step-by-step (chromosome cards, then the brain-disease genes on a chromosome, then an optional expert track).
+- **News ticker** in the header, fed by `assets/data/updates.json`; the daily job now also scans major journals for our seven
+  diseases and counts all new records on them in the last 24 hours.
+- **Cite & data** page (`cite.html`) with version number, citation, downloads, sources and how external resources are used.
+- **Rollback**: version 1.0 is site commit `f1b6a08` (private repo commit `04b3b30`). Revert with `git revert` to that state.
