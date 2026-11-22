@@ -1,0 +1,16 @@
+{
+ "checked": "2026-11-22T22:41+00:00",
+ "checked_local": "22 Nov 2026, 23:39 CET",
+ "queries": 224,
+ "summary": "Re-counted PubMed records for 220 flagged or watched genes and searched 4 topics. 0 gene counts changed; 0 flag(s) removed; 0 new records listed.",
+ "count_changes": [],
+ "unflagged": [],
+ "new_papers": [],
+ "history": [
+  {
+   "date": "2026-11-22",
+   "changes": 0,
+   "new": 0
+  }
+ ]
+}
