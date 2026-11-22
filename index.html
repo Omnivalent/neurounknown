@@ -1,571 +1,572 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NeuroUnknown — overlooked brain proteins</title>
-<meta name="description" content="A reproducible computational screen for poorly characterised, disease-relevant human neuronal proteins. Computational hypotheses only — no discovery claims.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NeuroUnknown — hunting for overlooked brain proteins</title>
+<meta name="description" content="An interactive journey through a reproducible computational screen of all 19,299 human protein-coding genes for overlooked, disease-linked brain proteins. Computational hypotheses only.">
+<meta property="og:title" content="NeuroUnknown — hunting for overlooked brain proteins">
+<meta property="og:description" content="From the whole genome to one lead protein. Computational hypotheses, no discovery claims.">
+<meta name="theme-color" content="#060b1d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23060b1d%27/%3E%3Cpath d=%27M9 5c0 8 14 14 14 22M23 5c0 8-14 14-14 22%27 stroke=%27%2393c5fd%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/svg%3E">
+<script>
+// old single-page links such as index.html#candidates now live on findings.html
+(function(){var h=location.hash.slice(1);
+ if(["overview","screen","candidates","lead","c11orf87","structures","biology","missing","library","reviews","downloads"].indexOf(h)>=0)
+  location.replace("findings.html#"+h);})();
+</script>
 <style>
-:root{
- /* palette matched to the NeuroUnknown PDF reports */
- --bg:#ffffff; --panel:#f3f4f6; --panel2:#eef2ff; --ink:#1f2933; --muted:#6b7280;
- --accent:#1e3a8a; --accent2:#1d4ed8; --line:#d1d5db;
- --violet:#6d28d9; --violet-soft:#ede9fe;
- --note:#fef9c3; --note-line:#a16207; --ok:#f0fdf4; --ok-line:#166534;
- --low:#16a34a; --mod:#f59e0b; --high:#dc2626; --unknown:#9ca3af; --warn:#a16207;
- --maxw:980px;
-}
-:root[data-theme="dark"]{
- --bg:#0f172a; --panel:#1e293b; --panel2:#1e2a4a; --ink:#e5e7eb; --muted:#9ca3af;
- --accent:#a5b4fc; --accent2:#93c5fd; --line:#334155;
- --violet:#c4b5fd; --violet-soft:#2e1065;
- --note:#3a3410; --note-line:#facc15; --ok:#052e16; --ok-line:#4ade80;
- --low:#22c55e; --mod:#fbbf24; --high:#f87171; --unknown:#9ca3af; --warn:#facc15;
-}
+:root{--bg:#060b1d;--bg2:#0b1430;--ink:#e5e7eb;--muted:#94a3b8;--accent:#93c5fd;--accent2:#3b82f6;--violet:#c4b5fd;
+ --amber:#fbbf24;--line:rgba(148,163,184,.22);--glass:rgba(15,23,42,.62);--maxw:1100px}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);
- font:16px/1.65 "DejaVu Sans",Verdana,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
- -webkit-font-smoothing:antialiased}
-a{color:var(--accent2);text-decoration:none}
-a:hover{text-decoration:underline}
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
-header.site{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);
- backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-header.site .wrap{display:flex;align-items:center;gap:16px;height:56px}
-header .brand{font-weight:700;color:var(--accent);letter-spacing:.2px}
-header nav{display:flex;gap:16px;margin-left:auto;flex-wrap:wrap}
-header nav a{color:var(--muted);font-size:14px}
-header nav a:hover{color:var(--ink);text-decoration:none}
-.theme-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
- padding:5px 9px;cursor:pointer;font-size:13px}
-@media(max-width:640px){
- header.site .wrap{height:auto;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;gap:8px 14px}
- header nav{order:3;width:100%;margin-left:0;gap:14px;padding-bottom:4px}
- .theme-btn{margin-left:auto}
-}
-.hero{padding:64px 0 28px;background:linear-gradient(180deg,var(--panel2),transparent)}
-.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0 0 12px;color:var(--accent)}
-.hero p.lead{font-size:clamp(16px,2.4vw,20px);color:var(--muted);max-width:720px;margin:0 0 20px}
-.hero .btns{display:flex;gap:12px;flex-wrap:wrap}
-.btn{display:inline-block;background:var(--accent2);color:#fff;padding:11px 18px;border-radius:10px;
- font-weight:600;font-size:15px}
-.btn:hover{text-decoration:none;filter:brightness(1.07)}
-.btn.ghost{background:transparent;color:var(--accent2);border:1px solid var(--accent2)}
-.caution{border:1px solid var(--accent);background:var(--panel2);
- border-radius:12px;padding:16px 18px;margin:22px 0;color:var(--ink)}
-.caution b{color:var(--accent)}
-section{padding:40px 0;border-top:1px solid var(--line)}
-section h2{font-size:clamp(22px,3.4vw,30px);color:var(--accent);margin:0 0 6px}
-section .kicker{color:var(--violet);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
-section p{max-width:760px}
-.grid{display:grid;gap:18px}
-.cards3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
-.card h3{margin:0 0 6px;font-size:17px}
-.card .big{font-size:30px;font-weight:800;color:var(--accent)}
-figure{margin:22px 0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
-figure img{max-width:100%;height:auto;border-radius:6px}
-figure figcaption{color:var(--muted);font-size:13px;text-align:left;margin-top:10px;font-style:italic}
-.steps{list-style:none;padding:0;margin:14px 0;display:grid;gap:10px}
-.steps li{background:var(--violet-soft);border:1px solid var(--line);border-left:4px solid var(--violet);
- border-radius:8px;padding:10px 14px}
-.steps li b{color:var(--accent)}
-table.data{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:14px;display:block;overflow-x:auto}
-table.data th,table.data td{border:1px solid var(--line);padding:8px 9px;text-align:left;vertical-align:top}
-table.data th{background:var(--accent);color:#fff;position:sticky;top:0}
-table.data tr:nth-child(even) td{background:var(--panel)}
-td.gene{white-space:nowrap}
-td.hyp{min-width:260px}
-.wave{font-size:11px;color:var(--muted)}
-.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;color:#fff}
-.chip.low{background:var(--low)} .chip.mod{background:var(--mod)}
-.chip.high{background:var(--high)} .chip.unknown{background:var(--unknown)}
-.chip.lead{background:var(--accent2)} .chip.bkp{background:#64748b}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
-.filters button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;
- padding:5px 12px;font-size:13px;cursor:pointer}
-.filters button.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-.lead-box{background:var(--panel2);border:1px solid var(--accent);border-radius:14px;padding:22px;margin-top:8px}
-.genebar{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 10px}
-.genebar button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;
- padding:5px 11px;font-size:13px;cursor:pointer}
-.genebar button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.mol-grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px}
-@media(max-width:820px){.mol-grid{grid-template-columns:1fr}}
-#mol{position:relative;width:100%;height:480px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);touch-action:none}
-@media(max-width:820px){#mol{height:380px}}
-#molmsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;text-align:center;padding:20px;pointer-events:none}
-.molinfo{background:var(--panel2);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;font-size:14px}
-.molinfo h3{margin:0 0 4px;color:var(--accent);font-size:20px}
-.molinfo dl{margin:8px 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px}
-.molinfo dt{color:var(--muted)} .molinfo dd{margin:0}
-.ctrls{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.ctrls button,.ctrls select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:5px 9px;font-size:13px;cursor:pointer}
-.ctrls label{font-size:13px;display:flex;align-items:center;gap:5px;margin-top:6px}
-.plddt{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
-.plddt i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-2px}
-.note{background:var(--note);border:1px solid var(--note-line);border-radius:12px;padding:16px 18px;margin:18px 0}
-.note b{color:var(--note-line)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:720px){.two{grid-template-columns:1fr}}
-.dl{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
-.dl a{flex:1 1 260px;display:block;background:var(--ok);border:1px solid var(--ok-line);border-radius:12px;padding:16px}
-.dl a:hover{border-color:var(--accent2);text-decoration:none}
-.dl b{color:var(--accent);font-size:16px}
-.dl span{color:var(--muted);font-size:13px;display:block;margin-top:4px}
-footer.site{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--muted);font-size:13px}
-footer.site a{color:var(--muted);text-decoration:underline}
-.small{font-size:13px;color:var(--muted)}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+ font:16px/1.6 "DejaVu Sans",Verdana,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(1200px 700px at 70% 20%,#13204a 0%,transparent 60%),radial-gradient(900px 600px at 10% 90%,#1e1048 0%,transparent 55%),var(--bg)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+canvas#dna{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
+canvas#dna.grabbing{cursor:grabbing}canvas#dna.pointer{cursor:pointer}
+/* top bar */
+.top{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;gap:14px;padding:14px max(18px,env(safe-area-inset-left)) 10px;
+ background:linear-gradient(180deg,rgba(6,11,29,.85),rgba(6,11,29,0))}
+.top .brand{font-weight:800;letter-spacing:.3px;color:#fff;font-size:17px}
+.top .brand i{font-style:normal;color:var(--accent)}
+.top nav{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+.top nav a{color:var(--muted);font-size:14px}.top nav a:hover{color:#fff;text-decoration:none}
+@media(max-width:560px){.top nav a.opt{display:none}.top nav{gap:12px;flex-wrap:nowrap}.top nav a{font-size:13px}.top .brand{font-size:15px}.top{gap:10px;padding-left:16px;padding-right:16px}}
+/* scenes */
+.scene{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;pointer-events:none;
+ opacity:0;visibility:hidden;transform:scale(.86);filter:blur(8px);
+ transition:opacity .75s ease,transform .95s cubic-bezier(.2,.75,.2,1),filter .75s ease,visibility 0s linear .95s}
+.scene.on{opacity:1;visibility:visible;transform:none;filter:none;transition-delay:.12s,.12s,.12s,0s}
+.sbody{pointer-events:auto;width:100%;max-width:var(--maxw);max-height:100%;overflow-y:auto;overscroll-behavior:contain;
+ padding:84px 24px 96px;scrollbar-width:thin}
+.kicker{color:var(--violet);font-weight:700;font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;margin:0 0 8px}
+h1{font-size:clamp(30px,min(5.2vw,7.4vh),58px);line-height:1.05;margin:0 0 14px;color:#fff;letter-spacing:-.5px}
+h1 em{font-style:normal;background:linear-gradient(90deg,#93c5fd,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(24px,3.6vw,40px);line-height:1.12;margin:0 0 12px;color:#fff}
+.lead{color:#cbd5e1;font-size:clamp(15px,1.9vw,19px);max-width:680px;margin:0 0 18px}
+.muted{color:var(--muted)}.small{font-size:13px;color:var(--muted)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:11px 18px;font-weight:700;font-size:14.5px;cursor:pointer;
+ border:1px solid transparent;background:var(--accent2);color:#fff;font-family:inherit;transition:transform .2s,filter .2s,background .2s}
+.btn:hover{text-decoration:none;filter:brightness(1.12);transform:translateY(-1px)}
+.btn.ghost{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--ink)}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.caution{font-size:13px;color:#cbd5e1;border-left:3px solid var(--violet);padding:4px 0 4px 12px;margin-top:14px;max-width:680px}
+/* scene 0 */
+#s0 .sbody{align-self:flex-start;text-align:center}
+#s0 .lead,#s0 .caution{margin-left:auto;margin-right:auto}#s0 .lead{max-width:760px}#s0 .btns{justify-content:center}#s0 .caution{text-align:left}
+.chips{display:none;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px auto 0;max-width:640px}
+body.chips-mode .chips{display:flex}
+.chip{border:1px solid var(--line);background:rgba(15,23,42,.7);color:var(--ink);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit}
+.chip:hover,.chip:focus-visible{border-color:var(--accent);color:#fff}
+/* stations anchored to the helix */
+.station{position:fixed;left:0;top:0;z-index:12;pointer-events:auto;transform:translate(-50%,-50%);white-space:nowrap;
+ border:1px solid rgba(147,197,253,.35);background:rgba(10,18,42,.78);color:#e2e8f0;border-radius:12px;padding:6px 11px 7px;
+ font:600 13px/1.25 inherit;font-family:inherit;cursor:pointer;text-align:center;transition:opacity .4s,border-color .2s,background .2s,box-shadow .2s}
+.station small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.station:hover,.station.hot,.station:focus-visible{border-color:#93c5fd;background:rgba(29,78,216,.55);box-shadow:0 0 22px rgba(96,165,250,.45);outline:none}
+.station.hide,body.chips-mode .station{opacity:0;pointer-events:none}
+/* scene 1 funnel */
+.split{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:34px;align-items:center}
+@media(max-width:860px){.split{grid-template-columns:1fr;gap:20px}}
+.funnel{padding:18px 18px 12px}
+.frow{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;padding:8px 6px;border-radius:12px;cursor:pointer;
+ opacity:0;transform:translateX(-14px);transition:opacity .5s,transform .5s,background .2s}
+.frow.in{opacity:1;transform:none}.frow:hover,.frow.sel{background:rgba(59,130,246,.12)}
+.frow b{font-size:22px;color:#fff;text-align:right;font-variant-numeric:tabular-nums}
+.frow .lbl{font-size:13.5px;color:#cbd5e1}
+.frow .bar{height:6px;border-radius:6px;background:rgba(148,163,184,.15);margin-top:5px;overflow:hidden}
+.frow .bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#3b82f6,#a78bfa);transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.frow:last-child b{color:var(--amber)}
+.fnote{min-height:44px;font-size:13.5px;color:#cbd5e1;margin:8px 6px 4px}
+.qs{display:grid;gap:10px;margin-top:6px}
+.q{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+.q .ic{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;color:#0b1020}
+.q h3{margin:0;font-size:15px;color:#fff}.q p{margin:2px 0 0;font-size:13.5px;color:#cbd5e1}
+/* scene 2 protein */
+.molwrap{position:relative;aspect-ratio:1/1;width:100%;max-width:460px;margin:0 auto;border-radius:50%;
+ background:radial-gradient(circle at 50% 45%,rgba(59,130,246,.18),rgba(6,11,29,0) 68%)}
+.molwrap::before{content:"";position:absolute;inset:4%;border-radius:50%;border:1px dashed rgba(147,197,253,.25);animation:turn 60s linear infinite}
+@keyframes turn{to{transform:rotate(360deg)}}
+#mol{position:absolute;inset:6%;border-radius:50%;overflow:hidden;touch-action:none}
+#molmsg{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px;text-align:center;padding:30px;pointer-events:none}
+.legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:11.5px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.fact{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+.fact b{display:block;color:#fff;font-size:18px}.fact span{font-size:12px;color:var(--muted)}
+@media(max-width:520px){.facts{grid-template-columns:1fr 1fr}.fact:first-child{grid-column:1/-1}.fact b{font-size:15px}}
+.hyp{border-left:3px solid var(--amber);padding:6px 0 6px 12px;color:#e2e8f0;font-size:14.5px;margin:12px 0}
+/* scene 3 neuron */
+.neuron{width:100%;height:auto;display:block}
+.neuron .part{cursor:pointer;transition:filter .25s,opacity .25s}
+.neuron .part:hover,.neuron .part.sel,.neuron .part:focus{filter:url(#glow) brightness(1.35);outline:none}
+.ninfo{padding:14px 16px;min-height:96px;margin-top:10px}
+.ninfo h3{margin:0 0 4px;font-size:16px;color:#fff}.ninfo p{margin:0;font-size:14px;color:#cbd5e1}
+.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+/* scene 4 hub */
+.hub{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+@media(max-width:900px){.hub{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.hub{grid-template-columns:1fr}}
+.card{display:block;position:relative;padding:18px 18px 16px;border-radius:18px;border:1px solid var(--line);background:rgba(15,23,42,.66);
+ color:var(--ink);overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+.card::after{content:"";position:absolute;inset:auto -40% -60% auto;width:180px;height:180px;border-radius:50%;
+ background:radial-gradient(circle,rgba(96,165,250,.22),transparent 70%);transition:transform .4s}
+.card:hover{text-decoration:none;transform:translateY(-4px);border-color:rgba(147,197,253,.6);box-shadow:0 14px 40px rgba(29,78,216,.25)}
+.card:hover::after{transform:scale(1.4)}
+.card .n{font-size:30px;font-weight:800;color:#fff;line-height:1}.card .n small{font-size:14px;color:var(--muted);font-weight:600}
+.card h3{margin:8px 0 4px;font-size:16.5px;color:#fff}.card p{margin:0;font-size:13.5px;color:#cbd5e1}
+.card .go{display:inline-block;margin-top:10px;font-size:13px;color:var(--accent);font-weight:700}
+/* chrome: dots, hint, overlay */
+.dots{position:fixed;right:max(18px,env(safe-area-inset-right));top:50%;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:14px}
+.dots button{position:relative;width:12px;height:12px;border-radius:50%;border:1px solid rgba(203,213,225,.6);background:transparent;padding:0;cursor:pointer;transition:background .3s,transform .3s}
+.dots button.on{background:#93c5fd;border-color:#93c5fd;transform:scale(1.25)}
+.dots button span{position:absolute;right:22px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;color:#e2e8f0;
+ background:rgba(10,18,42,.9);border:1px solid var(--line);padding:3px 8px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+.dots button:hover span,.dots button:focus-visible span{opacity:1}
+@media(max-width:720px){.dots{top:auto;bottom:max(14px,env(safe-area-inset-bottom));right:50%;transform:translateX(50%);flex-direction:row;gap:12px;
+ background:rgba(10,18,42,.7);padding:8px 12px;border-radius:999px;border:1px solid var(--line)}.dots button span{display:none}}
+.hint{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:24;border:1px solid var(--line);background:rgba(6,11,29,.72);border-radius:14px;padding:6px 12px 4px;color:var(--muted);font:13px/1.2 inherit;
+ font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:opacity .4s}
+.hint svg{animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(5px)}}
+.hint.hide,body.at0:not(.touch) .hint,body.touch:not(.at0) .hint{opacity:0;pointer-events:none}
+body.chips-mode #s0tip{display:none}
+@media(max-width:720px){.hint{bottom:66px}}
+.scale{position:fixed;left:max(18px,env(safe-area-inset-left));bottom:20px;z-index:24;font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+.scale b{color:#e2e8f0;font-weight:700}
+@media(max-width:720px){.scale{display:none}}
+#veil{position:fixed;inset:0;z-index:50;background:var(--bg);pointer-events:none;opacity:0;clip-path:circle(0% at 50% 50%);transition:clip-path .7s cubic-bezier(.6,0,.4,1),opacity .2s}
+#veil.go{opacity:1;clip-path:circle(150% at var(--vx,50%) var(--vy,50%))}
+noscript .nos{position:fixed;inset:auto 0 0 0;z-index:60;background:#0b1430;padding:16px;text-align:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(prefers-reduced-motion:reduce){.scene,.frow,.frow .bar i,#veil{transition:none!important}.hint svg,.molwrap::before{animation:none}}
 </style>
 </head>
 <body>
-<header class="site"><div class="wrap">
- <span class="brand">NeuroUnknown</span>
- <nav>
-  <a href="#screen">The screen</a>
-  <a href="#candidates">Candidates</a>
-  <a href="#lead">Lead</a>
-  <a href="#c11orf87">C11orf87</a>
-  <a href="#structures">3D</a>
-  <a href="#biology">Biology</a>
-  <a href="library.html">Library</a>
-  <a href="reviews.html">Reviews</a>
-  <a href="#downloads">Downloads</a>
+<canvas id="dna" aria-hidden="true"></canvas>
+
+<header class="top">
+ <a class="brand" href="index.html">Neuro<i>Unknown</i></a>
+ <nav aria-label="Site">
+  <a href="findings.html">Findings</a><a href="library.html">Library</a><a href="reviews.html">Reviews</a><a class="opt" href="findings.html#downloads">Reports</a>
  </nav>
- <button class="theme-btn" id="themeBtn" title="Toggle light/dark">Dark mode</button>
-</div></header>
+</header>
 
-<div class="hero"><div class="wrap">
- <h1>Hunting for overlooked brain proteins</h1>
- <p class="lead">A reproducible computational screen across all ~19,000 human genes for proteins that are
- brain-specific, disease-relevant, and almost unstudied — the places where one good experiment could
- teach us something genuinely new.</p>
- <div class="btns">
-  <a class="btn" href="#candidates">See the candidates</a>
-  <a class="btn ghost" href="#downloads">Download the reports</a>
- </div>
- <div class="caution">
-  <b>No discovery claims.</b> Everything here is a computational hypothesis or a summary of published
-  literature. No mechanism has been demonstrated and there are no wet-lab data. Evidence types are kept
-  separate throughout: a GWAS locus is not a causal gene, co-expression is not physical interaction, and a
-  high-throughput screen hit is not a validated finding.
- </div>
-</div></div>
-
-<main class="wrap">
-
-<section id="overview">
- <p class="kicker">In one paragraph</p>
- <h2>What this is</h2>
- <p>Scientists have studied some human proteins intensely and barely touched others. We built a pipeline to
- find proteins that are (1) used mainly in the brain, (2) already linked to a disease, and yet (3) almost
- unstudied. We then checked every candidate against the world's medical literature (PubMed, searched 5 and
- re-run 6 November 2026 — identical results, no new papers). One protein, <b>TMEM222</b>, is the strongest
- first bet.</p>
- <div class="grid cards3" style="margin-top:18px">
-  <div class="card"><div class="big">19,299</div><h3>genes scored</h3><p class="small">Every human protein-coding gene, on neuronal specificity, disease evidence and how little is known.</p></div>
-  <div class="card"><div class="big">14</div><h3>candidates</h3><p class="small">8 core + 6 second-wave proteins, across six disease areas.</p></div>
-  <div class="card"><div class="big">1</div><h3>lead</h3><p class="small">TMEM222 — disease-linked, barely studied, and the key experiment is undone.</p></div>
- </div>
-</section>
-
-<section id="screen">
- <p class="kicker">Method</p>
- <h2>How the screen worked</h2>
- <p>We started with every human gene and narrowed down in steps, like panning for gold. At each step we asked
- three plain questions: is it a brain specialist, is it tied to illness, and is it still a mystery?</p>
- <figure><img src="assets/figures/fig_funnel.png" alt="Funnel from 19,299 genes to one lead candidate">
-  <figcaption>From the whole genome to one lead candidate. Each step removes genes that do not fit.</figcaption></figure>
- <p>Not every clue is equally strong. We kept the evidence types apart and never let a weak clue stand in for a
- strong one.</p>
- <figure><img src="assets/figures/fig_evidence_ladder.png" alt="Strength-of-evidence ladder">
-  <figcaption>The strength-of-evidence ladder used throughout the project.</figcaption></figure>
-</section>
-
-<section id="candidates">
- <p class="kicker">Results</p>
- <h2>The 14 candidates</h2>
- <p>Working hypotheses only. "Competition" is how crowded the research question is, from a PubMed audit of all
- aliases. Use the filters to focus.</p>
- <div class="filters" id="filters">
-  <button data-f="all" class="active">All</button>
-  <button data-f="low">Competition: low</button>
-  <button data-f="mod">moderate</button>
-  <button data-f="high">high</button>
-  <button data-f="Core 8">Core 8</button>
-  <button data-f="Wave 2">Wave 2</button>
- </div>
- <table class="data" id="candTable">
-  <thead><tr><th>Gene</th><th>Track</th><th>Disease link (evidence type)</th><th>Working hypothesis (untested)</th><th>Competition</th></tr></thead>
-  <tbody>
-<tr data-comp="low" data-wave="Core 8">
-  <td class="gene"><b>C11orf87</b><br><span class="wave">Core 8</span></td>
-  <td>Discovery (unstudied protein)</td>
-  <td>psychiatric (reported schizophrenia locus; unverified - do not call it a…</td>
-  <td class="hyp">C11orf87 is a Golgi/post-Golgi membrane protein required for efficient surface delivery of a subset of neuronal membrane proteins. Our replication does not support CACNG8/AMPA…</td>
-  <td><span class="chip low">low</span></td>
-</tr>
-<tr data-comp="high" data-wave="Core 8">
-  <td class="gene"><b>TMEM151A</b> <span class="chip bkp">backup</span><br><span class="wave">Core 8</span></td>
-  <td>Mendelian mechanism (competition)</td>
-  <td>movement disorder (paroxysmal kinesigenic dyskinesia)</td>
-  <td class="hyp">TMEM151A acts in both neurons and oligodendrocytes, and PKD reflects the combined loss in a circuit (e.g. impaired axonal conduction plus neuronal excitability) rather than a…</td>
-  <td><span class="chip high">high</span></td>
-</tr>
-<tr data-comp="mod" data-wave="Core 8">
-  <td class="gene"><b>TMEM240</b><br><span class="wave">Core 8</span></td>
-  <td>Mendelian mechanism (follow-up)</td>
-  <td>cerebellar ataxia (SCA21) with cognitive impairment</td>
-  <td class="hyp">Follow-up to Seki 2018: the normal (loss-of-function) role of TMEM240 at cerebellar afferent terminals depends on C-terminal interactions; testing knockout plus WT/mutant…</td>
-  <td><span class="chip mod">moderate</span></td>
-</tr>
-<tr data-comp="high" data-wave="Core 8">
-  <td class="gene"><b>SYT14</b><br><span class="wave">Core 8</span></td>
-  <td>Mendelian mechanism</td>
-  <td>autosomal recessive cerebellar ataxia (SCAR11); neurodevelopment</td>
-  <td class="hyp">SYT14 supports a Ca2+-independent membrane-fusion or membrane-retrieval step in Purkinje-cell somatodendritic compartments (not fast synaptic release), and its loss impairs…</td>
-  <td><span class="chip high">high</span></td>
-</tr>
-<tr data-comp="low" data-wave="Core 8">
-  <td class="gene"><b>TMEM222</b> <span class="chip lead">lead</span><br><span class="wave">Core 8</span></td>
-  <td>Mendelian mechanism</td>
-  <td>neurodevelopmental disorder / intellectual disability</td>
-  <td class="hyp">TMEM222 is required for endosomal sorting/recycling of synaptic membrane proteins during synapse maturation; loss shifts cargo from recycling to degradation.</td>
-  <td><span class="chip low">low</span></td>
-</tr>
-<tr data-comp="low" data-wave="Core 8">
-  <td class="gene"><b>LMBRD2</b><br><span class="wave">Core 8</span></td>
-  <td>Mendelian mechanism</td>
-  <td>neurodevelopmental disorder with epilepsy/microcephaly</td>
-  <td class="hyp">LMBRD2 is a negative regulator of neuronal GPCR signalling (beyond beta2AR); recurrent de novo missense variants act as dominant gain- or loss-of-regulation, altering…</td>
-  <td><span class="chip low">low</span></td>
-</tr>
-<tr data-comp="unknown" data-wave="Core 8">
-  <td class="gene"><b>HS6ST3</b><br><span class="wave">Core 8</span></td>
-  <td>Locus - needs gene assignment</td>
-  <td>depression / mood (common-variant)</td>
-  <td class="hyp">Mood-associated variants reduce neuronal HS6ST3 expression, lowering 6-O-sulfation of synaptic heparan sulfate proteoglycans and weakening HS-dependent synaptic organiser binding.</td>
-  <td><span class="chip unknown">unknown</span></td>
-</tr>
-<tr data-comp="high" data-wave="Core 8">
-  <td class="gene"><b>GPR149</b> <span class="chip bkp">backup</span><br><span class="wave">Core 8</span></td>
-  <td>Locus - needs gene assignment</td>
-  <td>migraine (common-variant); orphan receptor</td>
-  <td class="hyp">GPR149 signalling in hypothalamic/forebrain neurons modulates migraine susceptibility; the migraine locus acts via GPR149 expression.</td>
-  <td><span class="chip high">high</span></td>
-</tr>
-<tr data-comp="unknown" data-wave="Wave 2">
-  <td class="gene"><b>PRR16</b><br><span class="wave">Wave 2</span></td>
-  <td>Locus - needs gene assignment</td>
-  <td>anxiety / depression (common-variant)</td>
-  <td class="hyp">Mood/anxiety risk variants lower neuronal PRR16 expression, and PRR16 controls neuronal mitochondrial mass/cell growth in deep-layer projection neurons.</td>
-  <td><span class="chip unknown">unknown</span></td>
-</tr>
-<tr data-comp="unknown" data-wave="Wave 2">
-  <td class="gene"><b>ZNF385D</b><br><span class="wave">Wave 2</span></td>
-  <td>Locus - needs gene assignment</td>
-  <td>migraine; reading/language (literature)</td>
-  <td class="hyp">ZNF385D is a neuronal RNA-binding protein whose reduced expression alters cortical excitability, linking migraine and language-related loci.</td>
-  <td><span class="chip unknown">unknown</span></td>
-</tr>
-<tr data-comp="low" data-wave="Wave 2">
-  <td class="gene"><b>TMEM178B</b><br><span class="wave">Wave 2</span></td>
-  <td>Discovery (unstudied protein)</td>
-  <td>none yet (LoF-constrained)</td>
-  <td class="hyp">TMEM178B, like its paralog, regulates ER/store-operated calcium handling, here in cortical projection neurons.</td>
-  <td><span class="chip low">low</span></td>
-</tr>
-<tr data-comp="mod" data-wave="Wave 2">
-  <td class="gene"><b>SLC35F4</b><br><span class="wave">Wave 2</span></td>
-  <td>Discovery (unstudied protein)</td>
-  <td>none yet (cerebellum-enriched)</td>
-  <td class="hyp">SLC35F4 imports FAD into the neuronal Golgi to support oxidative folding of secreted/surface neuronal proteins; loss reduces surface delivery of disulfide-rich cargo.</td>
-  <td><span class="chip mod">moderate</span></td>
-</tr>
-<tr data-comp="mod" data-wave="Wave 2">
-  <td class="gene"><b>MCTP1</b><br><span class="wave">Wave 2</span></td>
-  <td>Discovery (conserved mechanism test)</td>
-  <td>bipolar disorder (literature association)</td>
-  <td class="hyp">MCTP1 is required for presynaptic homeostatic plasticity in mammalian hippocampal neurons, as its fly homolog is.</td>
-  <td><span class="chip mod">moderate</span></td>
-</tr>
-<tr data-comp="mod" data-wave="Wave 2">
-  <td class="gene"><b>TCEAL1</b><br><span class="wave">Wave 2</span></td>
-  <td>Mendelian mechanism</td>
-  <td>X-linked neurodevelopmental disorder</td>
-  <td class="hyp">TCEAL1 is a transcriptional regulator whose loss alters neuronal maturation gene programmes.</td>
-  <td><span class="chip mod">moderate</span></td>
-</tr>
-  </tbody>
- </table>
- <figure><img src="assets/figures/fig_competition.png" alt="PubMed records per gene, by competition rating">
-  <figcaption>For each protein: the pale bar is how often it is mentioned in PubMed; the solid bar is how often
-  it is actually studied in depth. Green = the field is still open; red = others are already working on it.
-  Searched 5 and 6 November 2026.</figcaption></figure>
-</section>
-
-<section id="lead">
- <p class="kicker">Front-runner</p>
- <h2>TMEM222</h2>
- <div class="lead-box">
-  <p>In 2021, doctors found that children who inherit two broken copies of the <b>TMEM222</b> gene have a
-  neurodevelopmental disorder — intellectual disability, speech delay, and in some cases seizures. That is
-  strong, patient-based evidence that the protein matters for the brain. Yet since that single discovery paper,
-  essentially no one has studied what the protein does. That combination is exactly what this project was built
-  to find.</p>
-  <p><b>Hypothesis:</b> TMEM222 helps neurons recycle their surface receptors — the antennae that catch incoming
-  signals. If it fails, those receptors may be sent for destruction instead of reused.</p>
-  <p class="small"><b>One catch we flagged:</b> the antibody used to detect the protein in the original study was
-  never fully proven specific. So the first lab step must be a detection tool proven to see TMEM222 and nothing
-  else (a knockout-validated antibody or an endogenous tag).</p>
- </div>
-</section>
-
-<section id="c11orf87">
- <p class="kicker">The starting candidate</p>
- <h2>C11orf87 — and an honest negative result</h2>
- <div class="two">
-  <div>
-   <p>The project began with <b>C11orf87</b>, a protein found almost only in neurons. An earlier idea linked it
-   to a specific receptor partner (CACNG8 / TARP-γ8). When we re-checked that link, it dissolved: the two only
-   looked connected because they live in the same cells, not because they work together.</p>
-   <p class="small">In GTEx bulk data the correlation falls from ρ 0.89 to 0.01 after adjusting for cell
-   composition; in single-nucleus data it is null within neuron types. This stopped us chasing a false lead.
-   C11orf87 is still an interesting mystery protein; its one firm clue (a 2012 secretion screen) needs its
-   original data re-checked, which we have not yet been able to reach.</p>
+<!-- 0 GENOME -->
+<section class="scene on" id="s0" data-name="Genome" aria-label="Genome">
+ <div class="sbody" id="s0body">
+  <p class="kicker">A computational screen &middot; 19,299 human genes</p>
+  <h1>Hunting for <em>overlooked</em><br>brain proteins</h1>
+  <p class="lead">Some proteins have been studied thousands of times, others almost never. We searched the whole genome for brain proteins
+  that are tied to disease yet still barely understood.</p>
+  <div class="btns">
+   <button class="btn" data-next>Start the journey &darr;</button>
+   <a class="btn ghost" href="findings.html">Skip to findings</a>
   </div>
-  <figure style="margin:0"><img src="assets/figures/fig3_c11orf87_coexpression_replication.png" alt="C11orf87 co-expression collapses after adjustment">
-   <figcaption>The CACNG8 co-expression signal collapses after adjustment.</figcaption></figure>
+  <div class="chips" id="chips" aria-label="Jump to a section"></div>
+  <p class="small" id="s0tip" style="margin-top:10px">Drag the helix to turn it. Click a glowing point to jump straight in.</p>
  </div>
 </section>
 
-<section id="structures">
- <p class="kicker">Interactive</p>
- <h2>3D structures (predicted)</h2>
- <p>Pick a protein. <b>Drag</b> to rotate, <b>scroll or pinch</b> to zoom, <b>right-drag</b> (or two-finger drag) to move it.
- These are <b>AlphaFold predictions</b>, not experimentally solved structures. Colour shows how confident the prediction
- is: blue parts are probably shaped like this; orange parts are floppy or uncertain.</p>
- <div class="genebar" id="genebar"></div>
- <div class="mol-grid">
-  <div id="mol"><div id="molmsg">Loading 3D viewer…</div></div>
-  <aside class="molinfo" id="molinfo">
-   <h3 id="mi-gene">–</h3>
-   <dl>
-    <dt>UniProt</dt><dd id="mi-uni">–</dd>
-    <dt>Length</dt><dd id="mi-len">–</dd>
-    <dt>Mean pLDDT</dt><dd id="mi-pl">–</dd>
-    <dt>Track</dt><dd id="mi-track">–</dd>
-    <dt>Competition</dt><dd id="mi-comp">–</dd>
-   </dl>
-   <div class="ctrls">
-    <button id="b-zin" title="Zoom in">Zoom +</button>
-    <button id="b-zout" title="Zoom out">Zoom −</button>
-    <button id="b-reset">Reset</button>
-    <button id="b-spin">Spin</button>
+<!-- 1 SCREEN -->
+<section class="scene" id="s1" data-name="Screen" aria-label="The screen">
+ <div class="sbody"><div class="split">
+  <div>
+   <p class="kicker">Step 1 &middot; zooming into the genome</p>
+   <h2>From every gene to one first bet</h2>
+   <p class="lead">Each gene was scored on three plain questions. Then we narrowed down step by step, like panning for gold.</p>
+   <div class="qs">
+    <div class="q"><div class="ic" style="background:#93c5fd">N</div><div><h3>Is it a brain specialist?</h3><p>Expression in the brain and in neurons, from GTEx and a whole-brain single-cell atlas.</p></div></div>
+    <div class="q"><div class="ic" style="background:#c4b5fd">D</div><div><h3>Is it tied to illness?</h3><p>Patient genetics, fine-mapped GWAS and mouse phenotypes, kept as separate types of evidence.</p></div></div>
+    <div class="q"><div class="ic" style="background:#fbbf24">U</div><div><h3>Is it still a mystery?</h3><p>How little curated databases know about it, checked against PubMed by hand.</p></div></div>
    </div>
-   <div class="ctrls">
-    <select id="s-style" aria-label="Style">
-     <option value="cartoon">Cartoon</option>
-     <option value="surface">Surface</option>
-     <option value="stick">Sticks</option>
-    </select>
-    <select id="s-color" aria-label="Colour">
-     <option value="plddt">Colour: confidence</option>
-     <option value="rainbow">Colour: start → end</option>
-    </select>
+  </div>
+  <div class="glass funnel" role="list" aria-label="Screening funnel">
+   <div id="funnel"></div>
+   <p class="fnote" id="fnote">Tap a step to see what it removed.</p>
+   <p class="small" style="margin:0 6px">Bar length on a log scale. <a href="findings.html#screen">How the screen worked &rarr;</a></p>
+  </div>
+ </div></div>
+</section>
+
+<!-- 2 PROTEIN -->
+<section class="scene" id="s2" data-name="Protein" aria-label="Protein">
+ <div class="sbody"><div class="split">
+  <div>
+   <p class="kicker">Step 2 &middot; from gene to protein</p>
+   <h2>TMEM222, the front&#8209;runner</h2>
+   <p class="lead">In 2021, children with two broken copies of <b>TMEM222</b> were found to have a neurodevelopmental disorder.
+   Since that discovery paper, almost no one has studied what the protein actually does.</p>
+   <div class="facts">
+    <div class="fact"><b>Recessive</b><span>neurodevelopmental disorder (patients)</span></div>
+    <div class="fact"><b>84.8</b><span>mean AlphaFold confidence (pLDDT)</span></div>
+    <div class="fact"><b>Q9H0R3</b><span>UniProt accession</span></div>
    </div>
-   <div class="ctrls"><label id="tm-wrap"><input type="checkbox" id="c-tm"> Highlight our predicted membrane segments</label></div>
-   <p class="small" id="mi-note" style="margin:8px 0 0"></p>
-  </aside>
- </div>
- <div class="plddt">
-  <span><i style="background:#0053D6"></i>Very high (&gt;90)</span>
-  <span><i style="background:#65CBF3"></i>Confident (70–90)</span>
-  <span><i style="background:#FFDB13"></i>Low (50–70)</span>
-  <span><i style="background:#FF7D45"></i>Very low (&lt;50)</span>
-  <span><i style="background:#7c3aed"></i>Our predicted membrane segment</span>
- </div>
- <p class="small">Structures: AlphaFold DB (Jumper et al., Nature 2021; Varadi et al., Nucleic Acids Res 2024), CC BY 4.0.
- Viewer: 3Dmol.js (Rego &amp; Koes, Bioinformatics 2015), BSD licence.
- Low-confidence regions should not be read as real shapes; many of these proteins are predicted to be partly disordered.</p>
+   <p class="hyp"><b>Working hypothesis (untested):</b> TMEM222 helps neurons recycle their surface receptors. The first lab step is a detection
+   tool proven to see TMEM222 and nothing else.</p>
+   <div class="btns"><a class="btn" href="findings.html#lead">Why TMEM222</a><a class="btn ghost" href="findings.html#structures">All 14 3D structures</a></div>
+  </div>
+  <div>
+   <div class="molwrap no-nav"><div id="mol" aria-label="Interactive 3D model of TMEM222. Drag to rotate, scroll to zoom."><div id="molmsg">Loading the 3D model&hellip;</div></div></div>
+   <div class="legend"><span><i style="background:#0053D6"></i>very high</span><span><i style="background:#65CBF3"></i>confident</span>
+    <span><i style="background:#FFDB13"></i>low</span><span><i style="background:#FF7D45"></i>very low confidence</span></div>
+   <p class="small" style="text-align:center;margin:6px 0 0">AlphaFold DB prediction (CC BY 4.0), not an experimental structure. Drag to rotate.</p>
+  </div>
+ </div></div>
 </section>
 
-<section id="biology">
- <p class="kicker">Illustrated</p>
- <h2>The biology</h2>
- <p>These are schematic drawings made for this project. Filled markers show placements supported by a published
- experiment; open markers show placements from a screen or prediction only. The architecture panels are drawn
- from our own sequence predictions (a hydropathy scan for membrane-spanning segments; metapredict for disorder).
- No experimental or AlphaFold 3-D structures are shown — those databases were not reachable from the analysis
- environment.</p>
- <figure><img src="assets/figures/fig_neuron.png" alt="A neuron with candidate proteins labelled">
-  <figcaption>A neuron, and where some candidate proteins are thought to work (not to scale).</figcaption></figure>
- <figure><img src="assets/figures/fig_synapse.png" alt="Synapse close-up">
-  <figcaption>A synapse close-up. TMEM222 sits on the receiving side near the recycling compartments.</figcaption></figure>
- <figure><img src="assets/figures/fig_protein_maps.png" alt="Linear architecture of the 14 candidate proteins">
-  <figcaption>Predicted architecture of all 14 candidates (blue: membrane-spanning; orange: disordered/flexible).</figcaption></figure>
- <figure><img src="assets/figures/fig_membrane_cartoons.png" alt="Membrane cartoons of six candidates">
-  <figcaption>How six candidates are predicted to sit in a membrane. Which side is inside is not determined.</figcaption></figure>
+<!-- 3 NEURON -->
+<section class="scene" id="s3" data-name="Neuron" aria-label="Neuron">
+ <div class="sbody"><div class="split">
+  <div>
+   <p class="kicker">Step 3 &middot; out to the cell</p>
+   <h2>Where these proteins work</h2>
+   <p class="lead">Most candidates are made mainly in neurons, the brain's signalling cells. Tap a part of the neuron to see what it does
+   and how it connects to the project.</p>
+   <div class="ptabs" id="ptabs"></div>
+   <p class="caution">Our first screen only kept genes made in neurons. Our rapid review showed that is reasonable for schizophrenia and
+   developmental disorders, but glia matter more for Alzheimer's, Parkinson's and multiple sclerosis, so we added a separate glial screen.</p>
+  </div>
+  <div>
+   <svg class="neuron" viewBox="0 0 640 330" role="img" aria-label="Schematic neuron">
+    <defs>
+     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+     <radialGradient id="somaG" cx="45%" cy="40%"><stop offset="0" stop-color="#a5b4fc"/><stop offset="1" stop-color="#4338ca"/></radialGradient>
+    </defs>
+    <g class="part" data-p="dend" tabindex="0" stroke="#818cf8" stroke-width="5" stroke-linecap="round" fill="none">
+     <path d="M108 160 C80 130 60 110 30 96"/><path d="M62 118 C52 100 50 84 40 66"/><path d="M104 150 C96 110 100 80 88 46"/>
+     <path d="M96 92 C112 76 120 64 134 50"/><path d="M108 172 C80 196 58 214 26 226"/><path d="M60 208 C54 228 50 244 36 262"/>
+     <path d="M112 182 C106 220 110 252 96 288"/><path d="M108 246 C124 262 130 274 140 292"/>
+    </g>
+    <g class="part" data-p="axon" tabindex="0"><path id="axonPath" d="M150 165 C230 165 300 158 380 166 S 500 172 548 166" stroke="#60a5fa" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+    <g class="part" data-p="myelin" tabindex="0" fill="#c4b5fd" opacity=".9">
+     <rect x="186" y="155" width="44" height="20" rx="10"/><rect x="246" y="152" width="44" height="20" rx="10"/><rect x="306" y="153" width="44" height="20" rx="10"/>
+     <rect x="366" y="156" width="44" height="20" rx="10"/><rect x="426" y="159" width="44" height="20" rx="10"/>
+    </g>
+    <g class="part" data-p="soma" tabindex="0"><circle cx="116" cy="164" r="38" fill="url(#somaG)"/><circle cx="110" cy="158" r="14" fill="#1e1b4b" opacity=".85"/></g>
+    <g class="part" data-p="syn" tabindex="0">
+     <path d="M548 166 C560 150 566 136 578 124 M548 166 L582 166 M548 166 C560 182 566 196 578 208" stroke="#60a5fa" stroke-width="4" fill="none" stroke-linecap="round"/>
+     <circle cx="582" cy="122" r="8" fill="#93c5fd"/><circle cx="586" cy="166" r="8" fill="#93c5fd"/><circle cx="582" cy="210" r="8" fill="#93c5fd"/>
+     <path d="M606 100 C600 130 600 200 606 232 L640 232 L640 100 Z" fill="#312e81" opacity=".9"/>
+     <g fill="#fbbf24"><rect x="600" y="116" width="5" height="12" rx="2"/><rect x="599" y="160" width="5" height="12" rx="2"/><rect x="600" y="204" width="5" height="12" rx="2"/></g>
+    </g>
+    <g id="pulses"><circle r="5" fill="#fef08a" filter="url(#glow)"><animateMotion dur="2.2s" repeatCount="indefinite"><mpath href="#axonPath"/></animateMotion></circle>
+     <circle r="5" fill="#fef08a" filter="url(#glow)"><animateMotion dur="2.2s" begin="1.1s" repeatCount="indefinite"><mpath href="#axonPath"/></animateMotion></circle></g>
+   </svg>
+   <div class="glass ninfo" id="ninfo" aria-live="polite"><h3>Tap a part of the neuron</h3><p>Dendrites, cell body, axon, myelin or synapse.</p></div>
+  </div>
+ </div></div>
 </section>
 
-<section id="missing">
- <p class="kicker">Honesty</p>
- <h2>What is still missing</h2>
- <ul class="steps">
-  <li><b>Simpson 2012</b> per-gene RNAi data for C11orf87 (not in PubMed Central; supplementary spreadsheets needed).</li>
-  <li><b>Trubetskoy 2022</b> prioritised-gene tables (not in the accessible text).</li>
-  <li><b>Locus-to-gene / brain eQTL</b> evidence for the GWAS candidates (HS6ST3, PRR16, ZNF385D, GPR149).</li>
-  <li><b>Grants, theses and conference abstracts</b> — a TMEM222 competition check — which PubMed does not index.</li>
- </ul>
-</section>
-
-<section id="library">
- <p class="kicker">New</p>
- <h2>Protein library</h2>
- <p>All 100 proteins our screen has put through a literature check (60 audited, 27 added in wave 3, and 13 from a glial screen), each with its PubMed papers labelled by evidence type
- (experiment, human genetics, genetic association, screen, prediction, review or incidental mention) and a plain status:
- needs a mechanistic study, partly studied, being studied by others, or already studied elsewhere.</p>
- <p><a class="btn" href="library.html">Open the protein library</a></p>
-</section>
-
-<section id="reviews">
- <p class="kicker">New</p>
- <h2>Rapid reviews</h2>
- <p>Three small literature reviews and one gene audit tested our own assumptions: how "unknown" is defined, which cell types carry brain-disorder risk,
- whether small nuclear RNA genes are an open gap, and how studied schizophrenia rare-variant genes are. Result: our unstudied score needs rebuilding,
- the neuron-only filter should depend on the disease, and RNU4-2 and RNU2-2 are already heavily studied. PubMed only, one AI reviewer, not full systematic reviews.</p>
- <p><a class="btn" href="reviews.html">Read the reviews</a></p>
-</section>
-
-<div class="note"><b>In one line:</b> out of ~19,000 human genes, a careful, honest filter points to a
- handful of overlooked brain proteins worth a real experiment, and TMEM222 is first in line. Nothing here is a
- discovery: these are the best-justified next experiments, chosen from public data.</div>
-
-<section id="downloads">
- <p class="kicker">Read more</p>
- <h2>Full reports</h2>
- <div class="dl">
-  <a href="assets/reports/NeuroUnknown_public_summary.pdf">
-   <b>Plain-language summary (PDF)</b>
-   <span>8 pages, for a general audience. What we looked for, what we found, why TMEM222.</span></a>
-  <a href="assets/reports/NeuroUnknown_detailed_report.pdf">
-   <b>Detailed technical report (PDF)</b>
-   <span>16 pages. Methods, the full PubMed audit with DOIs, per-gene findings, the C11orf87 analysis.</span></a>
+<!-- 4 EXPLORE -->
+<section class="scene" id="s4" data-name="Explore" aria-label="Explore">
+ <div class="sbody">
+  <p class="kicker">Step 4 &middot; explore everything</p>
+  <h2>Choose where to look next</h2>
+  <p class="lead" style="margin-bottom:0">Every number, paper and decision behind the journey, kept as separate types of evidence.</p>
+  <div class="hub">
+   <a class="card" href="findings.html#candidates"><div class="n">14 <small>candidates</small></div><h3>The shortlist</h3><p>Filter by competition and track, with the disease link and working hypothesis for each.</p><span class="go">Open findings &rarr;</span></a>
+   <a class="card" href="findings.html#structures"><div class="n">14 <small>3D models</small></div><h3>Predicted structures</h3><p>Rotate and zoom AlphaFold models, coloured by prediction confidence.</p><span class="go">Open the 3D viewer &rarr;</span></a>
+   <a class="card" href="library.html"><div class="n">100 <small>proteins</small></div><h3>Protein library</h3><p>1,202 paper links, each labelled by evidence type, with a plain research status.</p><span class="go">Browse the library &rarr;</span></a>
+   <a class="card" href="reviews.html"><div class="n">3 + 1 <small>reviews + audit</small></div><h3>Rapid reviews</h3><p>We tested our own assumptions against the literature and changed the plan.</p><span class="go">Read the reviews &rarr;</span></a>
+   <a class="card" href="findings.html#c11orf87"><div class="n">1 <small>negative result</small></div><h3>An honest negative result</h3><p>How an apparent C11orf87 partner dissolved once cell composition was taken into account.</p><span class="go">See the analysis &rarr;</span></a>
+   <a class="card" href="findings.html#downloads"><div class="n">2 <small>PDF reports</small></div><h3>Reports</h3><p>A plain-language summary and a detailed technical report with every DOI.</p><span class="go">Download &rarr;</span></a>
+  </div>
+  <p class="caution"><b>No discovery claims.</b> Everything here is a computational hypothesis or a summary of published literature. A GWAS locus is
+  not a causal gene, co-expression is not interaction, and a screen hit is not a validated finding.</p>
+  <div class="btns" style="margin-top:14px"><button class="btn ghost" data-goto="0">&#8634; Replay the journey</button></div>
  </div>
 </section>
 
-</main>
-
-<footer class="site"><div class="wrap">
- <p>Sources: literature from PubMed and PubMed Central (NCBI), accessed 5–6 November 2026; expression and
- structural figures from the project's own analyses of public data (GTEx v11, the Siletti 2023 human whole-brain
- atlas, gnomAD v4.1, the Monarch knowledge graph, FinnGen R12). Full provenance and code are in the project
- repository.</p>
- <p>NeuroUnknown — computational hypotheses only, no discovery claims. Last updated 7 November 2026.</p>
-</div></footer>
+<nav class="dots" id="dots" aria-label="Journey steps"></nav>
+<button class="hint" id="hint" aria-label="Next step"><span id="hintTxt">Scroll to zoom in</span>
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+<div class="scale" id="scale" aria-hidden="true">Scale: <b id="scaleTxt">genome</b></div>
+<div id="veil"></div>
+<noscript><div class="nos">This page is interactive. <a href="findings.html">Open the findings page</a> &middot; <a href="library.html">Library</a> &middot; <a href="reviews.html">Reviews</a></div></noscript>
 
 <script>
 (function(){
- var r=document.documentElement, b=document.getElementById('themeBtn');
- try{var s=localStorage.getItem('nu-theme'); if(s){ r.setAttribute('data-theme',s); if(s==='dark') b.textContent='Light mode'; }}catch(e){}
- b.addEventListener('click',function(){
-  var cur=r.getAttribute('data-theme');
-  var now=(cur==='dark')?'light':'dark';
-  r.setAttribute('data-theme',now); b.textContent=now==='dark'?'Light mode':'Dark mode';
-  try{localStorage.setItem('nu-theme',now);}catch(e){}
- });
- var tb=document.getElementById('candTable'), fs=document.getElementById('filters');
- fs.addEventListener('click',function(ev){
-  var btn=ev.target.closest('button'); if(!btn) return;
-  [].forEach.call(fs.children,function(c){c.classList.remove('active');});
-  btn.classList.add('active');
-  var f=btn.getAttribute('data-f');
-  [].forEach.call(tb.tBodies[0].rows,function(row){
-   var show = f==='all' || row.getAttribute('data-comp')===f || row.getAttribute('data-wave')===f;
-   row.style.display = show?'':'none';
-  });
- });
-})();
-</script>
-<script src="assets/js/3Dmol-min.js" defer></script>
-<script>
-(function(){
- var DATA = [{"gene": "TMEM222", "uniprot": "Q9H0R3", "file": "assets/structures/TMEM222.pdb", "version": 6, "plddt": 84.81, "len": 208, "tm": [[179, 208]], "track": "Mendelian mechanism", "comp": "low"}, {"gene": "C11orf87", "uniprot": "Q6NUJ2", "file": "assets/structures/C11orf87.pdb", "version": 6, "plddt": 57.84, "len": 197, "tm": [[53, 86]], "track": "Discovery (unstudied protein)", "comp": "low"}, {"gene": "TMEM240", "uniprot": "Q5SV17", "file": "assets/structures/TMEM240.pdb", "version": 6, "plddt": 58.75, "len": 173, "tm": [[3, 31], [87, 113]], "track": "Mendelian mechanism (follow-up)", "comp": "mod"}, {"gene": "SYT14", "uniprot": "Q8NB59", "file": "assets/structures/SYT14.pdb", "version": 6, "plddt": 65.06, "len": 574, "tm": [[20, 53], [506, 524]], "track": "Mendelian mechanism", "comp": "high"}, {"gene": "TCEAL1", "uniprot": "Q15170", "file": "assets/structures/TCEAL1.pdb", "version": 6, "plddt": 67.06, "len": 159, "tm": [], "track": "Mendelian mechanism", "comp": "mod"}, {"gene": "LMBRD2", "uniprot": "Q68DH5", "file": "assets/structures/LMBRD2.pdb", "version": 6, "plddt": 76.75, "len": 695, "tm": [[1, 25], [31, 62], [152, 177], [184, 210], [380, 423], [429, 457], [521, 553]], "track": "Mendelian mechanism", "comp": "low"}, {"gene": "MCTP1", "uniprot": "Q6DN14", "file": "assets/structures/MCTP1.pdb", "version": 6, "plddt": 64.69, "len": 999, "tm": [[578, 597], [807, 844], [908, 945]], "track": "Discovery (conserved mechanism test)", "comp": "mod"}, {"gene": "SLC35F4", "uniprot": "A4IF30", "file": "assets/structures/SLC35F4.pdb", "version": 6, "plddt": 66.94, "len": 485, "tm": [[118, 143], [242, 288], [329, 353], [365, 403], [412, 440]], "track": "Discovery (unstudied protein)", "comp": "mod"}, {"gene": "TMEM178B", "uniprot": "H3BS89", "file": "assets/structures/TMEM178B.pdb", "version": 6, "plddt": 75.44, "len": 294, "tm": [[5, 30], [169, 228]], "track": "Discovery (unstudied protein)", "comp": "low"}, {"gene": "HS6ST3", "uniprot": "Q8IZP7", "file": "assets/structures/HS6ST3.pdb", "version": 6, "plddt": 80.38, "len": 471, "tm": [[5, 27]], "track": "Locus - needs gene assignment", "comp": "unknown"}, {"gene": "PRR16", "uniprot": "Q569H4", "file": "assets/structures/PRR16.pdb", "version": 6, "plddt": 63.12, "len": 304, "tm": [], "track": "Locus - needs gene assignment", "comp": "unknown"}, {"gene": "ZNF385D", "uniprot": "Q9H6B1", "file": "assets/structures/ZNF385D.pdb", "version": 6, "plddt": 61.97, "len": 395, "tm": [], "track": "Locus - needs gene assignment", "comp": "unknown"}, {"gene": "TMEM151A", "uniprot": "Q8N4L1", "file": "assets/structures/TMEM151A.pdb", "version": 6, "plddt": 72.0, "len": 468, "tm": [[43, 65], [97, 117]], "track": "Mendelian mechanism (competition)", "comp": "high"}, {"gene": "GPR149", "uniprot": "Q86SP6", "file": "assets/structures/GPR149.pdb", "version": 6, "plddt": 53.97, "len": 731, "tm": [[30, 60], [147, 172], [182, 218], [310, 332], [345, 364]], "track": "Locus - needs gene assignment", "comp": "high"}];
- var viewer=null, cur=null, spinning=false, model=null, started=false;
- var el=document.getElementById('mol'), msg=document.getElementById('molmsg');
- function plddtColor(a){ var b=a.b; return b>90?'#0053D6':b>70?'#65CBF3':b>50?'#FFDB13':'#FF7D45'; }
- function bg(){ return document.documentElement.getAttribute('data-theme')==='dark'?'#0f172a':'#ffffff'; }
- function tmOk(d){ return d.tm && d.tm.length && d.len && cur && cur.nres===d.len; }
- function style(){
-  if(!viewer||!model) return;
-  var st=document.getElementById('s-style').value, col=document.getElementById('s-color').value;
-  var c = col==='plddt' ? {colorfunc:plddtColor} : {color:'spectrum'};
-  viewer.removeAllSurfaces(); viewer.setStyle({},{});
-  if(st==='cartoon') viewer.setStyle({},{cartoon:c});
-  else if(st==='stick') viewer.setStyle({},{stick:Object.assign({radius:0.18},c)});
-  else { viewer.setStyle({},{cartoon:Object.assign({opacity:0.35},c)});
-         viewer.addSurface($3Dmol.SurfaceType.VDW, Object.assign({opacity:0.92},c)); }
-  var d=cur&&cur.d;
-  if(d && document.getElementById('c-tm').checked && tmOk(d)){
-   d.tm.forEach(function(seg){
-    var sel={resi:(seg[0]+1)+'-'+seg[1]};
-    if(st==='stick') viewer.setStyle(sel,{stick:{radius:0.22,color:'#7c3aed'}});
-    else viewer.setStyle(sel,{cartoon:{color:'#7c3aed'}});
-   });
-  }
-  viewer.render();
+'use strict';
+var TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints>0;
+if(TOUCH) document.body.classList.add('touch');
+var RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var FUNNEL = [[19299, "", "human protein-coding genes scored", "Every gene gets three scores: brain specificity (N), disease evidence (D) and how little is known (U)."], [12208, "", "pass the brain-expression check", "Genes that are not clearly used in the brain are set aside."], [60, "~", "top candidates checked in the literature", "The highest-ranked genes are read against PubMed, alias by alias."], [14, "", "portfolio candidates", "8 core and 6 second-wave proteins across six disease areas."], [12, "", "remain after the PubMed audit", "Candidates whose question is already being studied elsewhere move to backup."], [1, "", "lead: TMEM222", "Patient genetics, barely studied, and the key experiment is still undone."]];
+var STATIONS = [
+ {i:5,  t:'Method',      s:'how the screen worked',  href:'findings.html#screen'},
+ {i:11, t:'Candidates',  s:'14 proteins',          href:'findings.html#candidates'},
+ {i:18, t:'TMEM222',     s:'the lead',               href:'findings.html#lead'},
+ {i:24, t:'3D models',   s:'14 predictions',     href:'findings.html#structures'},
+ {i:30, t:'Library',     s:'100 proteins',           href:'library.html'},
+ {i:36, t:'Reviews',     s:'evidence checks',        href:'reviews.html'},
+ {i:42, t:'Reports',     s:'2 PDFs',                 href:'findings.html#downloads'}];
+var SCALE = ['genome','gene','protein','cell','everything'];
+var HASH = ['j-genome','j-screen','j-protein','j-neuron','j-explore'];
+var CAMS = [{z:1,a:1,s:1},{z:2.4,a:.24,s:0},{z:5.2,a:.17,s:0},{z:9,a:.1,s:0},{z:1.25,a:.22,s:0}];
+
+/* ---------- canvas helix ---------- */
+var cv=document.getElementById('dna'), ctx=cv.getContext('2d');
+var W=1,H=1,DPR=1,G={len:800,R:80,tilt:-.1,cy:.6};
+var N=64, TW=0.31, seq=[], PAIR={A:'T',T:'A',G:'C',C:'G'};
+var BASE={A:'#34d399',T:'#f87171',G:'#fbbf24',C:'#60a5fa'};
+var seed=20261122; function rnd(){ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; }
+for(var q=0;q<N;q++) seq.push('ATGC'.charAt(Math.floor(rnd()*4)));
+var stars=[]; for(q=0;q<170;q++) stars.push({x:rnd(),y:rnd(),r:rnd()*1.3+.3,d:rnd()*.8+.2,p:rnd()*6.28});
+var cam={z:1,a:1,s:1,ox:0,oy:0}, tgt={z:1,a:1,s:1,ox:0,oy:0};
+var rot=0, spin=RM?0:0.26, drag=null, hot=-1, flying=false, last=performance.now();
+var s0body=document.getElementById('s0body'), chipsMode=false;
+
+function layout(){
+ DPR=Math.min(2,window.devicePixelRatio||1); W=window.innerWidth; H=window.innerHeight;
+ cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); cv.style.width=W+'px'; cv.style.height=H+'px';
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+ var land=W>=H*0.9;
+ G.len=Math.min(W*(land?0.84:0.92),1300); G.R=land?Math.max(46,Math.min(H*0.105,105)):Math.max(34,Math.min(W*0.13,110));
+ chipsMode = W<1000;
+ G.tilt=chipsMode?(land?-0.05:-0.1):-0.09;
+ document.body.classList.toggle('chips-mode',chipsMode);
+ var bottom = s0body.offsetTop + s0body.scrollHeight - 96;      // content bottom without the bottom padding
+ var rise = G.len/2*Math.abs(Math.sin(G.tilt));
+ var want = Math.max(bottom + G.R*1.16 + rise*0.6 + 22, H*0.5);
+ if(!chipsMode && want + G.R*1.16 + 114 > H - 8) { chipsMode=true; document.body.classList.add('chips-mode'); bottom=s0body.offsetTop+s0body.scrollHeight-96; want=Math.max(bottom+G.R*1.16+rise+18,H*0.5); }
+ G.cy = (chipsMode ? Math.min(want, H - G.R*0.35) : want) / H;
+ document.body.classList.toggle('labels-mode',!chipsMode);
+}
+function P(i,strand){
+ var u=(i/(N-1)-0.5)*G.len, th=i*TW+rot+(strand?Math.PI:0), y=G.R*Math.sin(th), z=G.R*Math.cos(th);
+ var s=900/(900-z), ca=Math.cos(G.tilt), sa=Math.sin(G.tilt), cx=W/2+cam.ox, cy=H*(cam.s*G.cy+(1-cam.s)*0.5)+cam.oy, yy=y*s;
+ return {x:cx+cam.z*(u*ca-yy*sa), y:cy+cam.z*(u*sa+yy*ca), z:z, s:s, d:(z+G.R)/(2*G.R)};
+}
+function axisPt(i,off){
+ var u=(i/(N-1)-0.5)*G.len, ca=Math.cos(G.tilt), sa=Math.sin(G.tilt), cx=W/2+cam.ox, cy=H*(cam.s*G.cy+(1-cam.s)*0.5)+cam.oy;
+ return {x:cx+cam.z*(u*ca)-off*sa, y:cy+cam.z*(u*sa)+off*ca};
+}
+var stIdx={}; STATIONS.forEach(function(st,k){stIdx[st.i]=k;});
+function draw(t){
+ ctx.clearRect(0,0,W,H);
+ // drifting background "genes"
+ for(var k=0;k<stars.length;k++){var st=stars[k], px=((st.x*W+(cam.z-1)*(st.x-.5)*W*st.d*.6)%W+W)%W, py=((st.y*H+(cam.z-1)*(st.y-.5)*H*st.d*.6)%H+H)%H;
+  ctx.globalAlpha=(.25+.35*Math.sin(t*.0006+st.p)*.5+.2)*st.d; ctx.fillStyle='#c7d2fe'; ctx.beginPath(); ctx.arc(px,py,st.r,0,6.283); ctx.fill();}
+ if(cam.a<0.01){ctx.globalAlpha=1;return;}
+ var A=[],B=[],items=[],i,a,b;
+ for(i=0;i<N;i++){A.push(P(i,0));B.push(P(i,1));}
+ var zr=Math.min(cam.z,6);
+ for(i=0;i<N;i++){
+  a=A[i]; b=B[i]; var mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+  items.push({k:0,z:a.z/2-1,x1:a.x,y1:a.y,x2:mx,y2:my,c:BASE[seq[i]],w:2.3*zr*(a.s+b.s)/2,d:(a.d+.5)/1.5});
+  items.push({k:0,z:b.z/2-1,x1:b.x,y1:b.y,x2:mx,y2:my,c:BASE[PAIR[seq[i]]],w:2.3*zr*(a.s+b.s)/2,d:(b.d+.5)/1.5});
+  if(i<N-1){ for(var sd=0;sd<2;sd++){ var p0=sd?b:a;
+   for(var j=1;j<=4;j++){ var p1=P(i+j/4,sd);
+    items.push({k:1,z:(p0.z+p1.z)/2,x1:p0.x,y1:p0.y,x2:p1.x,y2:p1.y,c:sd?'#a78bfa':'#60a5fa',w:3.4*zr*p1.s,d:(p0.d+p1.d)/2}); p0=p1; } } }
+  items.push({k:2,z:a.z+.5,x:a.x,y:a.y,r:Math.min(42,4.4*zr*a.s),c:'#93c5fd',d:a.d,st:stIdx[i]});
+  items.push({k:2,z:b.z+.5,x:b.x,y:b.y,r:Math.min(42,4.4*zr*b.s),c:'#c4b5fd',d:b.d});
  }
- function info(d,nres){
-  document.getElementById('mi-gene').textContent=d.gene;
-  document.getElementById('mi-uni').innerHTML='<a href="https://alphafold.ebi.ac.uk/entry/'+d.uniprot+'">'+d.uniprot+'</a>';
-  document.getElementById('mi-len').textContent=(nres||'–')+' residues';
-  document.getElementById('mi-pl').textContent=d.plddt!=null?Number(d.plddt).toFixed(1):'–';
-  document.getElementById('mi-track').textContent=d.track||'–';
-  document.getElementById('mi-comp').textContent=({low:'low',mod:'moderate',high:'high',unknown:'unknown'})[d.comp]||'–';
-  var ok = d.tm && d.tm.length && d.len===nres;
-  document.getElementById('c-tm').disabled=!ok;
-  document.getElementById('tm-wrap').style.opacity=ok?1:0.5;
-  document.getElementById('mi-note').textContent = !d.tm||!d.tm.length ? 'Our hydropathy scan predicts no membrane-spanning segment for this protein.'
-    : ok ? 'Purple overlay = segments from our own hydropathy scan (a rough prediction).'
-         : 'Overlay off: the AlphaFold model and our sequence differ in length, so positions would not line up.';
+ items.sort(function(p,q){return p.z-q.z;});
+ ctx.lineCap='round';
+ for(i=0;i<items.length;i++){var it=items[i]; ctx.globalAlpha=cam.a*(.22+.78*it.d);
+  if(it.k<2){ctx.strokeStyle=it.c; ctx.lineWidth=Math.max(1,it.w); ctx.beginPath(); ctx.moveTo(it.x1,it.y1); ctx.lineTo(it.x2,it.y2); ctx.stroke();}
+  else{
+   if(it.st!==undefined && cam.s>0.02){
+    var pul=1+.25*Math.sin(t*.004+it.st), hr=it.r*(it.st===hot?5.2:3.8)*pul; it.r*=1.45;
+    var gr=ctx.createRadialGradient(it.x,it.y,0,it.x,it.y,hr); gr.addColorStop(0,'rgba(251,191,36,.95)'); gr.addColorStop(.35,'rgba(251,191,36,.35)'); gr.addColorStop(1,'rgba(251,191,36,0)');
+    ctx.globalAlpha=cam.a*cam.s*(.45+.55*it.d); ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(it.x,it.y,hr,0,6.283); ctx.fill();
+    ctx.globalAlpha=cam.a*(.22+.78*it.d); ctx.fillStyle=it.st===hot?'#fff':'#fde68a';
+   } else ctx.fillStyle=it.c;
+   ctx.beginPath(); ctx.arc(it.x,it.y,it.r,0,6.283); ctx.fill();
+  }}
+ // connectors from station labels down to the helix
+ if(!chipsMode && cam.s>0.02){
+  ctx.globalAlpha=cam.s*cam.a*.55; ctx.strokeStyle='#fde68a'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+  STATIONS.forEach(function(st,k){var n=A[st.i], lp=labelPos(k); ctx.beginPath(); ctx.moveTo(lp.x,lp.y-14); ctx.lineTo(n.x,n.y); ctx.stroke();});
+  ctx.setLineDash([]);
  }
- function load(d){
-  [].forEach.call(document.querySelectorAll('#genebar button'),function(b){b.classList.toggle('active',b.textContent===d.gene);});
-  msg.style.display='flex'; msg.textContent='Loading '+d.gene+'…';
-  fetch(d.file).then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); }).then(function(txt){
-   viewer.clear(); model=viewer.addModel(txt,'pdb');
-   var nres=new Set(model.selectedAtoms({}).map(function(a){return a.resi;})).size;
-   cur={d:d,nres:nres}; info(d,nres); style(); viewer.zoomTo(); viewer.render(); msg.style.display='none';
-   try{ history.replaceState(null,'','#structures'); }catch(e){}
-  }).catch(function(){ msg.style.display='flex';
-   msg.textContent='Could not load the structure file. Open this page from the website (not as a local file), or view it on AlphaFold DB.'; });
- }
- function start(){
-  if(started) return; started=true;
-  if(!window.$3Dmol){ msg.textContent='3D viewer could not load in this browser.'; return; }
-  viewer=$3Dmol.createViewer(el,{backgroundColor:bg(),antialias:true});
-  var bar=document.getElementById('genebar');
-  DATA.forEach(function(d){ var b=document.createElement('button'); b.textContent=d.gene; b.onclick=function(){load(d);}; bar.appendChild(b); });
-  document.getElementById('b-zin').onclick=function(){ viewer.zoom(1.25,300); };
-  document.getElementById('b-zout').onclick=function(){ viewer.zoom(0.8,300); };
-  document.getElementById('b-reset').onclick=function(){ viewer.zoomTo(); viewer.render(); };
-  document.getElementById('b-spin').onclick=function(){ spinning=!spinning; viewer.spin(spinning?'y':false); this.textContent=spinning?'Stop':'Spin'; };
-  document.getElementById('s-style').onchange=style;
-  document.getElementById('s-color').onchange=style;
-  document.getElementById('c-tm').onchange=style;
-  new MutationObserver(function(){ if(viewer){ viewer.setBackgroundColor(bg()); viewer.render(); } })
-   .observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-  window.addEventListener('resize',function(){ viewer.resize(); viewer.render(); });
-  load(DATA[0]);
- }
- function ready(){
-  if('IntersectionObserver' in window){
-   var io=new IntersectionObserver(function(es){ if(es.some(function(e){return e.isIntersecting;})){ io.disconnect(); start(); } },{rootMargin:'300px'});
-   io.observe(el);
-  } else start();
- }
- if(document.readyState==='complete') ready(); else window.addEventListener('load',ready);
+ ctx.globalAlpha=1;
+}
+function labelPos(k){ var off=G.R*1.16*cam.z+30+(k%2?60:0); return axisPt(STATIONS[k].i,off); }
+
+/* station buttons */
+var stEls=[], chips=document.getElementById('chips');
+STATIONS.forEach(function(st,k){
+ var b=document.createElement('button'); b.className='station'; b.type='button';
+ b.innerHTML=st.t+'<small>'+st.s+'</small>'; b.setAttribute('aria-label',st.t+': '+st.s);
+ b.addEventListener('click',function(){fly(k);}); b.addEventListener('mouseenter',function(){hot=st.i;}); b.addEventListener('mouseleave',function(){hot=-1;});
+ b.addEventListener('focus',function(){hot=st.i;}); b.addEventListener('blur',function(){hot=-1;});
+ document.body.appendChild(b); stEls.push(b);
+ var c=document.createElement('button'); c.className='chip'; c.type='button'; c.textContent=st.t;
+ c.addEventListener('click',function(){fly(k);}); chips.appendChild(c);
+});
+function placeStations(){
+ var vis=cur===0 && !flying && cam.s>0.5;
+ stEls.forEach(function(b,k){ var p=labelPos(k); b.style.transform='translate('+p.x.toFixed(1)+'px,'+p.y.toFixed(1)+'px) translate(-50%,-50%)';
+  b.classList.toggle('hide',!vis); b.classList.toggle('hot',hot===STATIONS[k].i); b.tabIndex=vis&&!chipsMode?0:-1; });
+}
+function veil(href,x,y){
+ var v=document.getElementById('veil');
+ if(RM){location.href=href;return;}
+ v.style.setProperty('--vx',(x!=null?x:W/2)+'px'); v.style.setProperty('--vy',(y!=null?y:H/2)+'px');
+ v.classList.add('go'); setTimeout(function(){location.href=href;},620);
+}
+function fly(k){
+ var st=STATIONS[k];
+ if(RM||cur!==0){location.href=st.href;return;}
+ flying=true; spin=0; hot=st.i;
+ var n=P(st.i,0), cx=W/2+cam.ox, cy=H*(cam.s*G.cy+(1-cam.s)*.5)+cam.oy, vx=(n.x-cx)/cam.z, vy=(n.y-cy)/cam.z, Z=7;
+ tgt.z=Z; tgt.ox=-Z*vx; tgt.oy=H/2-H*G.cy-Z*vy;
+ setTimeout(function(){veil(st.href,W/2,H/2);},380);
+}
+window.addEventListener('pageshow',function(e){ if(e.persisted){ document.getElementById('veil').classList.remove('go'); flying=false; spin=RM?0:.26; hot=-1; tgt.ox=0; tgt.oy=0; tgt.z=CAMS[cur].z; } });
+
+/* drag to rotate, click on glowing nodes */
+cv.addEventListener('pointerdown',function(e){drag={x:e.clientX,y:e.clientY,r:rot,moved:false}; cv.setPointerCapture(e.pointerId); cv.classList.add('grabbing');});
+cv.addEventListener('pointermove',function(e){
+ if(drag){var dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.abs(dx)+Math.abs(dy)>5) drag.moved=true; rot=drag.r+(dx+dy*.5)*0.012; return;}
+ if(cur!==0||chipsMode) return; var k=nearest(e.clientX,e.clientY); hot=k<0?-1:STATIONS[k].i; cv.classList.toggle('pointer',k>=0);
+});
+function endDrag(e){ if(!drag) return; var d=drag; drag=null; cv.classList.remove('grabbing');
+ if(!d.moved && cur===0){ var k=nearest(e.clientX,e.clientY); if(k>=0) fly(k); } }
+cv.addEventListener('pointerup',endDrag); cv.addEventListener('pointercancel',function(){drag=null;cv.classList.remove('grabbing');});
+function nearest(x,y){ var best=-1,bd=30*30; STATIONS.forEach(function(st,k){var n=P(st.i,0), d=(n.x-x)*(n.x-x)+(n.y-y)*(n.y-y); if(d<bd){bd=d;best=k;}}); return best; }
+
+/* ---------- scenes ---------- */
+var scenes=[].slice.call(document.querySelectorAll('.scene')), cur=0, lockUntil=0;
+var dots=document.getElementById('dots');
+scenes.forEach(function(s,k){var b=document.createElement('button'); b.type='button'; b.setAttribute('aria-label','Step '+(k+1)+': '+s.dataset.name);
+ b.innerHTML='<span>'+s.dataset.name+'</span>'; b.addEventListener('click',function(){go(k);}); dots.appendChild(b);});
+function setCam(n){ var c=CAMS[n]; tgt.z=c.z; tgt.a=c.a; tgt.s=c.s; tgt.ox=0; tgt.oy=0; }
+function go(n,instant){
+ n=Math.max(0,Math.min(scenes.length-1,n)); if(n===cur && !instant) return;
+ var dir=n>cur?1:-1, old=scenes[cur], nw=scenes[n];
+ if(old!==nw){ old.classList.remove('on'); old.style.transform=RM?'':(dir>0?'scale(1.28)':'scale(.82)'); old.setAttribute('aria-hidden','true');
+  setTimeout(function(){ if(!old.classList.contains('on')) old.style.transform=''; },1000); }
+ nw.style.transition='none'; nw.style.transform=RM?'none':(dir>0?'scale(.84)':'scale(1.25)'); void nw.offsetWidth;
+ nw.style.transition=''; nw.style.transform=''; nw.classList.add('on'); nw.removeAttribute('aria-hidden');
+ nw.querySelector('.sbody').scrollTop=0;
+ cur=n; setCam(n); document.body.classList.toggle('at0',n===0); lockUntil=performance.now()+(RM?250:950);
+ [].forEach.call(dots.children,function(d,k){d.classList.toggle('on',k===n); if(k===n) d.setAttribute('aria-current','step'); else d.removeAttribute('aria-current');});
+ document.getElementById('hint').classList.toggle('hide',n===scenes.length-1);
+ document.getElementById('hintTxt').textContent=(TOUCH?'Swipe up':'Scroll')+(n===0?' to zoom in':' to keep zooming');
+ document.getElementById('scaleTxt').textContent=SCALE[n];
+ try{history.replaceState(null,'','#'+HASH[n]);}catch(e){}
+ if(n===1) runFunnel(); if(n===2) load3D();
+}
+scenes.forEach(function(s,k){ if(k) s.setAttribute('aria-hidden','true'); });
+document.querySelectorAll('[data-next]').forEach(function(b){b.addEventListener('click',function(){go(cur+1);});});
+document.querySelectorAll('[data-goto]').forEach(function(b){b.addEventListener('click',function(){go(+b.dataset.goto);});});
+document.getElementById('hint').addEventListener('click',function(){go(cur+1);});
+
+function canScroll(el,dy){ // let a scrollable panel scroll before switching scenes
+ while(el && el!==document.body){
+  if(el.classList && el.classList.contains('no-nav')) return true;
+  if(el.classList && el.classList.contains('sbody') && el.scrollHeight>el.clientHeight+2){
+   if(dy>0 && el.scrollTop+el.clientHeight<el.scrollHeight-2) return true;
+   if(dy<0 && el.scrollTop>2) return true; return false; }
+  el=el.parentNode; }
+ return false;
+}
+var acc=0, accT=0;
+window.addEventListener('wheel',function(e){
+ if(canScroll(e.target,e.deltaY)) return;
+ e.preventDefault(); var now=performance.now(); if(now<lockUntil) return;
+ if(now-accT>250) acc=0; accT=now; acc+=e.deltaY;
+ if(acc>40){acc=0;go(cur+1);} else if(acc<-40){acc=0;go(cur-1);}
+},{passive:false});
+var ts=null;
+window.addEventListener('touchstart',function(e){ var t=e.touches[0]; ts={x:t.clientX,y:t.clientY,el:e.target}; },{passive:true});
+window.addEventListener('touchend',function(e){ if(!ts) return; var t=e.changedTouches[0], dx=t.clientX-ts.x, dy=t.clientY-ts.y, el=ts.el; ts=null;
+ if(Math.abs(dy)<60 || Math.abs(dy)<Math.abs(dx)*1.3) return; if(canScroll(el,-dy)) return; if(performance.now()<lockUntil) return;
+ go(cur+(dy<0?1:-1)); },{passive:true});
+window.addEventListener('keydown',function(e){
+ if(e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+ var k=e.key;
+ if(k==='ArrowDown'||k==='PageDown'||(k===' '&&e.target===document.body)){e.preventDefault();go(cur+1);}
+ else if(k==='ArrowUp'||k==='PageUp'){e.preventDefault();go(cur-1);}
+ else if(k==='Home'){go(0);} else if(k==='End'){go(scenes.length-1);}
+ else if(cur===0 && (k==='ArrowLeft'||k==='ArrowRight')){rot+=k==='ArrowLeft'?-.25:.25;}
+});
+
+/* ---------- scene 1: funnel ---------- */
+var fBox=document.getElementById('funnel'), fNote=document.getElementById('fnote'), fDone=false, LMAX=Math.log10(FUNNEL[0][0]);
+FUNNEL.forEach(function(f,k){ var r=document.createElement('div'); r.className='frow'; r.setAttribute('role','listitem'); r.tabIndex=0;
+ r.innerHTML='<b data-n="'+f[0]+'" data-p="'+f[1]+'">'+(RM?f[1]+f[0].toLocaleString('en-US'):'0')+'</b><div><div class="lbl">'+f[2]+'</div><div class="bar"><i></i></div></div>';
+ function sel(){ [].forEach.call(fBox.children,function(c){c.classList.remove('sel');}); r.classList.add('sel'); fNote.textContent=f[3]; }
+ r.addEventListener('click',sel); r.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();sel();}});
+ fBox.appendChild(r); });
+function runFunnel(){
+ if(fDone) return; fDone=true;
+ [].forEach.call(fBox.children,function(r,k){ setTimeout(function(){
+  r.classList.add('in'); var b=r.querySelector('b'), n=+b.dataset.n, p=b.dataset.p, w=Math.max(2.5,100*Math.log10(Math.max(n,1))/LMAX);
+  if(n===1) w=2.5; r.querySelector('.bar i').style.width=w+'%';
+  if(RM){b.textContent=p+n.toLocaleString('en-US');return;}
+  var t0=performance.now(); (function tick(now){ var x=Math.min(1,(now-t0)/900), e=1-Math.pow(1-x,3);
+   b.textContent=p+Math.round(n*e).toLocaleString('en-US'); if(x<1) requestAnimationFrame(tick); })(t0);
+ }, RM?0:200+k*230); });
+}
+
+/* ---------- scene 2: 3D protein (lazy) ---------- */
+var molStarted=false;
+function load3D(){
+ if(molStarted) return; molStarted=true;
+ var msg=document.getElementById('molmsg');
+ var sc=document.createElement('script'); sc.src='assets/js/3Dmol-min.js';
+ sc.onerror=function(){msg.textContent='The 3D viewer could not be loaded. The structures are also on the findings page.';};
+ sc.onload=function(){
+  try{
+   var v=$3Dmol.createViewer(document.getElementById('mol'),{backgroundColor:'#060b1d',antialias:true});
+   v.setBackgroundColor('#000000',0);
+   fetch('assets/structures/TMEM222.pdb').then(function(r){if(!r.ok) throw new Error(r.status); return r.text();}).then(function(txt){
+    v.addModel(txt,'pdb');
+    v.setStyle({},{cartoon:{colorfunc:function(a){var b=a.b; return b>90?'#0053D6':b>70?'#65CBF3':b>50?'#FFDB13':'#FF7D45';}}});
+    v.zoomTo(); v.zoom(1.45); v.render(); if(!RM) v.spin('y',0.5); msg.style.display='none';
+   }).catch(function(){msg.textContent='The structure file could not be loaded.';});
+   window.addEventListener('resize',function(){v.resize();});
+  }catch(e){msg.textContent='3D is not supported in this browser (WebGL needed).';}
+ };
+ document.head.appendChild(sc);
+}
+
+/* ---------- scene 3: neuron parts ---------- */
+var PARTS={
+ dend:['Dendrites','Branches that receive signals from other neurons. Many candidates are thought to work at these receiving sites; for most this is a prediction, not a measurement.'],
+ soma:['Cell body','Holds the nucleus, where genes are read to make proteins. Our screen asked which genes neurons read far more than other cells do.'],
+ axon:['Axon','A long cable that carries the electrical signal to the next cell. The yellow pulses show signals travelling along it.'],
+ myelin:['Myelin (made by glia)','An insulating wrap made by oligodendrocytes, a type of glial cell. Our added glial screen looks for overlooked genes in glia like these.'],
+ syn:['Synapse','The junction where a chemical message passes to the next neuron, whose receptors (yellow) catch it. Our TMEM222 hypothesis is about recycling such receptors; it has not been tested.']};
+var ninfo=document.getElementById('ninfo'), ptabs=document.getElementById('ptabs'), partEls=document.querySelectorAll('.neuron .part');
+function showPart(p){ ninfo.innerHTML='<h3>'+PARTS[p][0]+'</h3><p>'+PARTS[p][1]+'</p>';
+ [].forEach.call(partEls,function(g){g.classList.toggle('sel',g.dataset.p===p);});
+ [].forEach.call(ptabs.children,function(c){c.setAttribute('aria-pressed',c.dataset.p===p?'true':'false'); c.style.borderColor=c.dataset.p===p?'#93c5fd':'';}); }
+Object.keys(PARTS).forEach(function(p){ var c=document.createElement('button'); c.className='chip'; c.type='button'; c.dataset.p=p; c.textContent=PARTS[p][0];
+ c.addEventListener('click',function(){showPart(p);}); ptabs.appendChild(c); });
+[].forEach.call(partEls,function(g){ g.addEventListener('click',function(){showPart(g.dataset.p);}); g.addEventListener('mouseenter',function(){showPart(g.dataset.p);});
+ g.addEventListener('focus',function(){showPart(g.dataset.p);}); g.addEventListener('keydown',function(e){if(e.key==='Enter'){showPart(g.dataset.p);}}); });
+if(RM){ var pu=document.getElementById('pulses'); if(pu) pu.parentNode.removeChild(pu); }
+
+/* hub cards: zoom-through transition */
+document.querySelectorAll('.card').forEach(function(a){ a.addEventListener('click',function(e){
+ if(e.metaKey||e.ctrlKey||e.shiftKey||e.button) return; e.preventDefault(); veil(a.getAttribute('href'),e.clientX,e.clientY); }); });
+
+/* ---------- loop ---------- */
+function frame(now){
+ var dt=Math.min(.05,(now-last)/1000); last=now;
+ if(!drag) rot+=spin*dt;
+ var k=1-Math.pow(flying?0.0008:0.02,dt);
+ ['z','a','s','ox','oy'].forEach(function(p){cam[p]+=(tgt[p]-cam[p])*k;});
+ draw(now); placeStations();
+ raf=requestAnimationFrame(frame);
+}
+var raf=0;
+document.addEventListener('visibilitychange',function(){ if(document.hidden){cancelAnimationFrame(raf);} else {last=performance.now(); raf=requestAnimationFrame(frame);} });
+var rT=0; window.addEventListener('resize',function(){clearTimeout(rT); rT=setTimeout(layout,80);});
+layout();
+var start=HASH.indexOf(location.hash.slice(1));
+if(start>0){ scenes[0].classList.remove('on'); scenes[0].setAttribute('aria-hidden','true'); cur=0; go(start,true); var c0=CAMS[start]; cam.z=c0.z; cam.a=c0.a; cam.s=c0.s; }
+else { go(0,true); }
+raf=requestAnimationFrame(frame);
+window.addEventListener('hashchange',function(){ var h=location.hash.slice(1), n=HASH.indexOf(h);
+ if(["overview","screen","candidates","lead","c11orf87","structures","biology","missing","library","reviews","downloads"].indexOf(h)>=0) location.replace('findings.html#'+h);
+ else if(n>=0 && n!==cur) go(n); });
 })();
 </script>
 </body>
