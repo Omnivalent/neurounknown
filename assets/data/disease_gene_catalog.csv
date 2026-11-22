@@ -1,6 +1,6 @@
 disease,gene,name,evidence,source_note,pubmed_records,ambiguous_symbol,N,U,volume_scarcity,overlooked_flag,in_protein_library
-Schizophrenia,XPO7,exportin 7,Rare-variant exome-wide (SCHEMA),"Singh 2022, PMID 35396579",40,False,0.73,0.45,0.54,True,False
 Schizophrenia,FAM120A,family with sequence similarity 120 member A,Rare-variant FDR<5% (SCHEMA),"Singh 2022, PMID 35396579",29,False,0.4,0.48,0.61,True,False
+Schizophrenia,XPO7,exportin 7,Rare-variant exome-wide (SCHEMA),"Singh 2022, PMID 35396579",40,False,0.73,0.45,0.54,False,False
 Schizophrenia,HERC1,HECT and RLD domain containing E3 ubiquitin protein ligase family member 1,Rare-variant exome-wide (SCHEMA),"Singh 2022, PMID 35396579",98,False,0.89,0.37,0.35,False,False
 Schizophrenia,GRIA3,glutamate ionotropic receptor AMPA type subunit 3,Rare-variant exome-wide (SCHEMA),"Singh 2022, PMID 35396579",193,False,0.91,0.36,0.23,False,False
 Schizophrenia,SETD1A,"SET domain containing 1A, histone lysine methyltransferase",Rare-variant exome-wide (SCHEMA),"Singh 2022, PMID 35396579",214,False,0.7,0.12,0.22,False,False
