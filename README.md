@@ -107,3 +107,14 @@ Content is computational hypotheses only — no discovery claims.
   questions were removed. `tools/site_check.py` runs data, link and browser checks before publishing.
 - Feedback bar on every page: opens a prefilled GitHub issue (`.github/ISSUE_TEMPLATE/feedback.yml`).
 - Rollback: version 2.2 is site commit `d63d64a`.
+
+## Version 2.4 (23 Nov 2026)
+
+- 3D cortex and cerebellum carved from the 0.5 mm ICBM 2009b template (label AND tissue mask, threshold between CSF and grey
+  matter), so meshes follow the template's gyri and sulci (`build_brain3d.carved_mask`; needs the slice volumes first).
+- Cranial nerves I to XII and the optic tract: schematic tubes along intracranial courses (`brain_structures.NERVES`), 3D only.
+  Views: with the brain, without nerves, nerves + brainstem (nerves and nuclei share colours; camera frames the brainstem).
+- MRI slices in the 3D view: any of axial, coronal and sagittal, each with its own position and flip; optional cut-away
+  (three.js clipping planes, intersection mode: one plane removes half, two or three remove a corner).
+- Triplanar view ("All three") with a shared crosshair; search over structures and systems; layers panel; expandable groups.
+- Rollback: version 2.3 is site commit `be31c24`.
