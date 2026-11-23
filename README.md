@@ -61,3 +61,18 @@ Content is computational hypotheses only — no discovery claims.
   diseases and counts all new records on them in the last 24 hours.
 - **Cite & data** page (`cite.html`) with version number, citation, downloads, sources and how external resources are used.
 - **Rollback**: version 1.0 is site commit `f1b6a08` (private repo commit `04b3b30`). Revert with `git revert` to that state.
+
+## Version 2.1 (23 Nov 2026)
+
+- Round-4 review fixes (see `references/external_reviews/reconciliation_round4_chatgpt_2026-11-23.md` in the private repo):
+  database-only links no longer set the overlooked flag; autism table split; alias-aware PubMed counts in the daily job;
+  explicit disease structure sets; corrected dopamine-pathway text; EU/US treatment differences; ADORE and ulotaront.
+- Treatments as first/second/third line, disease-modifying, gene-specific and supportive steps, each with its source scope;
+  a drug map shows where each treatment acts on the 3D brain.
+- Atlas: axial, coronal and sagittal MRI-style slices (`assets/brain3d/slices.*`, built by `build_brain3d.py ... slices`).
+- Study section: 67 original questions (`src/neurounknown/quiz.py` -> `assets/data/quiz.json`), "Test yourself" buttons.
+- Interface languages: `assets/js/i18n.js` (en, de, fr, es, it, ar with right-to-left layout, zh).
+- Security: `src/neurounknown/secure_site.py` adds a Content-Security-Policy (inline scripts by SHA-256 hash) to every page;
+  run it after all builders. Build order: build_atlas, build_genome, quiz, build_landing, build_website, build_library,
+  build_reviews, build_cite, secure_site.
+- Rollback: version 2.0 is site commit `14cb29c`; version 1.0 is `f1b6a08`.

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-tc9QNv7YqOMFRGTU0n2Rvvl6DKx0gl9o5ZN41UQSUxM='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cite &amp; data — NeuroUnknown</title>
 <meta name="description" content="How to cite NeuroUnknown, version history, data downloads and sources.">
 <style>
@@ -32,28 +33,30 @@
 })();
 </script>
 <meta name="color-scheme" content="light dark">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/i18n.js" defer></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%2314161b%27/%3E%3Cpath d=%27M10 5c0 8 12 14 12 22M22 5c0 8-12 14-12 22%27 stroke=%27%23f5b544%27 stroke-width=%272.6%27 fill=%27none%27/%3E%3C/svg%3E">
 </head>
 <body class="cite">
 <header class="site"><div class="wrap hdr">
  <a class="brand" href="index.html#/"><i class="mark" aria-hidden="true"></i>Neuro<span>Unknown</span></a>
- <nav class="mainnav" aria-label="Site"><a href="index.html#/" data-nav="Home">Home</a><a href="index.html#/screen" data-nav="Our screen">Our screen</a><a href="index.html#/self" data-nav="The Self">The Self</a><a href="index.html#/diseases" data-nav="Diseases">Diseases</a><a href="index.html#/atlas" data-nav="Brain atlas">Brain atlas</a><a href="index.html#/genome" data-nav="Gene atlas">Gene atlas</a><a href="findings.html" data-nav="Findings">Findings</a><a href="library.html" data-nav="Library">Library</a><a href="reviews.html" data-nav="Reviews">Reviews</a><a href="cite.html" data-nav="Cite & data" aria-current="page">Cite & data</a></nav>
+ <nav class="mainnav" aria-label="Site"><a href="index.html#/" data-nav="Home">Home</a><a href="index.html#/screen" data-nav="Our screen">Our screen</a><a href="index.html#/self" data-nav="Self-disorders">Self-disorders</a><a href="index.html#/diseases" data-nav="Diseases">Diseases</a><a href="index.html#/atlas" data-nav="Brain atlas">Brain atlas</a><a href="index.html#/genome" data-nav="Gene atlas">Gene atlas</a><a href="index.html#/study" data-nav="Study">Study</a><a href="findings.html" data-nav="Findings">Findings</a><a href="library.html" data-nav="Library">Library</a><a href="reviews.html" data-nav="Reviews">Reviews</a><a href="cite.html" data-nav="Cite & data" aria-current="page">Cite & data</a></nav>
  <div class="hdr-tools"><div class="layout-seg" role="group" aria-label="Page layout"><button type="button" data-layout-set="auto" title="Layout: auto" aria-label="Layout: auto"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button><button type="button" data-layout-set="phone" title="Layout: phone" aria-label="Layout: phone"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button><button type="button" data-layout-set="desktop" title="Layout: desktop" aria-label="Layout: desktop"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.6"/><path d="M8.5 20h7M12 16.5V20"/></svg></button></div><button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button></div>
 </div><div class="ticker" id="nuTicker"><a class="tk-live" href="index.html#/">Today</a><div class="tk-track"><div class="tk-run" id="nuTickerRun">Daily literature watch: every day at 12:00 Central European Time we re-check PubMed for our genes and diseases.</div></div></div></header>
 <main class="wrap">
-<span class="ver">Version 2.0 &middot; 22 November 2026</span>
+<span class="ver">Version 2.1 &middot; 23 November 2026</span>
 <h1>Cite &amp; data</h1>
 <p class="lede">NeuroUnknown is a <b>hypothesis-generating resource</b>: it ranks brain-disease genes that have strong genetic evidence but little research, and explains the diseases and treatments around them. It contains no laboratory data and makes no discovery claims. A flagged gene is a starting point for a question, not an answer.</p>
 
 <h2>How to cite</h2>
-<div class="box"><pre>NeuroUnknown project (2026). NeuroUnknown: an open, hypothesis-generating atlas of under-studied brain-disease genes. Version 2.0. https://omnivalent.github.io/neurounknown/ (accessed DD Month YYYY).</pre></div>
+<div class="box"><pre>NeuroUnknown project (2026). NeuroUnknown: an open, hypothesis-generating atlas of under-studied brain-disease genes. Version 2.1. https://omnivalent.github.io/neurounknown/ (accessed DD Month YYYY).</pre></div>
 <div class="box"><pre>@misc{neurounknown2026,
   title  = {NeuroUnknown: an open, hypothesis-generating atlas of under-studied brain-disease genes},
   author = {{NeuroUnknown project}},
   year   = {2026},
-  note   = {Version 2.0},
+  note   = {Version 2.1},
   url    = {https://omnivalent.github.io/neurounknown/}
 }</pre></div>
 <p>Please also cite the original sources of any data you reuse (listed below and in every reference list on the site).</p>
@@ -61,25 +64,28 @@
 <h2>What is in this version</h2>
 <ul>
 <li>19,299 protein-coding genes scored; 19,203 placed in the gene atlas.</li>
-<li>1,366 unique PubMed records screened or cited; 72 references behind the disease, atlas and self pages; 11 clinical guidelines.</li>
+<li>1,380 unique PubMed records screened or cited; 86 references behind the disease, atlas and self pages; 11 clinical guidelines.</li>
 <li>7 diseases in 3 groups (neurological, psychiatric, neurodevelopmental) with treatment pathways and drug-site diagrams.</li>
 <li>A 3D brain with 52 structures and 13 systems.</li>
-<li>A daily literature watch at 12:00 Central European Time.</li>
+<li>A daily literature watch at 12:00 Central European Time. "Selected journals" are: Nature, Science, Cell, N Engl J Med, Lancet, Lancet Neurol, Lancet Psychiatry, JAMA, JAMA Neurol, JAMA Psychiatry, Nat Med, Nat Neurosci, Neuron, Nat Genet, Mol Psychiatry, Am J Psychiatry, Brain and BMJ.</li>
+<li>Interface in English, German, French, Spanish, Italian, Arabic and Chinese (AI-drafted, not yet reviewed by native-speaker clinicians); scientific content in English.</li>
+<li>Security: static site served over HTTPS; a Content-Security-Policy allows only this site's own scripts (inline scripts by hash), no third-party scripts, no forms, and no data collection. The only stored data are your theme, layout, language and quiz score, kept on your own device.</li>
 </ul>
 
 <h2>Version history</h2>
 <div class="tw"><table><tr><th>Version</th><th>Date</th><th>Changes</th></tr>
+<tr><td>2.1</td><td>23 Nov 2026</td><td>Round-4 review corrections (checked in PubMed): a database link alone no longer sets the overlooked flag (flags fell from 220 to 2); autism table split; alias-aware counts; disputed links marked (GIGYF2, TOMM40); KICS2 and FAM120A notes; explicit disease structure sets; dopamine-pathway card corrected; EU/US treatment differences (lecanemab, esketamine, valproate); oral edaravone (ADORE) and ulotaront marked negative; treatment lines; drug map on the 3D brain; axial/coronal/sagittal slice views; Study section with 67 questions; interface in 7 languages; Content-Security-Policy.</td></tr>
 <tr><td>2.0</td><td>22 Nov 2026</td><td>52-structure 3D atlas with systems and disease groups; treatment pathways and drug-site diagrams; neurodevelopmental group; step-by-step gene atlas; news ticker; this page.</td></tr>
 <tr><td>1.0</td><td>22 Nov 2026</td><td>First 3D brain, neurological/psychiatric split with numbered references, gene atlas, daily literature watch (site commit f1b6a08).</td></tr>
 <tr><td>0.x</td><td>Nov 2026</td><td>Genome-wide screen, findings, protein library, rapid reviews, schizophrenia self-disorder walkthrough.</td></tr></table></div>
 
 <h2>Data downloads</h2>
-<div class="tw"><table><tr><th>File</th><th>Contents</th><th>Size</th></tr><tr><td><a href="assets/data/scores_all_genes.tsv.gz" download>scores_all_genes.tsv.gz</a></td><td>Scores for all 19,299 protein-coding genes: neuronal RNA specificity (N), disease evidence (D), database undercharacterisation (U).</td><td class="mono">2.0 MB</td></tr><tr><td><a href="assets/data/disease_gene_catalog.csv" download>disease_gene_catalog.csv</a></td><td>Disease-gene catalog: 7 diseases, evidence type, PubMed record counts, overlooked flags.</td><td class="mono">172 kB</td></tr><tr><td><a href="assets/data/atlas.json" download>atlas.json</a></td><td>Everything on the disease, atlas and self pages: texts, regions, structures, systems, treatment pathways, references.</td><td class="mono">333 kB</td></tr><tr><td><a href="assets/data/genome.json" download>genome.json</a></td><td>Gene atlas: GRCh38 position, class, PubMed count, disease links, LOEUF and mouse phenotypes for 19,203 genes.</td><td class="mono">3.6 MB</td></tr><tr><td><a href="assets/data/protein_library.json" download>protein_library.json</a></td><td>Protein library: proteins with labelled papers.</td><td class="mono">516 kB</td></tr><tr><td><a href="assets/data/protein_library_papers.csv" download>protein_library_papers.csv</a></td><td>Protein library papers (flat table).</td><td class="mono">262 kB</td></tr><tr><td><a href="assets/data/reviews_screening.csv" download>reviews_screening.csv</a></td><td>Rapid review screening decisions.</td><td class="mono">34 kB</td></tr><tr><td><a href="assets/data/updates.json" download>updates.json</a></td><td>Latest daily literature watch (updated every day at 12:00 CET).</td><td class="mono">after first run</td></tr><tr><td><a href="assets/brain3d/brain.json" download>brain.json</a></td><td>3D brain manifest (52 structures, both hemispheres); meshes in brain.bin (int16 vertices in 0.05 mm, MNI space).</td><td class="mono">10 kB</td></tr></table></div>
+<div class="tw"><table><tr><th>File</th><th>Contents</th><th>Size</th></tr><tr><td><a href="assets/data/scores_all_genes.tsv.gz" download>scores_all_genes.tsv.gz</a></td><td>Scores for all 19,299 protein-coding genes: neuronal RNA specificity (N), disease evidence (D), database undercharacterisation (U).</td><td class="mono">2.0 MB</td></tr><tr><td><a href="assets/data/disease_gene_catalog.csv" download>disease_gene_catalog.csv</a></td><td>Disease-gene catalog: 7 diseases, evidence type, PubMed record counts, overlooked flags.</td><td class="mono">172 kB</td></tr><tr><td><a href="assets/data/atlas.json" download>atlas.json</a></td><td>Everything on the disease, atlas and self pages: texts, regions, structures, systems, treatment pathways, references.</td><td class="mono">381 kB</td></tr><tr><td><a href="assets/data/genome.json" download>genome.json</a></td><td>Gene atlas: GRCh38 position, class, PubMed count, disease links, LOEUF and mouse phenotypes for 19,203 genes.</td><td class="mono">3.6 MB</td></tr><tr><td><a href="assets/data/protein_library.json" download>protein_library.json</a></td><td>Protein library: proteins with labelled papers.</td><td class="mono">516 kB</td></tr><tr><td><a href="assets/data/protein_library_papers.csv" download>protein_library_papers.csv</a></td><td>Protein library papers (flat table).</td><td class="mono">262 kB</td></tr><tr><td><a href="assets/data/reviews_screening.csv" download>reviews_screening.csv</a></td><td>Rapid review screening decisions.</td><td class="mono">34 kB</td></tr><tr><td><a href="assets/data/updates.json" download>updates.json</a></td><td>Latest daily literature watch (updated every day at 12:00 CET).</td><td class="mono">0 kB</td></tr><tr><td><a href="assets/data/quiz.json" download>quiz.json</a></td><td>67 original exam-style questions with explanations, learning objectives and sources.</td><td class="mono">55 kB</td></tr><tr><td><a href="assets/brain3d/brain.json" download>brain.json</a></td><td>3D brain manifest (52 structures, both hemispheres); meshes in brain.bin. Derived from Neuromorphometrics labels (CC BY-NC): non-commercial use only, cannot be relicensed.</td><td class="mono">10 kB</td></tr><tr><td><a href="assets/brain3d/slices.json" download>slices.json</a></td><td>Slice-viewer volumes (slices.bin): MNI152 template resampled to 1.5 mm plus structure labels. Same licence limits as the meshes.</td><td class="mono">1 kB</td></tr></table></div>
 
 <h2>Sources and licences</h2>
 <ul>
 <li>Gene and disease data: HGNC, GENCODE v43 (GRCh38), OMIM, Orphanet, ClinGen, FinnGen R12, SCHEMA, GTEx v11, Siletti et al. 2023 brain atlas, gnomAD v4.1, MGI, PubMed (NCBI E-utilities). Each source's own terms apply.</li>
-<li>3D anatomy: Neuromorphometrics maximum-probability labels in MNI space (MICCAI 2012 Grand Challenge data, distributed with SPM12; CC BY-NC). Four small nuclei are approximate shapes. three.js (MIT).</li>
+<li>3D anatomy and slices: Neuromorphometrics maximum-probability labels in MNI space (MICCAI 2012 Grand Challenge data, distributed with SPM12; CC BY-NC) and the MNI152 template (FSL). Non-commercial use only; these derived files are not open data and cannot be relicensed. Four small nuclei are approximate shapes; published 7-Tesla atlases of these nuclei (PMIDs 24650599, 29664465, 33580320) could replace them once alignment and licences are checked. three.js (MIT).</li>
 <li>Protein structures: AlphaFold DB (CC BY 4.0).</li>
 <li>Our own code and texts: open in the public repository.</li>
 </ul>
@@ -97,18 +103,18 @@
 <li>No laboratory validation yet.</li>
 </ul>
 </main>
-<footer class="site"><div class="wrap">NeuroUnknown 2.0 &middot; a computational, hypothesis-generating resource. Not medical advice.</div></footer>
+<footer class="site"><div class="wrap">NeuroUnknown 2.1 &middot; a computational, hypothesis-generating resource. Not medical advice.</div></footer>
 <script>
 
 (function(){ var run=document.getElementById('nuTickerRun'); if(!run) return;
  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
  fetch('assets/data/updates.json',{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(u){
   var parts=['<b>Checked '+esc(u.checked_local||u.checked)+'</b>',
-   (u.queries||0).toLocaleString('en-US')+' PubMed searches run',
-   (u.genes_rechecked!=null?u.genes_rechecked:'')+' flagged genes re-counted'];
+   (u.queries||0).toLocaleString('en-US')+' PubMed searches run'];
+  if(u.genes_rechecked!=null) parts.push(u.genes_rechecked+' flagged genes re-counted');
   if(u.new_in_our_diseases_24h!=null) parts.push(u.new_in_our_diseases_24h.toLocaleString('en-US')+' new records on our 7 diseases in 24 h');
   parts.push((u.count_changes||[]).length+' gene counts changed, '+(u.unflagged||[]).length+' flags removed');
-  (u.new_papers||[]).slice(0,8).forEach(function(p){ parts.push('<a href="https://pubmed.ncbi.nlm.nih.gov/'+esc(p.pmid)+'/" target="_blank" rel="noopener">'+(p.topic==='Major journals'?'<i>New in '+esc(p.journal||'a major journal')+':</i> ':'<i>'+esc(p.topic)+':</i> ')+esc(p.title)+'</a>'); });
+  (u.new_papers||[]).slice(0,8).forEach(function(p){ parts.push('<a href="https://pubmed.ncbi.nlm.nih.gov/'+esc(p.pmid)+'/" target="_blank" rel="noopener">'+((p.topic==='Major journals'||p.topic==='Selected journals')?'<i>New in '+esc(p.journal||'a selected journal')+':</i> ':'<i>'+esc(p.topic)+':</i> ')+esc(p.title)+'</a>'); });
   var h=parts.join('<span class="tk-sep">&#9679;</span>'); run.innerHTML=h+'<span class="tk-sep">&#9679;</span>'+h;
   run.classList.add('go'); run.style.animationDuration=Math.max(30,parts.length*9)+'s';
  }).catch(function(){}); })();

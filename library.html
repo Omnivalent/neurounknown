@@ -2,6 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-C5UNs2b4ceadzf9dHdLsTu1UeU3TSK5Apk8aa1p3Bww=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-tc9QNv7YqOMFRGTU0n2Rvvl6DKx0gl9o5ZN41UQSUxM='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23060b1d%27/%3E%3Cpath d=%27M9 5c0 8 14 14 14 22M23 5c0 8-14 14-14 22%27 stroke=%27%2393c5fd%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NeuroUnknown — protein library</title>
@@ -79,13 +80,15 @@ footer.site{border-top:1px solid var(--line);padding:24px 0 50px;color:var(--mut
 })();
 </script>
 <meta name="color-scheme" content="light dark">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/i18n.js" defer></script>
 </head>
 <body>
 <header class="site"><div class="wrap hdr">
  <a class="brand" href="index.html#/"><i class="mark" aria-hidden="true"></i>Neuro<span>Unknown</span></a>
- <nav class="mainnav" aria-label="Site"><a href="index.html#/" data-nav="Home">Home</a><a href="index.html#/screen" data-nav="Our screen">Our screen</a><a href="index.html#/self" data-nav="The Self">The Self</a><a href="index.html#/diseases" data-nav="Diseases">Diseases</a><a href="index.html#/atlas" data-nav="Brain atlas">Brain atlas</a><a href="index.html#/genome" data-nav="Gene atlas">Gene atlas</a><a href="findings.html" data-nav="Findings">Findings</a><a href="library.html" data-nav="Library" aria-current="page">Library</a><a href="reviews.html" data-nav="Reviews">Reviews</a><a href="cite.html" data-nav="Cite & data">Cite & data</a></nav>
+ <nav class="mainnav" aria-label="Site"><a href="index.html#/" data-nav="Home">Home</a><a href="index.html#/screen" data-nav="Our screen">Our screen</a><a href="index.html#/self" data-nav="Self-disorders">Self-disorders</a><a href="index.html#/diseases" data-nav="Diseases">Diseases</a><a href="index.html#/atlas" data-nav="Brain atlas">Brain atlas</a><a href="index.html#/genome" data-nav="Gene atlas">Gene atlas</a><a href="index.html#/study" data-nav="Study">Study</a><a href="findings.html" data-nav="Findings">Findings</a><a href="library.html" data-nav="Library" aria-current="page">Library</a><a href="reviews.html" data-nav="Reviews">Reviews</a><a href="cite.html" data-nav="Cite & data">Cite & data</a></nav>
  <div class="hdr-tools"><div class="layout-seg" role="group" aria-label="Page layout"><button type="button" data-layout-set="auto" title="Layout: auto" aria-label="Layout: auto"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button><button type="button" data-layout-set="phone" title="Layout: phone" aria-label="Layout: phone"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button><button type="button" data-layout-set="desktop" title="Layout: desktop" aria-label="Layout: desktop"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.6"/><path d="M8.5 20h7M12 16.5V20"/></svg></button></div><button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button></div>
 </div><div class="ticker" id="nuTicker"><a class="tk-live" href="index.html#/">Today</a><div class="tk-track"><div class="tk-run" id="nuTickerRun">Daily literature watch: every day at 12:00 Central European Time we re-check PubMed for our genes and diseases.</div></div></div></header>
 <main class="wrap">
@@ -197,11 +200,11 @@ footer.site{border-top:1px solid var(--line);padding:24px 0 50px;color:var(--mut
  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
  fetch('assets/data/updates.json',{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(u){
   var parts=['<b>Checked '+esc(u.checked_local||u.checked)+'</b>',
-   (u.queries||0).toLocaleString('en-US')+' PubMed searches run',
-   (u.genes_rechecked!=null?u.genes_rechecked:'')+' flagged genes re-counted'];
+   (u.queries||0).toLocaleString('en-US')+' PubMed searches run'];
+  if(u.genes_rechecked!=null) parts.push(u.genes_rechecked+' flagged genes re-counted');
   if(u.new_in_our_diseases_24h!=null) parts.push(u.new_in_our_diseases_24h.toLocaleString('en-US')+' new records on our 7 diseases in 24 h');
   parts.push((u.count_changes||[]).length+' gene counts changed, '+(u.unflagged||[]).length+' flags removed');
-  (u.new_papers||[]).slice(0,8).forEach(function(p){ parts.push('<a href="https://pubmed.ncbi.nlm.nih.gov/'+esc(p.pmid)+'/" target="_blank" rel="noopener">'+(p.topic==='Major journals'?'<i>New in '+esc(p.journal||'a major journal')+':</i> ':'<i>'+esc(p.topic)+':</i> ')+esc(p.title)+'</a>'); });
+  (u.new_papers||[]).slice(0,8).forEach(function(p){ parts.push('<a href="https://pubmed.ncbi.nlm.nih.gov/'+esc(p.pmid)+'/" target="_blank" rel="noopener">'+((p.topic==='Major journals'||p.topic==='Selected journals')?'<i>New in '+esc(p.journal||'a selected journal')+':</i> ':'<i>'+esc(p.topic)+':</i> ')+esc(p.title)+'</a>'); });
   var h=parts.join('<span class="tk-sep">&#9679;</span>'); run.innerHTML=h+'<span class="tk-sep">&#9679;</span>'+h;
   run.classList.add('go'); run.style.animationDuration=Math.max(30,parts.length*9)+'s';
  }).catch(function(){}); })();

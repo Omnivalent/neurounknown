@@ -87,17 +87,19 @@ class Brain {
   setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null; this.apply(); }
   apply() {
     const any = Object.keys(this.focus).length > 0, grey = css('--line-strong');
+    const approxOn = Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).approx);
     const planes = this.cut ? [this.clip] : [];
     for (const m of this.meshes) {
       const id = m.userData.id, mat = m.material, inf = this.info[id] || {}, isCortex = CORTEX[inf.lobe];
       m.visible = !(this.cut && m.userData.side === 'R');
       mat.clippingPlanes = m.userData.side === 'M' ? planes : [];
-      const f = this.focus[id];
+      const f = this.focus[id + '@' + m.userData.side] || this.focus[id];
       if (any && f) {
         mat.color.set(f); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true;
         mat.emissive.set(id === this.sel ? f : '#000000'); mat.emissiveIntensity = id === this.sel ? 0.28 : 0;
         m.renderOrder = 1;
       } else if (any) {
+        if (approxOn && id === 'ventral_dc') m.visible = false;
         mat.color.set(grey); mat.emissive.set('#000000'); mat.transparent = true; mat.depthWrite = false;
         mat.opacity = isCortex ? 0.07 : 0.12; m.renderOrder = 3;
         if (isCortex && this.cortexMode === 0) m.visible = false;
@@ -116,7 +118,7 @@ class Brain {
     this.ray.setFromCamera(this.ptr, this.camera);
     let hits = this.ray.intersectObjects(this.meshes.filter(m => m.visible && m.material.opacity > 0.05), false);
     if (this.cut) hits = hits.filter(h => h.object.userData.side !== 'M' || h.point.x <= 0.5);
-    const foc = hits.find(h => this.focus[h.object.userData.id]);
+    const foc = hits.find(h => this.focus[h.object.userData.id] || this.focus[h.object.userData.id + '@' + h.object.userData.side]);
     const h = foc || hits.find(h => h.object.material.opacity > 0.2) || hits[0];
     const id = h ? h.object.userData.id : null;
     if (click) { if (id && this.opts.onPick) this.opts.onPick(id); }
@@ -127,6 +129,12 @@ class Brain {
     if (this.opts.onHover) this.opts.onHover(id, e);
   }
   pause(p) { this.paused = p; }
+  dispose() {
+    cancelAnimationFrame(this.raf); if (this.ro) this.ro.disconnect();
+    for (const m of this.meshes) { m.geometry.dispose(); m.material.dispose(); }
+    this.controls.dispose(); this.renderer.dispose(); try { this.renderer.forceContextLoss(); } catch (e) {}
+    this.renderer.domElement.remove(); this.meshes = []; this.disposed = true;
+  }
 }
 window.NUBrain = {
   create: async (el, opts) => {

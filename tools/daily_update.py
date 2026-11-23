@@ -1,12 +1,13 @@
 """NeuroUnknown daily literature watch. Runs every day at 12:00 Europe/Berlin (CET/CEST) via GitHub Actions, or on demand.
 
 What it does (Python standard library only, NCBI E-utilities, no API key, <= 3 requests/second):
-1. For every gene flagged "overlooked" or "checked by hand" in assets/data/atlas.json, re-counts PubMed records with the same
-   query the pipeline used ("SYMBOL"[tiab]; flagged genes have unambiguous symbols).
+1. For every gene flagged "overlooked", checked by hand, or marked "few papers, database link only" in assets/data/atlas.json,
+   re-counts PubMed records with the pipeline's query ("SYMBOL"[tiab]) and an alias-aware query (official symbol OR former
+   symbols OR aliases; may include homonyms).
 2. If a gene now exceeds the flag threshold (60 records), its flag is removed and a dated note is added. Flags are never
    added automatically: new flags need the full pipeline and a manual check.
 3. Lists new PubMed records (last 2 days by entry date) for the flagged genes and for fixed topics (self-disorders, sense of
-   agency in schizophrenia, the catalog diseases' genetics, and our seven diseases in major journals), with titles from
+   agency in schizophrenia, the catalog diseases' genetics, and our seven diseases in a fixed list of selected journals, published on cite.html), with titles from
    esummary, and counts all new records on our seven diseases in the last 24 hours (shown in the site's news ticker).
 4. Writes assets/data/updates.json (read by the home page) and updates atlas.json meta.
 Failures are recorded as NOT ACCESSED; nothing is imputed.
@@ -38,7 +39,7 @@ DISEASE_TI = ('(schizophreni*[ti] OR psychosis[ti] OR bipolar[ti] OR depressi*[t
 MAJOR = ('("Nature"[ta] OR "Science"[ta] OR "Cell"[ta] OR "N Engl J Med"[ta] OR "Lancet"[ta] OR "Lancet Neurol"[ta] OR "Lancet Psychiatry"[ta] '
          'OR "JAMA"[ta] OR "JAMA Neurol"[ta] OR "JAMA Psychiatry"[ta] OR "Nat Med"[ta] OR "Nat Neurosci"[ta] OR "Neuron"[ta] OR "Nat Genet"[ta] '
          'OR "Mol Psychiatry"[ta] OR "Am J Psychiatry"[ta] OR "Brain"[ta] OR "BMJ"[ta])')
-TOPICS["Major journals"] = DISEASE_TI + " AND " + MAJOR
+TOPICS["Selected journals"] = DISEASE_TI + " AND " + MAJOR
 ALL_TOPICS = DISEASE_TI  # used only to count how many new records appeared in our diseases
 _last = [0.0]
 
@@ -99,7 +100,7 @@ def main():
     genes = {}
     for d in atlas["diseases"]:
         for r in d["genes"]:
-            if r.get("over") or r.get("watch_note"):
+            if r.get("over") or r.get("watch_note") or r.get("dbfew"):
                 genes.setdefault(r["g"], []).append((d, r))
     changes, unflagged, failed, new = [], [], [], []
     for sym, rows in sorted(genes.items()):
@@ -112,8 +113,12 @@ def main():
         old = rows[0][1].get("pm")
         if old is not None and c != old:
             changes.append(dict(gene=sym, before=old, now=c))
+        al = rows[0][1].get("al") or []
+        ca = count("(" + " OR ".join(f'"{x}"[tiab]' for x in [sym] + al) + ")") if al else None
         for d, r in rows:
             r["pm"] = c
+            if ca is not None:
+                r["pma"] = ca
             if r.get("over") and c > THRESHOLD:
                 r["over"] = False
                 r["studied_note"] = f"Flag removed automatically on {now.date().isoformat()}: {c} PubMed records, above the threshold of {THRESHOLD}."
@@ -126,7 +131,7 @@ def main():
     m_ = re.search(r"<Count>(\d+)</Count>", x or "")
     new_in_diseases = int(m_.group(1)) if m_ else None
     for topic, term in TOPICS.items():
-        ids = recent(term, n=8 if topic == "Major journals" else 5)
+        ids = recent(term, n=8 if topic == "Selected journals" else 5)
         if ids is None:
             failed.append(topic)
             continue
@@ -138,7 +143,7 @@ def main():
     meta = summaries([x["pmid"] for x in uniq][:40])
     for x in uniq:
         x.update(meta.get(x["pmid"], dict(title="(title NOT ACCESSED)", journal="", date="")))
-    uniq.sort(key=lambda x: x["topic"] != "Major journals")
+    uniq.sort(key=lambda x: x["topic"] != "Selected journals")
     for d in atlas["diseases"]:
         d["n_over"] = sum(1 for r in d["genes"] if r.get("over"))
     n_q = len(genes) + len(TOPICS)
