@@ -46,17 +46,17 @@
  <div class="hdr-tools"><div class="layout-seg" role="group" aria-label="Page layout"><button type="button" data-layout-set="auto" title="Layout: auto" aria-label="Layout: auto"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button><button type="button" data-layout-set="phone" title="Layout: phone" aria-label="Layout: phone"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button><button type="button" data-layout-set="desktop" title="Layout: desktop" aria-label="Layout: desktop"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.6"/><path d="M8.5 20h7M12 16.5V20"/></svg></button></div><button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button></div>
 </div><div class="ticker" id="nuTicker"><a class="tk-live" href="index.html#/">Today</a><div class="tk-track"><div class="tk-run" id="nuTickerRun">Daily literature watch: every day at 12:00 Central European Time we re-check PubMed for our genes and diseases.</div></div></div></header><div class="fb-bar" id="nuFb"><div class="wrap fb-row"><span class="fb-t">Help improve NeuroUnknown: tell us what is wrong, unclear or missing.</span><button type="button" class="fb-btn" id="fbOpen" aria-expanded="false" aria-controls="fbPanel">Give feedback</button></div><div class="wrap fb-panel" id="fbPanel" hidden><label class="fb-l" for="fbText">Your feedback</label><textarea id="fbText" rows="4" maxlength="2000" placeholder="What is wrong, unclear or missing? If something is incorrect, what should it say (with a source if you have one)?"></textarea><div class="fb-sel"><label class="fb-l">How useful is this page? <select id="fbRate"><option value="">Choose</option><option>5 - Very useful</option><option>4 - Useful</option><option>3 - OK</option><option>2 - Not very useful</option><option>1 - Not useful</option></select></label><label class="fb-l">You are (optional) <select id="fbRole"><option value="">Choose</option><option>Medical student</option><option>Physician</option><option>Researcher</option><option>Other student</option><option>Patient or family member</option><option>Other</option></select></label></div><p class="fb-note">Your feedback opens as a <b>public</b> GitHub issue (a free GitHub account is needed); you can review it before posting. Please do not include personal, health or patient information.</p><div class="fb-act"><button type="button" class="fb-btn" id="fbSend">Continue on GitHub &rarr;</button><button type="button" class="fb-x" id="fbCancel">Cancel</button></div></div></div>
 <main class="wrap">
-<span class="ver">Version 2.6 &middot; 23 November 2026</span>
+<span class="ver">Version 2.6.1 &middot; 23 November 2026</span>
 <h1>Cite &amp; data</h1>
 <p class="lede">NeuroUnknown is a <b>hypothesis-generating resource</b>: it ranks brain-disease genes that have strong genetic evidence but little research, and explains the diseases and treatments around them. It contains no laboratory data and makes no discovery claims. A flagged gene is a starting point for a question, not an answer.</p>
 
 <h2>How to cite</h2>
-<div class="box"><pre>NeuroUnknown project (2026). NeuroUnknown: an open, hypothesis-generating atlas of under-studied brain-disease genes. Version 2.6. https://omnivalent.github.io/neurounknown/ (accessed DD Month YYYY).</pre></div>
+<div class="box"><pre>NeuroUnknown project (2026). NeuroUnknown: an open, hypothesis-generating atlas of under-studied brain-disease genes. Version 2.6.1. https://omnivalent.github.io/neurounknown/ (accessed DD Month YYYY).</pre></div>
 <div class="box"><pre>@misc{neurounknown2026,
   title  = {NeuroUnknown: an open, hypothesis-generating atlas of under-studied brain-disease genes},
   author = {{NeuroUnknown project}},
   year   = {2026},
-  note   = {Version 2.6},
+  note   = {Version 2.6.1},
   url    = {https://omnivalent.github.io/neurounknown/}
 }</pre></div>
 <p>Please also cite the original sources of any data you reuse (listed below and in every reference list on the site).</p>
@@ -74,6 +74,7 @@
 
 <h2>Version history</h2>
 <div class="tw"><table><tr><th>Version</th><th>Date</th><th>Changes</th></tr>
+<tr><td>2.6.1</td><td>23 Nov 2026</td><td>Phone layout: the 3D brain stays pinned at the top while the structure list and info card scroll underneath; Layers, MRI slices in 3D and Sources fold into buttons under the brain.</td></tr>
 <tr><td>2.6</td><td>23 Nov 2026</td><td>Dynamic 3D atlas: structures fade between views instead of switching, the camera glides to frame what you pick, regions fly in and assemble when you return to the whole brain; glowing nodes at the structures of a system, disease or neurotransmitter, with particles flowing along neurotransmitter pathways; neurotransmitter cards with tabs (pathways, receptors, drugs, sources); previous/next navigation through systems, diseases and neurotransmitters.</td></tr>
 <tr><td>2.5</td><td>23 Nov 2026</td><td>Realistic 3D brain: one continuous cortical surface per hemisphere (and the cerebellum) drawn at the middle of the grey-matter intensity of the 0.5 mm template with sub-voxel surface nets, sulcal shading baked from depth below a closed hull, studio lighting; cranial nerves rebuilt (exits on the template brainstem surface, real calibres, flattened bands, rootlets of IX to XII, trigeminal ganglion with V1 to V3, ivory colour); the brain turns slowly when untouched; guided tour; new atlas sections: Pathways (fibre tracts and cranial nerves by type), Neurotransmitters (8 systems with moving schematic pathway lines, receptors, drug examples and PubMed-checked reviews) and Networks (Yeo 7 networks from the Schaefer 2018 atlas painted on the cortex).</td></tr>
 <tr><td>2.4</td><td>23 Nov 2026</td><td>Sharper 3D brain: cortex and cerebellum carved from the 0.5 mm template so the meshes follow its gyri and sulci; cranial nerves I to XII and the optic tract (schematic courses, 3D view) with three views (with the brain, without nerves, nerves with the brainstem and their nuclei in matching colours); MRI slices inside the 3D view (any of the three planes, movable, with a cut-away); a triplanar view with a shared crosshair; search and layers for the 3D atlas; expandable structure groups with distinct colours for several structures; question banks 384 clinical and 604 neuroanatomy.</td></tr>
@@ -111,7 +112,7 @@
 <li>No laboratory validation yet.</li>
 </ul>
 </main>
-<footer class="site"><div class="wrap">NeuroUnknown 2.6 &middot; a computational, hypothesis-generating resource. Not medical advice.</div></footer>
+<footer class="site"><div class="wrap">NeuroUnknown 2.6.1 &middot; a computational, hypothesis-generating resource. Not medical advice.</div></footer>
 <script>
 (function(){ var o=document.getElementById('fbOpen'), p=document.getElementById('fbPanel'); if(!o||!p) return;
  function tog(show){ p.hidden=!show; o.setAttribute('aria-expanded',show); if(show) document.getElementById('fbText').focus(); }

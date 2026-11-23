@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-qzMmK3XYwU5Q3eVQmwTsmV+m+BTEvHtb4dB22+n2/wg=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-Otc5Qm21dW5YmQHU1Sf0JTKQwov5Fb/Nf+gKMGh50KY=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeuroUnknown — the brain's overlooked genes</title>
 <meta name="description" content="An open computational screen for brain-disease genes that are strongly linked to illness yet barely studied, with a brain atlas, a disease explorer and a deep dive into the disturbed sense of self in schizophrenia. No discovery claims.">
@@ -271,6 +271,25 @@ html[data-layout="phone"] .b3wrap{height:420px}
 .b3ctl button{border:1px solid var(--line);background:var(--hdr-bg);color:var(--ink);border-radius:999px;padding:7px 11px;font:600 12px/1 var(--sans);cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .b3ctl button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .b3credit{font:500 10.5px/1.5 var(--mono);color:var(--faint);margin-top:8px}
+/* phone: brain stays on screen (sticky) while you scroll the list; secondary panels fold away */
+.b3tools{display:none}
+html[data-layout="phone"] .atlas-grid{display:flex;flex-direction:column;align-items:stretch}
+html[data-layout="phone"] .atlas-grid>div:first-child{display:contents}
+html[data-layout="phone"] .atlas-grid .vtabs{order:1;margin:0}
+html[data-layout="phone"] #atlas3d{order:2;position:sticky;top:var(--stk,150px);z-index:6;height:44vh;min-height:280px;box-shadow:0 10px 24px -18px rgba(0,0,0,.5)}
+html[data-layout="phone"] .b3tools{order:3;display:flex;gap:6px;flex-wrap:wrap}
+html[data-layout="phone"] .b3tools .chip[aria-expanded=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+html[data-layout="phone"] #triBox{order:4}
+html[data-layout="phone"] #lyPanel{order:5}
+html[data-layout="phone"] #p3panel{order:6}
+html[data-layout="phone"] #sliceBox{order:7}
+html[data-layout="phone"] .atside{order:8}
+html[data-layout="phone"] #b3credit{order:9}
+html[data-layout="phone"] #atlasFallback{order:10}
+html[data-layout="phone"] #lyPanel:not(.open),html[data-layout="phone"] #p3panel:not(.open),html[data-layout="phone"] #b3credit:not(.open){display:none}
+html[data-layout="phone"] .atside .rinfo,html[data-layout="phone"] #atPick,html[data-layout="phone"] .atmodes,html[data-layout="phone"] #lyPanel,html[data-layout="phone"] #p3panel,html[data-layout="phone"] #b3credit,html[data-layout="phone"] #triBox,html[data-layout="phone"] .atsearch{scroll-margin-top:calc(var(--stk,150px) + 44vh + 10px)}
+html[data-layout="phone"] #atlas3d .b3ctl button{padding:5px 10px;font-size:12px}
+
 /* disease categories and references */
 .cats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0 0}
 html[data-layout="phone"] .cats{grid-template-columns:minmax(0,1fr)}
@@ -643,6 +662,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
      <div class="grp"><button type="button" id="aCut" aria-pressed="false">Cut in half</button><button type="button" id="aCortex">Cortex: solid</button></div></div>
      <div class="b3ctl b3nv" role="group" aria-label="Cranial nerves"><div class="grp"><button type="button" data-nv="show" aria-pressed="true">Nerves</button><button type="button" data-nv="hide" aria-pressed="false">No nerves</button><button type="button" data-nv="iso" aria-pressed="false">Nerves + brainstem</button></div></div>
     </div>
+    <div class="b3tools" role="group" aria-label="More 3D tools"><button type="button" class="chip" data-tool="lyPanel" aria-expanded="false">Layers</button><button type="button" class="chip" data-tool="p3panel" aria-expanded="false">MRI slices in 3D</button><button type="button" class="chip" data-tool="b3credit" aria-expanded="false">Sources</button></div>
     <div class="tribox" id="triBox" hidden>
      <div class="trigrid"><div class="tricell" data-tv="ax"><canvas aria-label="Axial slice"></canvas><span class="trilab">Axial</span></div><div class="tricell" data-tv="co"><canvas aria-label="Coronal slice"></canvas><span class="trilab">Coronal</span></div><div class="tricell" data-tv="sa"><canvas aria-label="Sagittal slice"></canvas><span class="trilab">Sagittal</span></div><div class="tricell triinfo" id="triInfo"></div></div>
     </div>
@@ -662,7 +682,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
      <div class="slinfo"><span class="mono" id="slInfo"></span><span id="slExt"></span></div>
      <p class="slnote">Same 1 mm slice positions as before; each slice is drawn from the ICBM 2009b template at 0.5 mm (loads after the 1 mm preview). Structure borders are atlas estimates; brainstem divisions are approximate and cranial nerve nuclei are schematic. Colours: the structures you picked; faint tints show the other labelled structures. Axial and coronal slices use the neurological convention (the person's left on your left). Tap a coloured area to select it.</p>
     </div>
-    <div class="b3credit">Anatomy in ICBM 2009 (MNI) space: Neuromorphometrics labels (MICCAI 2012; SPM12; CC BY-NC); small subcortical and brainstem nuclei, internal capsule and fornix from MASSP 2.0 (7 T MRI; Bazin et al. 2020, 2025); fibre tracts from the Juelich histological atlas; cortex and cerebellum are one continuous surface drawn through the grey matter of the 0.5 mm ICBM 2009b template (sulcal shading from fold depth); resting-state networks from Schaefer et al. 2018 (7 networks, Yeo et al. 2011); brainstem divisions approximate; cranial nerve nuclei and cranial nerve courses schematic. Population average, not one person's brain. Function notes are simplified standard neuroanatomy.</div>
+    <div class="b3credit" id="b3credit">Anatomy in ICBM 2009 (MNI) space: Neuromorphometrics labels (MICCAI 2012; SPM12; CC BY-NC); small subcortical and brainstem nuclei, internal capsule and fornix from MASSP 2.0 (7 T MRI; Bazin et al. 2020, 2025); fibre tracts from the Juelich histological atlas; cortex and cerebellum are one continuous surface drawn through the grey matter of the 0.5 mm ICBM 2009b template (sulcal shading from fold depth); resting-state networks from Schaefer et al. 2018 (7 networks, Yeo et al. 2011); brainstem divisions approximate; cranial nerve nuclei and cranial nerve courses schematic. Population average, not one person's brain. Function notes are simplified standard neuroanatomy.</div>
     <div id="atlasFallback"></div>
    </div>
    <div class="atside">
@@ -1251,13 +1271,13 @@ var TOUR=[[null,'Welcome to the 3D atlas','104 brain structures and the cranial 
 var TS={i:0,ring:null,card:null};
 function tourDone(){ try{ localStorage.setItem('nu-tour-done','1'); }catch(e){} }
 function tourEnd(){ if(TS.ring) TS.ring.remove(); if(TS.card) TS.card.remove(); TS.ring=TS.card=null; window.removeEventListener('resize',tourPlace); window.removeEventListener('scroll',tourPlace,true); }
-function tourPlace(){ if(!TS.card) return; var st=TOUR[TS.i], el=st[0]?document.querySelector(st[0]):null, W=innerWidth, H=innerHeight, c=TS.card, ch=c.offsetHeight, cw=c.offsetWidth;
+function tourPlace(){ if(!TS.card) return; var st=TOUR[TS.i], el=st[0]?document.querySelector(st[0]):null; if(el&&!el.offsetHeight) el=document.querySelector('.b3tools'); var W=innerWidth, H=innerHeight, c=TS.card, ch=c.offsetHeight, cw=c.offsetWidth;
  if(!el){ TS.ring.style.cssText+='top:'+(H/2)+'px;left:'+(W/2)+'px;width:0;height:0'; c.style.top=Math.max(16,(H-ch)/2)+'px'; c.style.left=(W-cw)/2+'px'; return; }
  var r=el.getBoundingClientRect(), pad=6, top=Math.max(4,r.top-pad), bot=Math.min(H-4,r.bottom+pad);
  TS.ring.style.top=top+'px'; TS.ring.style.left=Math.max(4,r.left-pad)+'px'; TS.ring.style.width=Math.min(W-8,r.width+2*pad)+'px'; TS.ring.style.height=Math.max(0,bot-top)+'px';
  var nav=phone()?86:12, y=bot+12; if(y+ch>H-nav) y=top-ch-12; if(y<12) y=Math.max(12,H-ch-nav);
  c.style.top=y+'px'; c.style.left=Math.max(16,Math.min(W-cw-16,r.left+r.width/2-cw/2))+'px'; }
-function tourShow(i){ TS.i=i; var st=TOUR[i], el=st[0]?document.querySelector(st[0]):null;
+function tourShow(i){ TS.i=i; var st=TOUR[i], el=st[0]?document.querySelector(st[0]):null; if(el&&!el.offsetHeight) el=document.querySelector('.b3tools');
  if(el) el.scrollIntoView({block:phone()?'center':'nearest',behavior:'auto'});
  TS.card.innerHTML='<button type="button" class="x" aria-label="Close the tour">&times;</button><div class="te">Tour &middot; '+(i+1)+'/'+TOUR.length+'</div><h4>'+st[1]+'</h4><p>'+st[2]+'</p><div class="tr"><button type="button" class="skip">Don&rsquo;t show again</button><span class="sp"></span>'+(i?'<button type="button" class="bk">Back</button>':'')+'<button type="button" class="pri nx">'+(i===0?'Start the tour':i===TOUR.length-1?'Done':'Next')+'</button></div><div class="dots">'+TOUR.map(function(_,k){ return '<i class="'+(k===i?'on':'')+'"></i>'; }).join('')+'</div>';
  TS.card.querySelector('.x').onclick=function(){ tourDone(); tourEnd(); };
@@ -1312,6 +1332,9 @@ function atlasInit(){
  at.v=make3D('atlas3d','atlasMsg','atlasTip',function(id){ atlasPick(id,true); },'atlasFallback','medial'); at.v.onReady=function(){ if(at.v.b){ at.v.b.setNerves(at.nerves); at.v.b.setLayers(at.layers); } atlasApply();
   var seen=false; try{ seen=!!localStorage.getItem('nu-tour-done'); }catch(e){ seen=true; } if(!seen) setTimeout(function(){ if(location.hash.indexOf('#/atlas')===0&&!TS.card) tourStart(); },1200); };
  document.getElementById('aTour').addEventListener('click',tourStart);
+ [].forEach.call(document.querySelectorAll('[data-tool]'),function(b){ b.addEventListener('click',function(){ var el=document.getElementById(b.dataset.tool), o=!el.classList.contains('open'); el.classList.toggle('open',o); b.setAttribute('aria-expanded',o); if(o) el.scrollIntoView({block:'start',behavior:RM?'auto':'smooth'}); }); });
+ function stk(){ var h=document.querySelector('header.site'); document.documentElement.style.setProperty('--stk',(h?Math.round(h.getBoundingClientRect().height):120)+'px'); }
+ stk(); window.addEventListener('resize',stk);
  [].forEach.call(document.querySelectorAll('[data-ly]'),function(b){ b.addEventListener('click',function(){ var k=b.dataset.ly; at.layers[k]=!at.layers[k]; b.setAttribute('aria-pressed',at.layers[k]); if(at.v&&at.v.b) at.v.b.setLayers(at.layers); }); });
  (function(){ var inp=document.getElementById('atSearch'), res=document.getElementById('atRes');
   function norm(t){ return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
