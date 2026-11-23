@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-F7ewbrfDXunlQ6pPgY6EYBVYnoY1cMCNiY+pC66cnZI=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-7aHBLw1IpAe8L23PfpkXYIDT7C/lRW23+IcSEu6XodQ=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeuroUnknown — the brain's overlooked genes</title>
 <meta name="description" content="An open computational screen for brain-disease genes that are strongly linked to illness yet barely studied, with a brain atlas, a disease explorer and a deep dive into the disturbed sense of self in schizophrenia. No discovery claims.">
@@ -271,23 +271,101 @@ html[data-layout="phone"] .b3wrap{height:420px}
 .b3ctl button{border:1px solid var(--line);background:var(--hdr-bg);color:var(--ink);border-radius:999px;padding:7px 11px;font:600 12px/1 var(--sans);cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .b3ctl button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .b3credit{font:500 10.5px/1.5 var(--mono);color:var(--faint);margin-top:8px}
+/* v2.7 view picker, panes, MRI controls, 3D labels, layers popover */
+.vpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
+.vpick .vl{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.vpick [data-pane]{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 15px;font:600 13px var(--sans);cursor:pointer;transition:background .25s ease,color .25s ease,border-color .25s ease}
+.vpick [data-pane][aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.vpick .vsep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.vpick .vpre{border:0;background:none;color:var(--muted);font:500 12.5px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 5px}
+.vpick .vpre:hover{color:var(--ink)}
+.vstage{display:grid;gap:10px;justify-content:center;align-content:start}
+.vstage.one{display:block}
+.vslices{display:contents}
+.pane[hidden]{display:none!important}
+.pane{animation:panein .35s ease}
+@keyframes panein{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+.slpane{position:relative;background:#000;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.slpane canvas{display:block;cursor:crosshair;outline:none}
+.slpane canvas:focus-visible{box-shadow:0 0 0 2px #f2a93b}
+.slpane.in3d{box-shadow:inset 0 0 0 2px var(--signal)}
+.slpane .ori{position:absolute;font:700 10px var(--mono);color:#e8e6e1;opacity:.5;pointer-events:none}
+.slpane .o1{top:6px;left:50%;transform:translateX(-50%)}.slpane .o2{bottom:46px;left:50%;transform:translateX(-50%)}.slpane .o3{left:7px;top:50%;transform:translateY(-50%)}.slpane .o4{right:7px;top:50%;transform:translateY(-50%)}
+.slcap{position:absolute;left:0;right:0;bottom:0;padding:18px 11px 8px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.82));color:#ece9e3;display:flex;flex-wrap:wrap;gap:2px 9px;align-items:baseline;pointer-events:none}
+.slcap b{font:700 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#f2a93b}
+.slcap .cc{font:500 11px var(--mono);color:#bdb8ae}
+.slcap .cn{flex-basis:100%;font:600 13.5px/1.3 var(--sans);color:#fff}
+.slcap .cn:empty{display:none}
+.slctl2{position:relative;background:#111318;color:#e8e6e1;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:7px;justify-content:center;overflow:auto}
+.slctl2.strip{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 18px;grid-column:1/-1}
+.slctl2 .ctlh{color:#f2a93b;font-size:11px}
+.slctl2.strip .ctlh{flex-basis:100%;margin-bottom:-2px}
+.crow{display:flex;align-items:center;gap:6px;min-width:0}
+.crow[hidden]{display:none}
+.slctl2.strip .crow{flex:1 1 190px}
+.slctl2.strip .crow .cv,.slctl2.strip .ctlh{display:none}
+.slctl2.strip .cfoot{flex-basis:auto;flex:1 1 auto}
+.slctl2.strip{padding:10px 12px;gap:6px 14px}
+.slctl2.strip .cchk{font-size:12px}
+.slctl2.tile{padding:10px 12px;gap:5px}
+.slctl2.tile .cfoot .mono{display:none}
+.slctl2.tile .cchk{font-size:12px;line-height:1.25}
+.slctl2.strip .cfoot .mono{font-size:10px}
+.atlas-grid.wide{grid-template-columns:minmax(0,1.75fr) minmax(300px,.8fr);gap:24px}
+.b3wrap.compact .b3ctl{left:8px;right:8px;bottom:8px;gap:4px}
+.b3wrap.compact .b3ctl.b3nv{top:8px;bottom:auto}
+.b3wrap.compact .b3ctl button{padding:5px 8px;font-size:11px}
+.b3wrap.compact .lypop{bottom:46px}
+.crow .cl{font:700 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;width:66px;color:#cfcbc2;flex:0 0 auto}
+.crow input{flex:1;min-width:50px;accent-color:#f2a93b}
+.crow button{width:26px;height:26px;border-radius:7px;border:1px solid #3a3d44;background:#1a1c21;color:#e8e6e1;cursor:pointer;font:600 14px/1 var(--sans);flex:0 0 auto;padding:0}
+.crow .cv{font:500 11px var(--mono);color:#bdb8ae;min-width:58px;text-align:right;flex:0 0 auto}
+.crow .cf{width:auto;padding:0 8px;font-size:11px}
+.crow .cf[aria-pressed=true]{background:#f2a93b;color:#111;border-color:#f2a93b}
+.slctl2:not(.p3) .cf,.slctl2:not(.has3d) #c3dl,.slctl2:not(.p3) #ccutl{display:none}
+.cchk{display:flex;gap:8px;align-items:center;font-size:12.5px;color:#cfcbc2;cursor:pointer}
+.slctl2.strip .cchk{flex:0 0 auto}
+.cfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;flex-basis:100%}
+.cfoot .mono{font-size:10.5px;color:#9c9890;text-transform:none;letter-spacing:0}
+.cfoot .chip{color:#e8e6e1;border-color:#3a3d44;padding:4px 10px;font-size:12px;background:none}
+.lypop{position:absolute;right:12px;bottom:56px;z-index:4;width:min(330px,calc(100% - 24px));background:var(--hdr-bg);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 14px 30px -18px rgba(0,0,0,.45);animation:panein .25s ease}
+.lypop[hidden]{display:none}
+.lynote{font-size:11.5px;color:var(--muted);margin:8px 0 0;line-height:1.4}
+#aLayers[aria-expanded=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.b3lab{position:absolute;left:0;top:0;pointer-events:none;z-index:3;opacity:0;transition:opacity .25s ease}
+.b3lab.on{opacity:1}
+.b3lab i{position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 10px rgba(0,0,0,.35)}
+.b3lab span{position:absolute;left:0;top:-34px;width:1px;height:30px;background:var(--ink);opacity:.45}
+.b3lab b{position:absolute;left:0;top:-34px;transform:translate(-50%,-100%);white-space:nowrap;background:var(--ink);color:var(--bg);font:600 12.5px/1 var(--sans);padding:6px 11px;border-radius:999px;box-shadow:0 6px 16px -6px rgba(0,0,0,.45)}
+.b3lab.pop b{animation:labpop .35s ease}
+.b3lab.below span{top:4px}.b3lab.below b{top:34px;transform:translate(-50%,0)}
+.b3lab.below.pop b{animation:none}
+@keyframes labpop{from{transform:translate(-50%,-70%) scale(.92);opacity:0}to{transform:translate(-50%,-100%);opacity:1}}
+@media (prefers-reduced-motion:reduce){.pane,.lypop,.b3lab.pop b{animation:none}}
+
 /* phone: brain stays on screen (sticky) while you scroll the list; secondary panels fold away */
 .b3tools{display:none}
 html[data-layout="phone"] .atlas-grid{display:flex;flex-direction:column;align-items:stretch}
 html[data-layout="phone"] .atlas-grid>div:first-child{display:contents}
-html[data-layout="phone"] .atlas-grid .vtabs{order:1;margin:0}
+html[data-layout="phone"] .vstage{display:contents}
+html[data-layout="phone"] .vpick{order:1;margin:0}
 html[data-layout="phone"] #atlas3d{order:2;position:sticky;top:var(--stk,150px);z-index:6;height:44vh;min-height:280px;box-shadow:0 10px 24px -18px rgba(0,0,0,.5)}
 html[data-layout="phone"] .b3tools{order:3;display:flex;gap:6px;flex-wrap:wrap}
 html[data-layout="phone"] .b3tools .chip[aria-expanded=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-html[data-layout="phone"] #triBox{order:5}
-html[data-layout="phone"] #lyPanel{order:6}
-html[data-layout="phone"] #p3panel{order:7}
-html[data-layout="phone"] #sliceBox{order:8}
-html[data-layout="phone"] .atside{order:9}
 html[data-layout="phone"] #b3credit{order:4}
-html[data-layout="phone"] #atlasFallback{order:10}
-html[data-layout="phone"] #lyPanel:not(.open),html[data-layout="phone"] #p3panel:not(.open),html[data-layout="phone"] #b3credit:not(.open){display:none}
-html[data-layout="phone"] .atside .rinfo,html[data-layout="phone"] #atPick,html[data-layout="phone"] .atmodes,html[data-layout="phone"] #lyPanel,html[data-layout="phone"] #p3panel,html[data-layout="phone"] #b3credit,html[data-layout="phone"] #triBox,html[data-layout="phone"] .atsearch{scroll-margin-top:calc(var(--stk,150px) + var(--b3h,44vh) + 12px)}
+html[data-layout="phone"] .vslices{order:5;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+html[data-layout="phone"] .vslices.k0{display:none}
+html[data-layout="phone"] .slpane{aspect-ratio:1/1}
+html[data-layout="phone"] .vslices.k1 .slpane,html[data-layout="phone"] .slctl2.strip{grid-column:1/-1}
+html[data-layout="phone"] .slctl2.tile{padding:8px 9px;gap:3px}
+html[data-layout="phone"] .slctl2.tile .crow button,html[data-layout="phone"] .slctl2.tile .cv,html[data-layout="phone"] .slctl2.tile .ctlh,html[data-layout="phone"] .slctl2.tile .cfoot .mono{display:none}
+html[data-layout="phone"] .slctl2.tile .crow .cl{width:auto;font-size:9.5px}
+html[data-layout="phone"] .slctl2.tile .crow{flex-wrap:wrap;gap:2px}
+html[data-layout="phone"] .slctl2.tile .cchk{font-size:11px}
+html[data-layout="phone"] .atside{order:6}
+html[data-layout="phone"] #atlasFallback{order:7}
+html[data-layout="phone"] #b3credit:not(.open){display:none}
+html[data-layout="phone"] .atside .rinfo,html[data-layout="phone"] #atPick,html[data-layout="phone"] .atmodes,html[data-layout="phone"] #b3credit,html[data-layout="phone"] .vslices,html[data-layout="phone"] .atsearch{scroll-margin-top:calc(var(--stk,150px) + var(--b3h,44vh) + 12px)}
 html[data-layout="phone"] #atlas3d .b3ctl button{padding:5px 10px;font-size:12px}
 
 /* disease categories and references */
@@ -656,33 +734,20 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
   </div>
   <div class="atlas-grid">
    <div>
-    <div class="vtabs" role="tablist" aria-label="View"><button type="button" role="tab" data-vw="3d" aria-selected="true">3D</button><button type="button" role="tab" data-vw="ax" aria-selected="false">Axial</button><button type="button" role="tab" data-vw="co" aria-selected="false">Coronal</button><button type="button" role="tab" data-vw="sa" aria-selected="false">Sagittal</button><button type="button" role="tab" data-vw="tri" aria-selected="false">All three</button></div>
-    <div class="b3wrap" id="atlas3d"><div class="b3msg" id="atlasMsg">Loading the 3D brain&hellip;</div><div class="b3tip" id="atlasTip"></div>
+    <div class="vpick" role="group" aria-label="Choose the views to show"><span class="vl">Show</span><button type="button" data-pane="d3" aria-pressed="true">3D</button><button type="button" data-pane="ax" aria-pressed="false">Axial</button><button type="button" data-pane="co" aria-pressed="false">Coronal</button><button type="button" data-pane="sa" aria-pressed="false">Sagittal</button><span class="vsep"></span><button type="button" class="vpre" data-preset="all">3D + all slices</button><button type="button" class="vpre" data-preset="mri">Slices only</button><button type="button" class="vpre" data-preset="d3">3D only</button></div>
+    <div class="vstage one" id="vStage">
+    <div class="b3wrap pane" id="atlas3d"><div class="b3msg" id="atlasMsg">Loading the 3D brain&hellip;</div><div class="b3tip" id="atlasTip"></div>
      <div class="b3ctl"><div class="grp" role="group" aria-label="Viewpoint"><button type="button" data-v="left">Left</button><button type="button" data-v="right">Right</button><button type="button" data-v="top">Top</button><button type="button" data-v="front">Front</button><button type="button" data-v="below">Below</button></div>
-     <div class="grp"><button type="button" id="aCut" aria-pressed="false">Cut in half</button><button type="button" id="aCortex">Cortex: solid</button></div></div>
+     <div class="grp"><button type="button" id="aCut" aria-pressed="false">Cut in half</button><button type="button" id="aCortex">Cortex: solid</button><button type="button" id="aLayers" aria-expanded="false">Layers</button></div></div>
+     <div class="lypop" id="lyPanel" hidden><div class="p3head"><span class="mono">Layers</span></div>
+      <div class="lyrow"><button type="button" class="chip" data-ly="cortex" aria-pressed="true">Cortex</button><button type="button" class="chip" data-ly="deep" aria-pressed="true">Deep structures</button><button type="button" class="chip" data-ly="brainstem" aria-pressed="true">Brainstem</button><button type="button" class="chip" data-ly="cerebellum" aria-pressed="true">Cerebellum</button><button type="button" class="chip" data-ly="tracts" aria-pressed="false">Fibre tracts</button><button type="button" class="chip" data-ly="ventricles" aria-pressed="false">Ventricles</button></div>
+      <p class="lynote">Fibre tracts are drawn as smooth fibre lines inside the atlas tract shapes, coloured by direction (red left-right, green front-back, blue up-down). Illustrative, not tractography.</p></div>
      <div class="b3ctl b3nv" role="group" aria-label="Cranial nerves"><div class="grp"><button type="button" data-nv="show" aria-pressed="true">Nerves</button><button type="button" data-nv="hide" aria-pressed="false">No nerves</button><button type="button" data-nv="iso" aria-pressed="false">Nerves + brainstem</button></div></div>
     </div>
-    <div class="b3tools" role="group" aria-label="More 3D tools"><button type="button" class="chip" data-tool="lyPanel" aria-expanded="false">Layers</button><button type="button" class="chip" data-tool="p3panel" aria-expanded="false">MRI slices in 3D</button><button type="button" class="chip" data-tool="b3credit" aria-expanded="false">Sources</button></div>
-    <div class="tribox" id="triBox" hidden>
-     <div class="trigrid"><div class="tricell" data-tv="ax"><canvas aria-label="Axial slice"></canvas><span class="trilab">Axial</span></div><div class="tricell" data-tv="co"><canvas aria-label="Coronal slice"></canvas><span class="trilab">Coronal</span></div><div class="tricell" data-tv="sa"><canvas aria-label="Sagittal slice"></canvas><span class="trilab">Sagittal</span></div><div class="tricell triinfo" id="triInfo"></div></div>
+     <div class="vslices k0" id="vSlices"><div class="pane slpane" data-tv="ax" hidden><canvas tabindex="0" aria-label="Axial MRI slice: click to move the crosshair and name the structure; arrow keys or scroll move through slices"></canvas><span class="ori o1">A</span><span class="ori o2">P</span><span class="ori o3">L</span><span class="ori o4">R</span><div class="b3tip"></div><div class="slcap"><b>Axial</b><span class="cc"></span><span class="cn"></span></div></div><div class="pane slpane" data-tv="co" hidden><canvas tabindex="0" aria-label="Coronal MRI slice: click to move the crosshair and name the structure; arrow keys or scroll move through slices"></canvas><span class="ori o1">S</span><span class="ori o2">I</span><span class="ori o3">L</span><span class="ori o4">R</span><div class="b3tip"></div><div class="slcap"><b>Coronal</b><span class="cc"></span><span class="cn"></span></div></div><div class="pane slpane" data-tv="sa" hidden><canvas tabindex="0" aria-label="Sagittal MRI slice: click to move the crosshair and name the structure; arrow keys or scroll move through slices"></canvas><span class="ori o1">S</span><span class="ori o2">I</span><span class="ori o3">A</span><span class="ori o4">P</span><div class="b3tip"></div><div class="slcap"><b>Sagittal</b><span class="cc"></span><span class="cn"></span></div></div><div class="pane slctl2" id="slCtl" hidden><div class="mono ctlh">MRI controls</div><div class="crow" data-cr="ax" hidden><span class="cl">Axial</span><button type="button" data-step="ax:-1" aria-label="Previous axial slice">&minus;</button><input type="range" data-sr="ax" min="0" max="100" value="50" aria-label="Axial slice position"><button type="button" data-step="ax:1" aria-label="Next axial slice">+</button><span class="cv" data-cv="ax"></span><button type="button" class="cf" data-plf="ax" aria-pressed="false" title="Cut away the other side of the 3D brain">Flip</button></div><div class="crow" data-cr="co" hidden><span class="cl">Coronal</span><button type="button" data-step="co:-1" aria-label="Previous coronal slice">&minus;</button><input type="range" data-sr="co" min="0" max="100" value="50" aria-label="Coronal slice position"><button type="button" data-step="co:1" aria-label="Next coronal slice">+</button><span class="cv" data-cv="co"></span><button type="button" class="cf" data-plf="co" aria-pressed="false" title="Cut away the other side of the 3D brain">Flip</button></div><div class="crow" data-cr="sa" hidden><span class="cl">Sagittal</span><button type="button" data-step="sa:-1" aria-label="Previous sagittal slice">&minus;</button><input type="range" data-sr="sa" min="0" max="100" value="50" aria-label="Sagittal slice position"><button type="button" data-step="sa:1" aria-label="Next sagittal slice">+</button><span class="cv" data-cv="sa"></span><button type="button" class="cf" data-plf="sa" aria-pressed="false" title="Cut away the other side of the 3D brain">Flip</button></div><label class="cchk" id="c3dl"><input type="checkbox" id="p3show" checked> Show these slices inside the 3D brain</label><label class="cchk" id="ccutl"><input type="checkbox" id="p3cut" checked> Cut the 3D brain at the slices</label><div class="cfoot"><span class="mono" id="slInfo"></span><button type="button" class="chip" id="slCenter">Centre on selection</button></div></div></div>
     </div>
-    <div class="p3panel lypanel" id="lyPanel"><div class="p3head"><span class="mono">Layers</span></div>
-     <div class="lyrow"><button type="button" class="chip" data-ly="cortex" aria-pressed="true">Cortex</button><button type="button" class="chip" data-ly="deep" aria-pressed="true">Deep structures</button><button type="button" class="chip" data-ly="brainstem" aria-pressed="true">Brainstem</button><button type="button" class="chip" data-ly="cerebellum" aria-pressed="true">Cerebellum</button><button type="button" class="chip" data-ly="tracts" aria-pressed="false">Fibre tracts</button><button type="button" class="chip" data-ly="ventricles" aria-pressed="false">Ventricles</button></div></div>
-    <div class="p3panel" id="p3panel">
-     <div class="p3head"><span class="mono">MRI slices in 3D</span><span class="p3all"><button type="button" class="chip" data-p3all="on">All three</button><button type="button" class="chip" data-p3all="off">None</button></span></div>
-     <div class="p3row" data-pl="ax"><button type="button" class="chip" data-plt="ax" aria-pressed="false">Axial</button><input type="range" data-plr="ax" min="0" max="181" value="90" aria-label="Axial plane position"><span class="mono" data-plv="ax"></span><button type="button" class="chip p3f" data-plf="ax" aria-pressed="false" title="Cut away the other side">Flip</button></div>
-     <div class="p3row" data-pl="co"><button type="button" class="chip" data-plt="co" aria-pressed="false">Coronal</button><input type="range" data-plr="co" min="0" max="217" value="108" aria-label="Coronal plane position"><span class="mono" data-plv="co"></span><button type="button" class="chip p3f" data-plf="co" aria-pressed="false" title="Cut away the other side">Flip</button></div>
-     <div class="p3row" data-pl="sa"><button type="button" class="chip" data-plt="sa" aria-pressed="false">Sagittal</button><input type="range" data-plr="sa" min="0" max="181" value="90" aria-label="Sagittal plane position"><span class="mono" data-plv="sa"></span><button type="button" class="chip p3f" data-plf="sa" aria-pressed="false" title="Cut away the other side">Flip</button></div>
-     <label class="p3cut"><input type="checkbox" id="p3cut" checked> Cut the brain at the slices (one slice cuts it in half; two or three cut out a corner)</label>
-    </div>
-    <div class="slbox" id="sliceBox" hidden>
-     <div class="slcv"><canvas id="slc" tabindex="0" aria-label="MRI-style slice; use arrow keys to move through slices"></canvas><div class="b3tip" id="slTip"></div>
-      <span class="ori t" id="oT"></span><span class="ori b" id="oB"></span><span class="ori l" id="oL"></span><span class="ori r" id="oR"></span></div>
-     <div class="slctl"><button type="button" id="slPrev" aria-label="Previous slice">&minus;</button><input type="range" id="slr" min="0" max="99" value="50" aria-label="Slice position"><button type="button" id="slNext" aria-label="Next slice">+</button></div>
-     <div class="slinfo"><span class="mono" id="slInfo"></span><span id="slExt"></span></div>
-     <p class="slnote">Same 1 mm slice positions as before; each slice is drawn from the ICBM 2009b template at 0.5 mm (loads after the 1 mm preview). Structure borders are atlas estimates; brainstem divisions are approximate and cranial nerve nuclei are schematic. Colours: the structures you picked; faint tints show the other labelled structures. Axial and coronal slices use the neurological convention (the person's left on your left). Tap a coloured area to select it.</p>
-    </div>
-    <div class="b3credit" id="b3credit">Anatomy in ICBM 2009 (MNI) space: Neuromorphometrics labels (MICCAI 2012; SPM12; CC BY-NC); small subcortical and brainstem nuclei, internal capsule and fornix from MASSP 2.0 (7 T MRI; Bazin et al. 2020, 2025); fibre tracts from the Juelich histological atlas; cortex and cerebellum are one continuous surface drawn through the grey matter of the 0.5 mm ICBM 2009b template (sulcal shading from fold depth); resting-state networks from Schaefer et al. 2018 (7 networks, Yeo et al. 2011); brainstem divisions approximate; cranial nerve nuclei and cranial nerve courses schematic. Population average, not one person's brain. Function notes are simplified standard neuroanatomy.</div>
+    <div class="b3tools" role="group" aria-label="More 3D tools"><button type="button" class="chip" data-tool="b3credit" aria-expanded="false">Sources</button></div>
+    <div class="b3credit" id="b3credit">Anatomy in ICBM 2009 (MNI) space: Neuromorphometrics labels (MICCAI 2012; SPM12; CC BY-NC); small subcortical and brainstem nuclei, internal capsule and fornix from MASSP 2.0 (7 T MRI; Bazin et al. 2020, 2025); fibre tracts from the Juelich histological atlas; cortex and cerebellum are one continuous surface drawn through the grey matter of the 0.5 mm ICBM 2009b template (sulcal shading from fold depth); resting-state networks from Schaefer et al. 2018 (7 networks, Yeo et al. 2011); brainstem divisions approximate; cranial nerve nuclei and cranial nerve courses schematic. Population average, not one person's brain. Function notes are simplified standard neuroanatomy. Fibre lines are illustrative streamlines drawn inside the atlas tract shapes, not tractography. MRI slices: 1 mm slice positions drawn from the ICBM 2009b template at 0.5 mm; axial and coronal slices use the neurological convention (the person's left on your left); structure borders are atlas estimates.</div>
     <div id="atlasFallback"></div>
    </div>
    <div class="atside">
@@ -1026,7 +1091,7 @@ function make3D(hostId,msgId,tipId,onPick,fallbackId,fallbackView){
  function fallback(){ if(done) return; done=true; msg.textContent='The 3D brain could not start here (it needs WebGL). Showing the schematic map instead.';
   var fb=document.getElementById(fallbackId); if(fb) out.svg=makeMap(fb,fallbackView||'medial',onPick); if(out.onReady) out.onReady(); }
  setTimeout(function(){ if(!window.NUBrain) fallback(); },10000);
- withBrain(function(){ if(done) return; window.NUBrain.create(host,{structures:A.structures,autoRotate:hostId!=='lzBrain',frame:hostId==='atlas3d',assemble:hostId!=='lzBrain',onPick:onPick,onHover:function(id,e){ if(!tip) return; if(!id){ tip.style.opacity=0; return; }
+ withBrain(function(){ if(done) return; window.NUBrain.create(host,{structures:A.structures,autoRotate:hostId!=='lzBrain',frame:hostId==='atlas3d',labels:hostId==='atlas3d',assemble:hostId!=='lzBrain',onPick:onPick,onHover:function(id,e){ if(!tip) return; if(!id){ tip.style.opacity=0; return; }
    var r=host.getBoundingClientRect(); tip.textContent=sname(id); tip.style.left=(e.clientX-r.left)+'px'; tip.style.top=(e.clientY-r.top)+'px'; tip.style.opacity=1; }})
   .then(function(b){ if(done) return; done=true; out.b=b; msg.style.display='none'; if(out.onReady) out.onReady(); })
   .catch(function(){ fallback(); }); });
@@ -1042,7 +1107,7 @@ function structHTML(id){ var s=A.structures[id]; if(!s) return regionHTML(id); v
    (reg.pmids.length?cites(reg.pmids):'')+'</div>':'')+'<p style="margin-top:12px">'+testBtn('a-lesion','Test yourself: lesions')+testBtn('lesion','Spot the lesion (3D)')+'</p>'; }
 
 /* ---------------- slice viewer ---------------- */
-var SL={m:null,t:null,l:null,h:null,hn:0,vw:'3d',pos:{ax:null,co:null,sa:null},loading:false};
+var SL={m:null,t:null,l:null,h:null,hn:0,pos:{ax:null,co:null,sa:null},loading:false};
 function slImg(src){ return new Promise(function(res,rej){ var im=new Image(); im.onload=function(){ res(im); }; im.onerror=rej; im.src=src; }); }
 function slUnpack(im,X,Y,cols,out,z0,nz){ var c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight; var x=c.getContext('2d',{willReadFrequently:true}); x.imageSmoothingEnabled=false; x.drawImage(im,0,0);
  var d=x.getImageData(0,0,c.width,c.height).data, W=c.width;
@@ -1055,11 +1120,11 @@ function slLoad(cb){ if(SL.m) return cb(); if(SL.loading) return; SL.loading=tru
   SL.m=m; SL.loading=false; cb(); if(m.hd) slLoadHD(m.hd); })
  .catch(function(){ SL.loading=false; document.getElementById('slInfo').textContent='The slice data could not be loaded.'; }); }
 function slLoadHD(h){ var X=h.dims[0], Y=h.dims[1], Z=h.dims[2], t=new Uint8Array(X*Y*Z), l=new Uint8Array(X*Y*Z), i=0;
- function next(){ if(i>=h.chunks){ SL.h={m:h,t:t,l:l}; if(SL.vw!=='3d') slRender(); if(P3.on.length) p3Update(); return; }
+ function next(){ if(i>=h.chunks){ SL.h={m:h,t:t,l:l}; if(secOn().length) secRender(); return; }
   var z0=i*h.per, nz=Math.min(h.per,Z-z0), k=i;
   Promise.all([slImg('assets/brain3d/t1_hd_'+k+'.png'),slImg('assets/brain3d/labels_hd_'+k+'.png')]).then(function(a){
-   slUnpack(a[0],X,Y,h.cols,t,z0,nz); slUnpack(a[1],X,Y,h.cols,l,z0,nz); i++; SL.hn=i; if(SL.vw!=='3d') slInfoText(); next(); })
-  .catch(function(){ SL.hn=-1; if(SL.vw!=='3d') slInfoText(); }); }
+   slUnpack(a[0],X,Y,h.cols,t,z0,nz); slUnpack(a[1],X,Y,h.cols,l,z0,nz); i++; SL.hn=i; secStatus(); next(); })
+  .catch(function(){ SL.hn=-1; secStatus(); }); }
  next(); }
 function slDims(v){ var d=SL.m.dims; return v==='ax'?{w:d[0],h:d[1],n:d[2]}:v==='co'?{w:d[0],h:d[2],n:d[1]}:{w:d[1],h:d[2],n:d[0]}; }
 function slVox(v,c,r,k){ var d=SL.m.dims; // canvas col c,row r (row 0 at top) on slice k -> x,y,z (1 mm grid)
@@ -1085,9 +1150,6 @@ function slMap(v,k){ var d=SL.m.dims, o=SL.m.origin, H=SL.h, org=H?H.m.origin:o,
  else { ax=1; bx=2; px=0; a0=o[1]+d[1]-1; a1=-1; b0=o[2]+d[2]-1; b1=-1; pmm=o[0]+k; }
  return {ax:ax,bx:bx,px:px,A0:(a0-org[ax])/st,A1:a1/st,B0:(b0-org[bx])/st,B1:b1/st,P:Math.round((pmm-org[px])/st),dims:dims,hd:!!H,
   T:H?H.t:SL.t, L:H?H.l:SL.l, st:st}; }
-function slInfoText(){ if(!SL.m||SL.vw==='3d') return; var v=SL.vw, D=slDims(v), k=SL.pos[v]; if(k==null) return; var ax={ax:2,co:1,sa:0}[v], nm={ax:'z',co:'y',sa:'x'}[v], val=mm(ax,k);
- var res=SL.h?'0.5 mm detail':(SL.hn<0?'1 mm (0.5 mm detail could not load)':'1 mm; loading 0.5 mm detail '+Math.round(100*SL.hn/((SL.m.hd||{}).chunks||1))+'%');
- document.getElementById('slInfo').textContent=({ax:'Axial',co:'Coronal',sa:'Sagittal'})[v]+' slice '+(k+1)+' / '+D.n+' · '+nm+' = '+(val>0?'+':'')+val.toFixed(0)+' mm (MNI) · '+res; }
 /* draw slice k of view v into canvas cv at W x H device pixels. bg: transparent outside the head (for 3D textures) */
 function slDraw(v,k,cv,W,H,bg){ var D=slDims(v); cv.width=W; cv.height=H;
  var x=cv.getContext('2d'), img=x.createImageData(W,H), px=img.data, sx=D.w/W, sy=D.h/H, anyF=Object.keys(at.focus).length>0, cache={};
@@ -1107,79 +1169,98 @@ function slDraw(v,k,cv,W,H,bg){ var D=slDims(v); cv.width=W; cv.height=H;
     else { R=g*.84+q.c[0]*.16; G=g*.84+q.c[1]*.16; B=g*.84+q.c[2]*.16; } }
    px[o]=R; px[o+1]=G; px[o+2]=B; px[o+3]=(bg&&g<4&&!lv)?0:255; } }
  x.putImageData(img,0,0); }
-function slRender(){ if(SL.vw==='tri'){ triRender(); return; } if(SL.vw==='3d'||!SL.m) return; var v=SL.vw, D=slDims(v);
- if(SL.pos[v]==null) SL.pos[v]=Math.floor(D.n/2); var k=SL.pos[v], cv=document.getElementById('slc'), box=cv.parentNode;
- var dpr=Math.min(3,window.devicePixelRatio||1), fit=Math.min(box.clientWidth/D.w,box.clientHeight/D.h), CW=Math.max(1,Math.floor(D.w*fit)), CH=Math.max(1,Math.floor(D.h*fit));
- slDraw(v,k,cv,Math.round(CW*dpr),Math.round(CH*dpr)); cv.style.width=CW+'px'; cv.style.height=CH+'px';
- var ax={ax:2,co:1,sa:0}[v], nm={ax:'z',co:'y',sa:'x'}[v], anyF=Object.keys(at.focus).length>0;
- document.getElementById('slr').max=D.n-1; document.getElementById('slr').value=k; slInfoText();
- var e=SL.ext, ex=document.getElementById('slExt');
- if(e){ var a0_=mm(ax,e.mn[ax]), a1_=mm(ax,e.mx[ax]); ex.textContent='Selection spans '+nm+' '+(a0_>0?'+':'')+a0_.toFixed(0)+' to '+(a1_>0?'+':'')+a1_.toFixed(0)+' mm (slices '+(e.mn[ax]+1)+'–'+(e.mx[ax]+1)+')'; } else ex.textContent=anyF?(Object.keys(at.focus).some(function(k){ return (A.structures[k.split('@')[0]]||{}).nerve; })?'Cranial nerves are shown in the 3D view only':'Not visible in this volume'):'Pick a structure to see its extent';
- var o2={ax:['Front','Back','L','R'],co:['Top','Bottom','L','R'],sa:['Top','Bottom','Front','Back']}[v];
- document.getElementById('oT').textContent=o2[0]; document.getElementById('oB').textContent=o2[1]; document.getElementById('oL').textContent=o2[2]; document.getElementById('oR').textContent=o2[3];
- if(P3.on.length) p3Update(); }
-
-/* ---------------- triplanar view: three planes with a shared crosshair ---------------- */
-var TRI={cross:null};
-function triRender(){ if(!SL.m) return; var d=SL.m.dims; ['ax','co','sa'].forEach(function(v){ if(SL.pos[v]==null) SL.pos[v]=Math.floor(slDims(v).n/2); });
- ['ax','co','sa'].forEach(function(v){ var D=slDims(v), cv=document.querySelector('[data-tv='+v+'] canvas'), box=cv.parentNode;
-  var dpr=Math.min(2.5,window.devicePixelRatio||1), fit=Math.min(box.clientWidth/D.w,(box.clientHeight||box.clientWidth)/D.h), CW=Math.max(1,Math.floor(D.w*fit)), CH=Math.max(1,Math.floor(D.h*fit));
+function slSidAt(xi,yi,zi){ var H=SL.h; if(H){ var o=H.m.origin, st=H.m.step, dm=H.m.dims, a=Math.round((mm(0,xi)-o[0])/st), b=Math.round((mm(1,yi)-o[1])/st), c=Math.round((mm(2,zi)-o[2])/st);
+  if(a<0||b<0||c<0||a>=dm[0]||b>=dm[1]||c>=dm[2]) return null; return slSid(H.l[a+dm[0]*(b+dm[1]*c)]); } return slSid(SL.l[slIdx(xi,yi,zi)]); }
+/* ---------------- views: 3D and/or axial, coronal, sagittal panes, sized to fit the screen ---------------- */
+var VW={d3:true,ax:false,co:false,sa:false}, SECS=['ax','co','sa'], SECN={ax:'Axial',co:'Coronal',sa:'Sagittal'}, SECA={ax:2,co:1,sa:0}, SECL={ax:'z',co:'y',sa:'x'};
+SL.cap={ax:'',co:'',sa:''};
+function secOn(){ return SECS.filter(function(v){ return VW[v]; }); }
+function fmm(n){ return (n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(0); }
+function paneApply(){
+ [].forEach.call(document.querySelectorAll('[data-pane]'),function(b){ b.setAttribute('aria-pressed',!!VW[b.dataset.pane]); });
+ var s=secOn(), b3=document.getElementById('atlas3d'), ctl=document.getElementById('slCtl');
+ b3.hidden=!VW.d3; if(at.v&&at.v.b) at.v.b.pause(!VW.d3);
+ SECS.forEach(function(v){ document.querySelector('.slpane[data-tv='+v+']').hidden=!VW[v]; document.querySelector('[data-cr='+v+']').hidden=!VW[v]; });
+ ctl.hidden=!s.length; ctl.classList.toggle('has3d',VW.d3); ctl.classList.toggle('p3',VW.d3&&P3.show);
+ P3.on=VW.d3&&P3.show?s.slice():[];
+ paneLayout();
+ if(s.length) slLoad(function(){ if(!SL.started){ SL.started=1; if(Object.keys(at.focus).length){ slAuto(); secCaps(); } } paneLayout(); secRender(); });
+ else if(at.v&&at.v.b) at.v.b.setPlanes([],{x0:0,x1:1,y0:0,y1:1,z0:0,z1:1},false); }
+function paneLayout(){ var st=document.getElementById('vStage'), vs=document.getElementById('vSlices'), ctl=document.getElementById('slCtl'), b3=document.getElementById('atlas3d');
+ var s=secOn(), k=s.length, P=k+(VW.d3?1:0), panes=s.map(function(v){ return document.querySelector('.slpane[data-tv='+v+']'); });
+ vs.className='vslices k'+k; [b3,ctl].concat([].slice.call(document.querySelectorAll('.slpane'))).forEach(function(e){ e.style.width=''; e.style.height=''; });
+ st.style.gridTemplateColumns=''; var ag=st.closest('.atlas-grid'); if(ag) ag.classList.toggle('wide',k>0&&!phone()); b3.classList.remove('compact');
+ if(phone()){ st.classList.remove('one'); ctl.classList.toggle('tile',k===3); ctl.classList.toggle('strip',k!==3); return; }
+ if(!k){ st.classList.add('one'); return; }
+ st.classList.remove('one');
+ var gap=10, colW=st.parentNode.clientWidth, pk=document.querySelector('.vpick'), availH=Math.max(440,innerHeight-108-(pk?pk.offsetHeight+10:46)-40), tile=P>=3;
+ ctl.classList.toggle('tile',tile); ctl.classList.toggle('strip',!tile);
+ var vis=(VW.d3?[b3]:[]).concat(panes), ch=0, Sp=0;
+ b3.style.gridColumn='';
+ if(P===4){ // 3D wide on top-left (two cells), slices and the control square in a 3 x 2 grid
+  var S4=Math.max(200,Math.floor(Math.min((colW-2*gap)/3,(availH-gap)/2)));
+  st.style.gridTemplateColumns=S4+'px '+S4+'px '+S4+'px'; b3.style.gridColumn='span 2'; b3.style.width=(2*S4+gap)+'px'; b3.style.height=S4+'px';
+  panes.forEach(function(e){ e.style.width=S4+'px'; e.style.height=S4+'px'; }); ctl.style.width=S4+'px'; ctl.style.height=S4+'px';
+  b3.classList.toggle('compact',S4<500); return; }
+ for(var it=0;it<3;it++){
+  if(P===1){ var w=colW; if(!tile){ ctl.style.width=w+'px'; ch=ctl.offsetHeight+gap; } var h=Math.max(300,Math.min(availH-ch,Math.round(colW*0.92)));
+   st.style.gridTemplateColumns=w+'px'; vis.forEach(function(e){ e.style.width=w+'px'; e.style.height=h+'px'; }); }
+  else { var rows=P<=2?1:2, S0=Math.floor((colW-gap)/2); if(!tile){ ctl.style.width=(2*(it?Sp:S0)+gap)+'px'; ch=ctl.offsetHeight+gap; }
+   var S=Math.max(210,Math.floor(Math.min(S0,(availH-ch-gap*(rows-1))/rows))); Sp=S;
+   st.style.gridTemplateColumns=S+'px '+S+'px'; vis.forEach(function(e){ e.style.width=S+'px'; e.style.height=S+'px'; });
+   if(tile){ ctl.style.width=S+'px'; ctl.style.height=S+'px'; } else ctl.style.width=(2*S+gap)+'px'; b3.classList.toggle('compact',S<500); } } }
+function secStatus(){ var e=document.getElementById('slInfo'); if(!e||!SL.m) return; var res=SL.h?'0.5 mm detail':(SL.hn<0?'1 mm (0.5 mm detail could not load)':'1 mm; loading 0.5 mm detail '+Math.round(100*SL.hn/((SL.m.hd||{}).chunks||1))+'%');
+ e.textContent=secOn().map(function(v){ return SECN[v]+' slice '+(SL.pos[v]+1)+'/'+slDims(v).n; }).join(' · ')+(secOn().length?' · ':'')+res; }
+function secCaps(){ var main=null; at.sel.forEach(function(x){ main=x; }); var n=main?sname(main).replace(' (approximate)',''):''; SECS.forEach(function(v){ SL.cap[v]=n?n+' (selected)':''; }); }
+function secRender(){ if(!SL.m) return; var d=SL.m.dims, s=secOn(), many=s.length>1;
+ SECS.forEach(function(v){ if(SL.pos[v]==null) SL.pos[v]=Math.floor(slDims(v).n/2); });
+ s.forEach(function(v){ var D=slDims(v), pane=document.querySelector('.slpane[data-tv='+v+']'), cv=pane.querySelector('canvas');
+  var dpr=Math.min(2.5,window.devicePixelRatio||1), fit=Math.min(pane.clientWidth/D.w,(pane.clientHeight||pane.clientWidth)/D.h), CW=Math.max(1,Math.floor(D.w*fit)), CH=Math.max(1,Math.floor(D.h*fit));
   slDraw(v,SL.pos[v],cv,Math.round(CW*dpr),Math.round(CH*dpr)); cv.style.width=CW+'px'; cv.style.height=CH+'px';
   var x=cv.getContext('2d'), W=cv.width, H=cv.height, cxv, cyv;
   if(v==='ax'){ cxv=SL.pos.sa; cyv=d[1]-1-SL.pos.co; } else if(v==='co'){ cxv=SL.pos.sa; cyv=d[2]-1-SL.pos.ax; } else { cxv=d[1]-1-SL.pos.co; cyv=d[2]-1-SL.pos.ax; }
-  x.strokeStyle='rgba(217,138,0,.9)'; x.lineWidth=Math.max(1,dpr); x.setLineDash([6*dpr,4*dpr]);
-  var px_=(cxv+.5)*W/D.w, py_=(cyv+.5)*H/D.h; x.beginPath(); x.moveTo(px_,0); x.lineTo(px_,H); x.moveTo(0,py_); x.lineTo(W,py_); x.stroke(); });
- var X=mm(0,SL.pos.sa), Y=mm(1,SL.pos.co), Z=mm(2,SL.pos.ax), s=slSidAt(SL.pos.sa,SL.pos.co,SL.pos.ax);
- function f(n){ return (n>0?'+':'')+n.toFixed(0); }
- document.getElementById('triInfo').innerHTML='<div class="mono">Crosshair</div><p class="tric">x '+f(X)+' · y '+f(Y)+' · z '+f(Z)+' mm</p>'+
-  (s?'<p class="trin">'+esc(lc(sname(s.sid)).replace(/^./,function(c){ return c.toUpperCase(); }))+' <span class="mono" style="text-transform:none">('+(s.side==='R'?'right':'left')+')</span></p><button type="button" class="chip" id="triSel">Select this structure</button>':'<p class="trin" style="color:var(--muted)">Not labelled</p>')+
-  '<p class="trih">Click or tap any slice to move the crosshair; the other two follow. Scroll on a slice to step through it.</p>';
- var b=document.getElementById('triSel'); if(b) b.onclick=function(){ atlasPick(s.sid,true); };
- ['ax','co','sa'].forEach(function(v){ var c=document.querySelector('[data-tv='+v+']'); c.classList.toggle('in3d',SL.vw==='3d'&&P3.on.indexOf(v)>=0); });
- if(P3.on.length) p3Update(); }
-function slSidAt(xi,yi,zi){ var H=SL.h; if(H){ var o=H.m.origin, st=H.m.step, dm=H.m.dims, a=Math.round((mm(0,xi)-o[0])/st), b=Math.round((mm(1,yi)-o[1])/st), c=Math.round((mm(2,zi)-o[2])/st);
-  if(a<0||b<0||c<0||a>=dm[0]||b>=dm[1]||c>=dm[2]) return null; return slSid(H.l[a+dm[0]*(b+dm[1]*c)]); } return slSid(SL.l[slIdx(xi,yi,zi)]); }
-function triInit(){ ['ax','co','sa'].forEach(function(v){ var cv=document.querySelector('[data-tv='+v+'] canvas');
-  function at_(e){ var b=cv.getBoundingClientRect(), D=slDims(v), c=Math.max(0,Math.min(D.w-1,Math.floor((e.clientX-b.left)/b.width*D.w))), r=Math.max(0,Math.min(D.h-1,Math.floor((e.clientY-b.top)/b.height*D.h))), d=SL.m.dims;
-   if(v==='ax'){ SL.pos.sa=c; SL.pos.co=d[1]-1-r; } else if(v==='co'){ SL.pos.sa=c; SL.pos.ax=d[2]-1-r; } else { SL.pos.co=d[1]-1-c; SL.pos.ax=d[2]-1-r; } triRender(); }
-  cv.addEventListener('click',at_);
-  cv.addEventListener('wheel',function(e){ e.preventDefault(); var D=slDims(v); SL.pos[v]=Math.max(0,Math.min(D.n-1,SL.pos[v]+(e.deltaY>0?-1:1))); triRender(); },{passive:false}); });
- window.addEventListener('resize',function(){ if(SL.vw==='tri') triRender(); }); }
+  x.strokeStyle=many?'rgba(242,169,59,.85)':'rgba(242,169,59,.45)'; x.lineWidth=Math.max(1,dpr); x.setLineDash([5*dpr,4*dpr]);
+  var px_=(cxv+.5)*W/D.w, py_=(cyv+.5)*H/D.h; x.beginPath(); x.moveTo(px_,0); x.lineTo(px_,H); x.moveTo(0,py_); x.lineTo(W,py_); x.stroke();
+  x.setLineDash([]); x.fillStyle='#f2a93b'; x.beginPath(); x.arc(px_,py_,3*dpr,0,7); x.fill();
+  pane.querySelector('.cc').textContent=SECL[v]+' '+fmm(mm(SECA[v],SL.pos[v]))+' mm · '+(SL.pos[v]+1)+'/'+D.n;
+  pane.querySelector('.cn').textContent=SL.cap[v]||'';
+  pane.classList.toggle('in3d',P3.on.indexOf(v)>=0);
+  var r=document.querySelector('[data-sr='+v+']'); r.max=D.n-1; r.value=SL.pos[v]; document.querySelector('[data-cv='+v+']').textContent=SECL[v]+' '+fmm(mm(SECA[v],SL.pos[v]))+' mm'; });
+ secStatus(); if(VW.d3) p3Update(); }
+function secPoint(v,e){ var cv=document.querySelector('.slpane[data-tv='+v+'] canvas'), b=cv.getBoundingClientRect(), D=slDims(v), d=SL.m.dims;
+ var fx=(e.clientX-b.left)/b.width, fy=(e.clientY-b.top)/b.height; if(fx<0||fy<0||fx>1||fy>1) return null;
+ var c=Math.max(0,Math.min(D.w-1,Math.floor(fx*D.w))), r=Math.max(0,Math.min(D.h-1,Math.floor(fy*D.h))), p={ax:SL.pos.ax,co:SL.pos.co,sa:SL.pos.sa};
+ if(v==='ax'){ p.sa=c; p.co=d[1]-1-r; } else if(v==='co'){ p.sa=c; p.ax=d[2]-1-r; } else { p.co=d[1]-1-c; p.ax=d[2]-1-r; } return p; }
+function secStep(v,dz){ if(!SL.m) return; var D=slDims(v); SL.pos[v]=Math.max(0,Math.min(D.n-1,SL.pos[v]+dz)); secRender(); }
+function slInit(){
+ [].forEach.call(document.querySelectorAll('[data-pane]'),function(b){ b.addEventListener('click',function(){ var k=b.dataset.pane; VW[k]=!VW[k]; if(!VW.d3&&!secOn().length) VW[k]=true; paneApply(); }); });
+ [].forEach.call(document.querySelectorAll('[data-preset]'),function(b){ b.addEventListener('click',function(){ var p=b.dataset.preset; VW.d3=p!=='mri'; SECS.forEach(function(v){ VW[v]=p!=='d3'; }); paneApply(); }); });
+ SECS.forEach(function(v){ var pane=document.querySelector('.slpane[data-tv='+v+']'), cv=pane.querySelector('canvas'), tip=pane.querySelector('.b3tip');
+  cv.addEventListener('click',function(e){ if(!SL.m) return; var p=secPoint(v,e); if(!p) return; SL.pos.ax=p.ax; SL.pos.co=p.co; SL.pos.sa=p.sa;
+   var s=slSidAt(p.sa,p.co,p.ax); SL.cap[v]=s?sname(s.sid).replace(' (approximate)','')+' ('+(s.side==='R'?'right':'left')+')':'Not labelled here';
+   if(s&&A.structures[s.sid]){ SL.noAuto=true; atlasPick(s.sid,true); SL.noAuto=false; } secRender(); });
+  cv.addEventListener('mousemove',function(e){ if(!SL.m) return; var p=secPoint(v,e), s=p&&slSidAt(p.sa,p.co,p.ax); if(!s){ tip.style.opacity=0; return; } var b=pane.getBoundingClientRect();
+   tip.textContent=sname(s.sid).replace(' (approximate)','')+' ('+(s.side==='R'?'right':'left')+')'; tip.style.left=(e.clientX-b.left)+'px'; tip.style.top=(e.clientY-b.top)+'px'; tip.style.opacity=1; });
+  cv.addEventListener('mouseleave',function(){ tip.style.opacity=0; });
+  cv.addEventListener('wheel',function(e){ e.preventDefault(); secStep(v,e.deltaY>0?-1:1); },{passive:false});
+  cv.addEventListener('keydown',function(e){ if(e.key==='ArrowUp'||e.key==='ArrowRight'){ e.preventDefault(); secStep(v,1); } if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ e.preventDefault(); secStep(v,-1); } }); });
+ [].forEach.call(document.querySelectorAll('[data-sr]'),function(r){ r.addEventListener('input',function(){ SL.pos[r.dataset.sr]=+r.value; secRender(); }); });
+ [].forEach.call(document.querySelectorAll('[data-step]'),function(b){ b.addEventListener('click',function(){ var q=b.dataset.step.split(':'); secStep(q[0],+q[1]); }); });
+ [].forEach.call(document.querySelectorAll('[data-plf]'),function(b){ b.addEventListener('click',function(){ var v=b.dataset.plf; P3.flip[v]=!P3.flip[v]; b.setAttribute('aria-pressed',!!P3.flip[v]); p3Update(); }); });
+ document.getElementById('p3cut').addEventListener('change',function(){ P3.cut=this.checked; p3Update(); });
+ document.getElementById('p3show').addEventListener('change',function(){ P3.show=this.checked; paneApply(); });
+ document.getElementById('slCenter').addEventListener('click',function(){ slAuto(); secCaps(); secRender(); });
+ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ paneLayout(); if(secOn().length) secRender(); },120); });
+ new MutationObserver(function(){ paneLayout(); if(secOn().length&&SL.m) secRender(); }).observe(document.documentElement,{attributes:true,attributeFilter:['data-layout']});
+ paneApply(); }
 
 /* ---------------- MRI planes inside the 3D view ---------------- */
-var P3={on:[],flip:{},cut:true,cv:{},t:null};
+var P3={on:[],flip:{},cut:true,show:true,cv:{},t:null};
 function p3Update(){ if(!at.v||!at.v.b||!SL.m) return; clearTimeout(P3.t); P3.t=setTimeout(function(){ var d=SL.m.dims, o=SL.m.origin;
   var planes=P3.on.map(function(v){ var D=slDims(v), k=SL.pos[v]==null?(SL.pos[v]=Math.floor(D.n/2)):SL.pos[v], sc=SL.h?2:1;
    var cv=P3.cv[v]||(P3.cv[v]=document.createElement('canvas')); slDraw(v,k,cv,D.w*sc,D.h*sc,true);
-   return {ax:v,mm:mm({ax:2,co:1,sa:0}[v],k),canvas:cv,flip:!!P3.flip[v]}; });
-  at.v.b.setPlanes(planes,{x0:o[0]-.5,x1:o[0]+d[0]-.5,y0:o[1]-.5,y1:o[1]+d[1]-.5,z0:o[2]-.5,z1:o[2]+d[2]-.5},P3.cut&&planes.length>0);
-  [].forEach.call(document.querySelectorAll('[data-plr]'),function(r){ var v=r.dataset.plr, D=slDims(v); r.max=D.n-1; r.value=SL.pos[v]; var lab=document.querySelector('[data-plv='+v+']'); if(lab){ var n=mm({ax:2,co:1,sa:0}[v],SL.pos[v]); lab.textContent=({ax:'z',co:'y',sa:'x'})[v]+' '+(n>0?'+':'')+n.toFixed(0)+' mm'; } }); },30); }
-function p3Init(){ [].forEach.call(document.querySelectorAll('[data-plt]'),function(b){ b.addEventListener('click',function(){ var v=b.dataset.plt, i=P3.on.indexOf(v);
-   if(i>=0) P3.on.splice(i,1); else P3.on.push(v); b.setAttribute('aria-pressed',i<0); document.querySelector('[data-pl='+v+']').classList.toggle('on',i<0);
-   var tb=document.getElementById('triBox'); if(SL.vw==='3d') tb.hidden=P3.on.length===0;
-   if(P3.on.length) slLoad(function(){ p3Update(); if(!tb.hidden) triRender(); }); else if(at.v&&at.v.b) at.v.b.setPlanes([],{x0:0,x1:1,y0:0,y1:1,z0:0,z1:1},false); }); });
- [].forEach.call(document.querySelectorAll('[data-plr]'),function(r){ r.addEventListener('input',function(){ SL.pos[r.dataset.plr]=+r.value; p3Update(); if(!document.getElementById('triBox').hidden) triRender(); }); });
- [].forEach.call(document.querySelectorAll('[data-plf]'),function(b){ b.addEventListener('click',function(){ var v=b.dataset.plf; P3.flip[v]=!P3.flip[v]; b.setAttribute('aria-pressed',!!P3.flip[v]); p3Update(); }); });
- document.getElementById('p3cut').addEventListener('change',function(){ P3.cut=this.checked; p3Update(); });
- [].forEach.call(document.querySelectorAll('[data-p3all]'),function(b){ b.addEventListener('click',function(){ var want=b.dataset.p3all==='on';
-   ['ax','co','sa'].forEach(function(v){ var on=P3.on.indexOf(v)>=0; if(on!==want) document.querySelector('[data-plt='+v+']').click(); }); }); }); }
-function slAt(e){ var cv=document.getElementById('slc'), b=cv.getBoundingClientRect(), D=slDims(SL.vw), fx=(e.clientX-b.left)/b.width*D.w-.5, fy=(e.clientY-b.top)/b.height*D.h-.5;
- if(fx<-.5||fy<-.5||fx>D.w-.5||fy>D.h-.5) return null; var M=slMap(SL.vw,SL.pos[SL.vw]), dm=M.dims, a=Math.round(M.A0+M.A1*fx), bb=Math.round(M.B0+M.B1*fy);
- if(M.P<0||M.P>=dm[M.px]||a<0||bb<0||a>=dm[M.ax]||bb>=dm[M.bx]) return null; var st=[1,dm[0],dm[0]*dm[1]];
- return slSid(M.L[M.P*st[M.px]+a*st[M.ax]+bb*st[M.bx]]); }
-function setView(vw){ SL.vw=vw; [].forEach.call(document.querySelectorAll('[data-vw]'),function(b){ b.setAttribute('aria-selected',b.dataset.vw===vw); });
- var is3=vw==='3d'; document.getElementById('atlas3d').hidden=!is3; document.getElementById('p3panel').hidden=!is3; document.getElementById('lyPanel').hidden=!is3; [].forEach.call(document.querySelectorAll('[data-tool=lyPanel],[data-tool=p3panel]'),function(x){ x.hidden=!is3; }); document.getElementById('sliceBox').hidden=is3||vw==='tri'; document.getElementById('triBox').hidden=!(vw==='tri'||(is3&&P3.on.length>0)); if(at.v&&at.v.b) at.v.b.pause(!is3);
- if(!is3) slLoad(function(){ slAuto(); slRender(); }); else if(P3.on.length) slLoad(function(){ triRender(); }); }
-function slInit(){ window.addEventListener('resize',function(){ if(SL.vw!=='3d') slRender(); }); [].forEach.call(document.querySelectorAll('[data-vw]'),function(b){ b.addEventListener('click',function(){ setView(b.dataset.vw); }); });
- var cv=document.getElementById('slc'), tip=document.getElementById('slTip'), r=document.getElementById('slr');
- r.addEventListener('input',function(){ SL.pos[SL.vw]=+r.value; slRender(); });
- document.getElementById('slPrev').addEventListener('click',function(){ SL.pos[SL.vw]=Math.max(0,SL.pos[SL.vw]-1); slRender(); });
- document.getElementById('slNext').addEventListener('click',function(){ SL.pos[SL.vw]=Math.min(slDims(SL.vw).n-1,SL.pos[SL.vw]+1); slRender(); });
- cv.addEventListener('keydown',function(e){ if(e.key==='ArrowUp'||e.key==='ArrowRight'){ e.preventDefault(); document.getElementById('slNext').click(); } if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ e.preventDefault(); document.getElementById('slPrev').click(); } });
- cv.addEventListener('wheel',function(e){ e.preventDefault(); (e.deltaY>0?document.getElementById('slPrev'):document.getElementById('slNext')).click(); },{passive:false});
- cv.addEventListener('mousemove',function(e){ var s=slAt(e); if(!s){ tip.style.opacity=0; return; } var b=cv.parentNode.getBoundingClientRect(); tip.textContent=sname(s.sid)+' ('+(s.side==='R'?'right':'left')+')'; tip.style.left=(e.clientX-b.left)+'px'; tip.style.top=(e.clientY-b.top)+'px'; tip.style.opacity=1; });
- cv.addEventListener('mouseleave',function(){ tip.style.opacity=0; });
- cv.addEventListener('click',function(e){ var s=slAt(e); if(s) atlasPick(s.sid,true); }); triInit(); p3Init(); }
+   return {ax:v,mm:mm(SECA[v],k),canvas:cv,flip:!!P3.flip[v]}; });
+  at.v.b.setPlanes(planes,{x0:o[0]-.5,x1:o[0]+d[0]-.5,y0:o[1]-.5,y1:o[1]+d[1]-.5,z0:o[2]-.5,z1:o[2]+d[2]-.5},P3.cut&&planes.length>0); },30); }
 
 /* ---------------- ATLAS ---------------- */
 var at={mode:'struct',sel:[],sys:null,dz:null,fn:null,nt:null,net:null,multi:false,v:null,cut:false,cortex:2,focus:{},nerves:'show',open:{},layers:{cortex:true,deep:true,brainstem:true,cerebellum:true,tracts:false,ventricles:false}};
@@ -1196,7 +1277,7 @@ function atlasApply(){ var f={}, main=null;
   f[s]=at.mode!=='struct'?'#d98a00':(at.sel.length<2?LOBEC[l]:(oneLobe?MPAL[i%MPAL.length]:shadeC(LOBEC[l],j))); main=s; });
  at.focus=f;
  if(at.v&&at.v.b){ at.v.b.setFocus(f,main); at.v.b.setNetwork(at.mode==='net'?(at.net||'all'):null); ntFlows(); atlasNodes(); }
- if(SL.vw!=='3d'&&SL.m){ slAuto(); slRender(); }
+ if(secOn().length&&SL.m){ if(!SL.noAuto){ slAuto(); secCaps(); } secRender(); }
  if(at.v&&at.v.svg){ var rs=[]; Object.keys(f).forEach(function(s){ var r=(A.structures[s.split('@')[0]]||{}).region; if(r&&rs.indexOf(r)<0) rs.push(r); }); markMap(at.v.svg,null,rs,rs.length>0); }
  if(at.mode==='struct') at.sel.forEach(function(k){ at.open[A.structures[k].lobe]=true; });
  [].forEach.call(document.querySelectorAll('#atPick [data-s]'),function(b){ var on=at.sel.indexOf(b.dataset.s)>=0; b.classList.toggle('on',on); var d=b.querySelector('.dot'); if(d) d.style.background=on&&at.mode==='struct'?f[b.dataset.s]:LOBEC[A.structures[b.dataset.s].lobe]; });
@@ -1264,11 +1345,11 @@ function setMode(m,keep){ if(at.mode===m){ return; } at.mode=m; if(!keep){ at.se
 function atlasFilter(id){ atlasDisease(id); }
 /* guided tour of the atlas (shown once; 'Guided tour' button restarts it) */
 var TOUR=[[null,'Welcome to the 3D atlas','104 brain structures and the cranial nerves in one MRI space, with systems, fibre pathways, neurotransmitter pathways, brain networks and MRI slices. A one-minute tour shows how it works.'],
- ['#atlas3d','Turn the brain, pick a structure','Drag to turn the brain, pinch or scroll to zoom, tap a structure to select it. When you leave it alone, the brain turns slowly by itself.'],
+ ['#atlas3d','Turn the brain, pick a structure','Drag to turn the brain, pinch or scroll to zoom, tap a structure to select it: its name appears above it. Layers shows fibre tracts and ventricles. When you leave it alone, the brain turns slowly by itself.'],
  ['.atmodes','Sections','Structures, Systems, Pathways, Neurotransmitters and Networks. Pick a neurotransmitter and its pathways start moving in the brain; pick a network and the cortex is painted in its colour.'],
  ['#atSearch','Search','Find any structure, cranial nerve or system by name, for example hippocampus or vagus.'],
  ['#regionInfo','Info card','What the selected part does, what happens when it is damaged, the systems it belongs to and the references.'],
- ['#lyPanel','Layers, nerves and MRI slices','Show or hide layers and the cranial nerves, or switch on axial, coronal and sagittal slices: they cut the 3D brain and open linked 2D windows below it.']];
+ ['.vpick','Views and MRI slices','Show the 3D brain alone, MRI slices alone, or both side by side: tap 3D, Axial, Coronal or Sagittal. The slices are linked: click one to move the crosshair and name the structure underneath. The slice controls sit in the last square.']];
 var TS={i:0,ring:null,card:null};
 function tourDone(){ try{ localStorage.setItem('nu-tour-done','1'); }catch(e){} }
 function tourEnd(){ if(TS.ring) TS.ring.remove(); if(TS.card) TS.card.remove(); TS.ring=TS.card=null; window.removeEventListener('resize',tourPlace); window.removeEventListener('scroll',tourPlace,true); }
@@ -1338,7 +1419,11 @@ function atlasInit(){
   R.setProperty('--stk',(h?Math.round(h.getBoundingClientRect().height):120)+'px');
   if(b&&b.offsetHeight) R.setProperty('--b3h',Math.round(b.getBoundingClientRect().height)+'px'); } /* scroll offsets use the rendered brain height (min-height wins on short screens) */
  stk(); window.addEventListener('resize',stk); if(window.ResizeObserver) new ResizeObserver(stk).observe(document.getElementById('atlas3d'));
- [].forEach.call(document.querySelectorAll('[data-ly]'),function(b){ b.addEventListener('click',function(){ var k=b.dataset.ly; at.layers[k]=!at.layers[k]; b.setAttribute('aria-pressed',at.layers[k]); if(at.v&&at.v.b) at.v.b.setLayers(at.layers); }); });
+ [].forEach.call(document.querySelectorAll('[data-ly]'),function(b){ b.addEventListener('click',function(){ var k=b.dataset.ly; at.layers[k]=!at.layers[k]; b.setAttribute('aria-pressed',at.layers[k]);
+   if(k==='tracts'&&at.layers.tracts&&at.cortex===2){ at.cortex=1; document.getElementById('aCortex').textContent='Cortex: see-through'; if(at.v&&at.v.b) at.v.b.setCortex(1); }
+   if(at.v&&at.v.b) at.v.b.setLayers(at.layers); }); });
+ document.getElementById('aLayers').addEventListener('click',function(){ var p=document.getElementById('lyPanel'), o=p.hidden; p.hidden=!o; this.setAttribute('aria-expanded',o); });
+ document.addEventListener('click',function(e){ var p=document.getElementById('lyPanel'); if(!p.hidden&&!e.target.closest('#lyPanel')&&!e.target.closest('#aLayers')){ p.hidden=true; document.getElementById('aLayers').setAttribute('aria-expanded','false'); } });
  (function(){ var inp=document.getElementById('atSearch'), res=document.getElementById('atRes');
   function norm(t){ return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
   function run(){ var q=norm(inp.value.trim()); if(q.length<2){ res.hidden=true; return; }
@@ -1346,7 +1431,7 @@ function atlasInit(){
     .concat(A.systems.filter(function(x){ return norm(x.n).indexOf(q)>=0; }).slice(0,4).map(function(x){ return {t:'y',k:x.id,n:x.n,l:'System'}; }));
    res.innerHTML=hits.length?hits.map(function(h){ return '<button type="button" data-hit="'+h.t+':'+h.k+'"><b>'+esc(h.n)+'</b><span>'+esc(h.l)+'</span></button>'; }).join(''):'<p>No match</p>'; res.hidden=false;
    [].forEach.call(res.querySelectorAll('[data-hit]'),function(b){ b.addEventListener('click',function(){ var p=b.dataset.hit.split(':'); res.hidden=true; inp.value='';
-     if(p[0]==='s'){ setMode('struct',true); atlasPick(p[1]); } else atlasSystem(p[1]); if(SL.vw!=='3d'&&SL.vw!=='tri') setView(SL.vw); }); }); }
+     if(p[0]==='s'){ setMode('struct',true); atlasPick(p[1]); } else atlasSystem(p[1]); }); }); }
   inp.addEventListener('input',run); inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ var f=res.querySelector('[data-hit]'); if(f) f.click(); } if(e.key==='Escape'){ res.hidden=true; } });
   document.addEventListener('click',function(e){ if(!e.target.closest('.atsearch')) res.hidden=true; }); })();
  [].forEach.call(document.querySelectorAll('[data-nv]'),function(b){ b.addEventListener('click',function(){ at.nerves=b.dataset.nv;

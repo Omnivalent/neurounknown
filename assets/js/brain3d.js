@@ -11,7 +11,9 @@ async function loadData() {
     fetch('assets/brain3d/brain.json').then(r => { if (!r.ok) throw new Error('manifest ' + r.status); return r.json(); }),
     fetch('assets/brain3d/brain.bin').then(r => { if (!r.ok) throw new Error('mesh ' + r.status); return r.arrayBuffer(); })
   ]);
-  DATA = { manifest: m, buf: b };
+  let fb = null;
+  if (m.fibers && m.fibers.length) { try { const r = await fetch('assets/brain3d/fibers.bin'); if (r.ok) fb = await r.arrayBuffer(); } catch (e) { /* fibres are optional */ } }
+  DATA = { manifest: m, buf: b, fbuf: fb };
   return DATA;
 }
 // MNI (x right, y anterior, z superior) -> three (x, y up, z towards the viewer at the front)
@@ -54,6 +56,53 @@ function glowTex(col) {
   g.fillStyle = r; g.beginPath(); g.arc(32, 32, 31, 0, 7); g.fill();
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return (NODE_TEX[key] = t);
 }
+// Fibre lines: smooth streamlines (tracts) or strands (nerves). Colour = focus colour, or the standard diffusion colour code
+// (red left-right, green front-back, blue up-down) mixed in by uDec. A soft light travels along each fibre.
+function fiberMaterial() {
+  return new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uOp: { value: 0 }, uCol: { value: new THREE.Color('#ffffff') }, uDec: { value: 1 }, uFlow: { value: 1 }, uDark: { value: 0 } },
+    vertexShader: `attribute float aT; attribute float aR; attribute vec3 aDir; varying float vT; varying float vR; varying vec3 vDir;
+      #include <clipping_planes_pars_vertex>
+      void main(){ vT = aT; vR = aR; vDir = aDir; vec4 mvPosition = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mvPosition;
+      #include <clipping_planes_vertex>
+      }`,
+    fragmentShader: `uniform float uTime; uniform float uOp; uniform vec3 uCol; uniform float uDec; uniform float uFlow; uniform float uDark; varying float vT; varying float vR; varying vec3 vDir;
+      #include <clipping_planes_pars_fragment>
+      void main(){
+      #include <clipping_planes_fragment>
+        vec3 dec = abs(vDir); dec = dec / max(max(dec.r, dec.g), max(dec.b, 0.001));
+        dec = mix(dec * 0.82 + 0.06, dec * 0.95 + 0.05, uDark);
+        vec3 c = mix(uCol, dec, uDec);
+        float p = fract(vT * 2.2 - uTime * 0.18 + vR);
+        float h = smoothstep(0.78, 0.97, p) * (1.0 - smoothstep(0.97, 1.0, p)) * uFlow;
+        float edge = smoothstep(0.0, 0.06, vT) * smoothstep(0.0, 0.06, 1.0 - vT);
+        gl_FragColor = vec4(mix(c, vec3(1.0), h * 0.65), uOp * (0.5 + 0.5 * h) * (0.35 + 0.65 * edge));
+      }`,
+    transparent: true, depthWrite: false, clipping: true
+  });
+}
+function fiberObject(fe, buf) {
+  const q = new Int16Array(buf, fe.po, fe.np * 3), ln = new Uint16Array(buf, fe.lo, fe.nf);
+  const n = fe.np, pos = new Float32Array(n * 3), aT = new Float32Array(n), aR = new Float32Array(n), aDir = new Float32Array(n * 3), idx = [];
+  for (let i = 0; i < n; i++) { pos[3 * i] = q[3 * i] / 20; pos[3 * i + 1] = q[3 * i + 2] / 20; pos[3 * i + 2] = -q[3 * i + 1] / 20; }
+  let o = 0;
+  for (let f = 0; f < fe.nf; f++) {
+    const L = ln[f], r = Math.random();
+    for (let j = 0; j < L; j++) {
+      const i = o + j, a = Math.max(o, i - 1), b = Math.min(o + L - 1, i + 1);
+      const dx = q[3 * b] - q[3 * a], dy = q[3 * b + 1] - q[3 * a + 1], dz = q[3 * b + 2] - q[3 * a + 2], d = Math.hypot(dx, dy, dz) || 1;
+      aDir[3 * i] = dx / d; aDir[3 * i + 1] = dy / d; aDir[3 * i + 2] = dz / d; aT[i] = L > 1 ? j / (L - 1) : 0; aR[i] = r;
+      if (j < L - 1) idx.push(i, i + 1);
+    }
+    o += L;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('aT', new THREE.BufferAttribute(aT, 1));
+  g.setAttribute('aR', new THREE.BufferAttribute(aR, 1)); g.setAttribute('aDir', new THREE.BufferAttribute(aDir, 3));
+  g.setIndex(n > 65535 ? new THREE.Uint32BufferAttribute(idx, 1) : new THREE.Uint16BufferAttribute(idx, 1));
+  const L = new THREE.LineSegments(g, fiberMaterial()); L.renderOrder = 6; L.frustumCulled = false; L.visible = false; L.userData.kind = fe.kind;
+  return L;
+}
 export const NETCOL = ['#000000', '#781180', '#4682b4', '#00760e', '#c43afa', '#b8cf6e', '#e69422', '#cd3e4e'];
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888'; }
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
@@ -69,11 +118,12 @@ class Brain {
     this.info = this.opts.structures || {}; // id -> {lobe, tint}
   }
   async init() {
-    const { manifest, buf } = await loadData();
+    const { manifest, buf } = await loadData(); this.mf = manifest;
     const W = this.el.clientWidth, H = this.el.clientHeight;
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); r.setSize(W, H); r.localClippingEnabled = true;
     this.el.appendChild(r.domElement); r.domElement.style.touchAction = 'none';
+    if (this.opts.labels) { const lb = this.lab = document.createElement('div'); lb.className = 'b3lab'; lb.innerHTML = '<i></i><b></b><span></span>'; this.el.appendChild(lb); }
     const s = this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(30, W / H, 1, 3000);
     // soft studio lighting: image-based light from a neutral room + a key light that follows the camera
@@ -91,6 +141,10 @@ class Brain {
       const m = new THREE.Mesh(g, mat); m.userData = { id: me.id, side: me.side, real };
       group.add(m); this.meshes.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
     }
+    if (DATA.fbuf) for (const fe of manifest.fibers) {
+      const host = (this.byId[fe.id] || []).find(m => m.userData.side === fe.side); if (!host) continue;
+      const L = fiberObject(fe, DATA.fbuf); host.add(L); host.userData.fib = L; this.fibs = this.fibs || []; this.fibs.push(L);
+    }
     const box = new THREE.Box3().setFromObject(group);
     this.center = box.getCenter(new THREE.Vector3()); this.radius = box.getSize(new THREE.Vector3()).length() / 2;
     const c = this.controls = new OrbitControls(this.camera, r.domElement);
@@ -106,7 +160,7 @@ class Brain {
     this.ray = new THREE.Raycaster(); this.ptr = new THREE.Vector2();
     let down = null;
     r.domElement.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
-    r.domElement.addEventListener('pointerup', e => { if (down && Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) < 6) this.pick(e, true); down = null; });
+    r.domElement.addEventListener('pointerup', e => { if (down && Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) < 6) { this.pick(e, true); this.hover(null); } down = null; });
     r.domElement.addEventListener('pointermove', e => { if (!down && e.pointerType === 'mouse') this.pick(e, false); });
     r.domElement.addEventListener('pointerleave', () => { this.hover(null); });
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(this.el);
@@ -125,6 +179,9 @@ class Brain {
       if (this.assembling) this.tickAssemble(now);
       if (this.flight) this.tickFly(now);
       if (this.nodeGroup) this.tickNodes(now);
+      if (this.fibs) this.tickFibs(now, dt);
+      if (this.netTw) this.tickNet(now);
+      if (this.lab) this.placeLabel();
       r.render(s, this.camera);
     };
     loop();
@@ -179,7 +236,7 @@ class Brain {
   // frame the currently visible meshes (used for the nerves + brainstem view)
   fit(name) {
     const box = new THREE.Box3(); let n = 0;
-    for (const m of this.meshes) if (m.visible) { box.expandByObject(m); n++; }
+    for (const m of this.meshes) { const vis = m.userData.tw ? m.userData.tw.to.v : m.visible; if (vis) { box.union(new THREE.Box3().setFromBufferAttribute(m.geometry.attributes.position)); n++; } }
     if (!n) return; this.fitted = true;
     const c = box.getCenter(new THREE.Vector3()), r = Math.max(20, box.getSize(new THREE.Vector3()).length() / 2);
     this.center0 = this.center0 || this.center.clone(); this.radius0 = this.radius0 || this.radius;
@@ -208,9 +265,9 @@ class Brain {
       const curve = new THREE.QuadraticBezierCurve3(A, M, B);
       const g = new THREE.TubeGeometry(curve, Math.max(24, Math.round(L * 1.5)), 0.8, 10, false);
       const mat = new THREE.ShaderMaterial({
-        uniforms: { uT: { value: Math.random() }, uC: { value: new THREE.Color(f.color) }, uR: { value: Math.max(1, L / 14) } },
+        uniforms: { uT: { value: Math.random() }, uC: { value: new THREE.Color(f.color) }, uR: { value: Math.max(1, L / 14) }, uA: { value: 0 } },
         vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-        fragmentShader: 'uniform float uT; uniform vec3 uC; uniform float uR; varying vec2 vUv; void main(){ float k = fract(vUv.x * uR - uT); float h = smoothstep(0.35, 0.96, k) * (1.0 - smoothstep(0.96, 1.0, k)); gl_FragColor = vec4(mix(uC, vec3(1.0), h * 0.6), 0.6 + 0.4 * h); }',
+        fragmentShader: 'uniform float uT; uniform vec3 uC; uniform float uR; uniform float uA; varying vec2 vUv; void main(){ float k = fract(vUv.x * uR - uT); float h = smoothstep(0.35, 0.96, k) * (1.0 - smoothstep(0.96, 1.0, k)); gl_FragColor = vec4(mix(uC, vec3(1.0), h * 0.6), (0.6 + 0.4 * h) * uA); }',
         transparent: true, depthWrite: false, depthTest: false
       });
       const t = new THREE.Mesh(g, mat); t.renderOrder = 5; G.add(t); this.flows.push(mat);
@@ -225,8 +282,8 @@ class Brain {
     }
   }
   tickFlows(dt) {
-    for (const m of this.flows) m.uniforms.uT.value += dt * 0.55;
-    for (const p of this.parts || []) { const u = p.userData; u.ph = (u.ph + dt * u.sp) % 1; p.position.copy(u.curve.getPoint(u.ph)); p.material.opacity = Math.sin(Math.PI * u.ph); }
+    for (const m of this.flows) { m.uniforms.uT.value += dt * 0.55; m.uniforms.uA.value = Math.min(1, m.uniforms.uA.value + dt * 1.8); }
+    for (const p of this.parts || []) { const u = p.userData; u.ph = (u.ph + dt * u.sp) % 1; p.position.copy(u.curve.getPoint(u.ph)); p.material.opacity = Math.sin(Math.PI * u.ph) * (this.flows[0] ? this.flows[0].uniforms.uA.value : 1); }
   }
   // Yeo networks on the cortex: null = off, 'all' = every network in its colour, 1..7 = one network
   setNetwork(n) { this.net = n == null ? null : n; this.apply(); }
@@ -234,15 +291,49 @@ class Brain {
     const g = m.geometry, u = g.userData; if (!u || !u.ao) return; const key = this.net == null ? 'ao' : String(this.net);
     if (u.key === key) return; u.key = key;
     const col = g.attributes.color.array, cs = NETCOL.map(c => new THREE.Color(c)), neutral = new THREE.Color('#e9e3d8');
+    const to = new Float32Array(col.length);
     for (let i = 0; i < u.ao.length; i++) {
       const a = u.ao[i]; let c = null;
       if (this.net != null) { const k = u.net[i]; c = k && (this.net === 'all' || this.net === k) ? cs[k] : neutral; }
-      col[3 * i] = (c ? c.r : 1) * a; col[3 * i + 1] = (c ? c.g : 1) * a; col[3 * i + 2] = (c ? c.b : 1) * a;
+      to[3 * i] = (c ? c.r : 1) * a; to[3 * i + 1] = (c ? c.g : 1) * a; to[3 * i + 2] = (c ? c.b : 1) * a;
     }
-    g.attributes.color.needsUpdate = true;
+    if (!this.ready || this.noTween) { col.set(to); g.attributes.color.needsUpdate = true; return; }
+    u.from = Float32Array.from(col); u.to = to; this.netTw = this.netTw || { t0: performance.now(), list: new Set() }; this.netTw.t0 = performance.now(); this.netTw.list.add(g);
+  }
+  tickNet(now) {
+    const k = Math.min(1, (now - this.netTw.t0) / 600), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    for (const g of this.netTw.list) { const u = g.userData, col = g.attributes.color.array; for (let i = 0; i < col.length; i++) col[i] = u.from[i] + (u.to[i] - u.from[i]) * e; g.attributes.color.needsUpdate = true; }
+    if (k >= 1) this.netTw = null;
+  }
+  // fibres: fade toward their target opacity, advance the travelling light
+  tickFibs(now, dt) {
+    const t = now / 1000, a = Math.min(1, dt * 5);
+    for (const L of this.fibs) { const u = L.material.uniforms, tg = L.userData.tgt || 0; u.uTime.value = t; u.uOp.value += (tg - u.uOp.value) * a; L.visible = u.uOp.value > 0.01 || tg > 0; }
+  }
+  // label above the selected structure (tap or list); anchored to the tapped point or the structure centre
+  placeLabel() {
+    const lb = this.lab, A = this.labAt; if (!A) { lb.classList.remove('on'); return; }
+    const p = A.p.clone(); if (A.m) p.add(A.m.position); p.project(this.camera);
+    if (p.z > 1 || Math.abs(p.x) > 1.05 || Math.abs(p.y) > 1.05) { lb.classList.remove('on'); return; }
+    const W = this.el.clientWidth, H = this.el.clientHeight;
+    const x = Math.round((p.x + 1) / 2 * W), y = Math.round((1 - p.y) / 2 * H), pill = lb.querySelector('b'), bw = pill.offsetWidth;
+    let shift = 0; if (x - bw / 2 < 8) shift = 8 - (x - bw / 2); else if (x + bw / 2 > W - 8) shift = (W - 8) - (x + bw / 2);
+    pill.style.marginLeft = shift + 'px'; lb.classList.toggle('below', y < 70);
+    lb.style.transform = 'translate(' + x + 'px,' + y + 'px)'; lb.classList.add('on');
+  }
+  setLabel(id, color) {
+    if (!this.lab) return; if (!id) { this.labAt = null; return; }
+    const inf = this.info[id] || {}, name = (inf.n || id).replace(' (approximate)', '');
+    let p = null, m = null;
+    if (this.lastHit && this.lastHit.id === id && performance.now() - this.lastHit.t < 2000) p = this.lastHit.point.clone();
+    else { const ms = (this.byId[id] || []).filter(x => x.visible); const pick = ms.find(x => x.userData.side === 'L') || ms[0]; if (pick) { const b = new THREE.Box3().setFromObject(pick); p = b.getCenter(new THREE.Vector3()).sub(pick.position); m = pick; } }
+    if (!p) { this.labAt = null; return; }
+    this.labAt = { p, m }; this.lab.querySelector('b').textContent = name; this.lab.querySelector('i').style.background = color || '#d98a00';
+    this.lab.classList.remove('pop'); void this.lab.offsetWidth; this.lab.classList.add('pop');
   }
   // focus: {structureId: color}; empty = natural view
-  setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null; this.apply(); }
+  setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null; this.apply();
+    if (this.lab) this.setLabel(this.sel, this.sel ? (this.focus[this.sel] || this.focus[this.sel + '@L'] || this.focus[this.sel + '@R'] || this.focus[this.sel + '@M']) : null); }
   // apply() with a soft cross-fade: compute the new look, then animate colour and opacity from the old one
   apply() {
     if (!this.meshes.length || this.noTween || !this.ready) return this.applyNow();
@@ -313,7 +404,7 @@ class Brain {
     for (const k of keys) { const [id, side] = k.split('@'); for (const m of this.byId[id] || []) if (!side || m.userData.side === side) { box.expandByObject(m); n++; } }
     if (!n) return;
     const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2;
-    const dist = Math.max(R * 1.45, Math.min(R * 2.6, r * 3.4)), tgt = c.clone().lerp(c0, 0.35);
+    const dist = Math.max(R * ((this.planes || []).length ? 2.0 : 1.6), Math.min(R * 2.6, r * 3.4)), tgt = c.clone().lerp(c0, 0.35);
     if (tgt.distanceTo(this.controls.target) < 2 && Math.abs(dist - this.camera.position.distanceTo(this.controls.target)) < 4) return;
     this.framed = true; this.fly(tgt, dist);
   }
@@ -350,7 +441,7 @@ class Brain {
       if (nm === 'iso' && !f && !(isNerve || ISO[id] || inf.nerveof)) { m.visible = false; continue; }
       const Ly = this.layers || {}, grp = LAYER_OF[inf.lobe];
       if (!f && nm !== 'iso' && grp && Ly[grp] === false) { m.visible = false; continue; }
-      if (!f && nm !== 'iso' && Ly.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#e6e0d2'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.clippingPlanes = cp.length ? cp : mat.clippingPlanes; mat.needsUpdate = true; continue; }
+      if (!f && !any && nm !== 'iso' && Ly.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#e6e0d2'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.clippingPlanes = cp.length ? cp : mat.clippingPlanes; mat.needsUpdate = true; continue; }
       if (!f && nm !== 'iso' && Ly.ventricles && inf.lobe === 'ventricles') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#8fb3c9'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.needsUpdate = true; continue; }
       if (nm === 'iso' && !any) { // nerve view: nerves and nuclei in matching colours, see-through brainstem
         m.visible = !(this.cut && m.userData.side === 'R') || isNerve;
@@ -381,6 +472,22 @@ class Brain {
       if (this.net != null && m.userData.real && !any) { mat.color.set(isCortex ? '#ffffff' : (inf.tint || '#bbb')); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; m.visible = isCortex || inf.lobe === 'cerebellum'; }
       mat.needsUpdate = true;
     }
+    // fibre lines (tracts: streamlines inside the atlas mask; nerves: strands, shown in the nerve view) and their faint sheath
+    const Lyr = this.layers || {}, nmode = this.nerveMode, dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    for (const m of this.meshes) {
+      const L = m.userData.fib; if (!L) continue;
+      const id = m.userData.id, inf = this.info[id] || {}, f = this.focus[id + '@' + m.userData.side] || this.focus[id], u = L.material.uniforms, mat = m.material;
+      const isNerve = L.userData.kind === 'nerve';
+      u.uDark.value = dark ? 1 : 0; L.material.clippingPlanes = mat.clippingPlanes; L.material.clipIntersection = true;
+      let tgt = 0;
+      if (m.visible) {
+        if (isNerve) { if (nmode === 'iso' && !any) { tgt = 0.95; u.uDec.value = 0; u.uCol.value.set(inf.ncol || '#c9a227').lerp(new THREE.Color(dark ? '#ffffff' : '#000000'), dark ? 0.15 : 0.25); } }
+        else if (f) { tgt = 0.92; u.uDec.value = 0; u.uCol.value.set(f).lerp(new THREE.Color(dark ? '#ffffff' : '#000000'), dark ? 0.05 : 0.1); }
+        else if (Lyr.tracts && !any && nmode !== 'iso') { tgt = dark ? 0.85 : 0.9; u.uDec.value = 1; }
+      }
+      L.userData.tgt = tgt;
+      if (tgt > 0) { mat.transparent = true; mat.depthWrite = false; m.renderOrder = 3; mat.opacity = isNerve ? 0.34 : (f ? 0.16 : 0.07); if (!f && !isNerve) mat.color.set(dark ? '#8a8f99' : '#cfc8b8'); mat.needsUpdate = true; }
+    }
   }
   pick(e, click) {
     const b = this.renderer.domElement.getBoundingClientRect();
@@ -392,7 +499,7 @@ class Brain {
     const foc = hits.find(h => this.focus[h.object.userData.id] || this.focus[h.object.userData.id + '@' + h.object.userData.side]);
     const h = foc || hits.find(h => h.object.material.opacity > 0.2) || hits[0];
     const id = h ? h.object.userData.id : null;
-    if (click) { if (id && this.opts.onPick) this.opts.onPick(id); }
+    if (click) { if (id) this.lastHit = { id, point: h.point.clone(), t: performance.now() }; if (id && this.opts.onPick) this.opts.onPick(id); }
     else this.hover(id, e);
   }
   hover(id, e) {

@@ -114,6 +114,17 @@ The brain meshes (`assets/brain3d/brain.bin`) and slice labels are derived from 
 non-commercial reuse only, with attribution. Other sources and their terms: see `cite.html`. The Juelich atlas terms (as
 distributed with FSL) and the MASSP and Schaefer licences should be re-checked before any reuse outside this site.
 
+## Version 2.7 (23 Nov 2026)
+
+- `src/neurounknown/fibers3d.py`: streamlines inside each tract mask (geodesic arc-length or fixed axis for corpus callosum,
+  internal capsule, corticospinal tract; fornix drawn as two halves); `website/assets/brain3d/fibers.bin` (int16 0.05 mm
+  points + uint16 lengths), listed in `brain.json` `fibers`. Nerve strands from `nerves3d.sweep` (sunflower cross-section).
+- Viewer: fibre lines as `LineSegments` children of their mesh (fade, clipping, travelling light, direction colours);
+  tap labels (`opts.labels`); network colour and flow fade-ins.
+- Atlas page: view picker (`data-pane`), `paneLayout()` fits 1 to 4 panes and the MRI control square into the screen height;
+  slice captions; `secRender()` replaces the old single, triplanar and planes-in-3D code; Layers is a popover in the 3D view.
+- Rollback: version 2.6.3 is site commit `059163c`.
+
 ## Version 2.6.3 (23 Nov 2026)
 
 - Review corrections (Grok): limbic network wording, XI and trigeminal ganglion notes, footer licence note, question grammar
