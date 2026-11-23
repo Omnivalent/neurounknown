@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-lCXG4tvo2b0QvGFhmSWffZFUR2tZinUrUKRM842FlTc=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-qzMmK3XYwU5Q3eVQmwTsmV+m+BTEvHtb4dB22+n2/wg=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeuroUnknown — the brain's overlooked genes</title>
 <meta name="description" content="An open computational screen for brain-disease genes that are strongly linked to illness yet barely studied, with a brain atlas, a disease explorer and a deep dive into the disturbed sense of self in schizophrenia. No discovery claims.">
@@ -350,6 +350,14 @@ html:not([data-layout="phone"]) .atlas-grid>div:first-child{position:sticky;top:
 .tour-card .tr .skip{border:0;padding:8px 0;text-decoration:underline;color:var(--muted);font-weight:500}
 .tour-card .dots{display:flex;gap:6px;margin-top:12px}.tour-card .dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}.tour-card .dots i.on{background:var(--amber)}
 .tour-card .x{position:absolute;top:10px;right:12px;border:0;background:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+.pnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+.pnav .chip{max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pnav .mono{font-size:11px;color:var(--muted)}
+.itabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:10px 0 8px;border-bottom:1px solid var(--line)}
+.itabs [role=tab]{flex:0 0 auto;border:0;background:none;color:var(--muted);font:600 13.5px var(--sans);padding:8px 12px;border-bottom:2px solid transparent;cursor:pointer}
+.itabs [role=tab][aria-selected=true]{color:var(--ink);border-bottom-color:var(--amber)}
+@keyframes rswap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.rinfo.swap{animation:rswap .35s ease}
+@media (prefers-reduced-motion:reduce){.rinfo.swap{animation:none}}
 .ccard{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:4px solid var(--cc,var(--ink));background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 12px;margin:0 0 7px;cursor:pointer;font:inherit}
 .ccard b{font:600 14.5px/1.3 var(--sans)}.ccard b .ab{font:500 11.5px var(--mono);color:var(--muted);margin-left:7px;letter-spacing:.04em}
 .ccard span{display:block;font-size:13px;line-height:1.45;color:var(--muted);margin-top:2px}
@@ -997,7 +1005,7 @@ function make3D(hostId,msgId,tipId,onPick,fallbackId,fallbackView){
  function fallback(){ if(done) return; done=true; msg.textContent='The 3D brain could not start here (it needs WebGL). Showing the schematic map instead.';
   var fb=document.getElementById(fallbackId); if(fb) out.svg=makeMap(fb,fallbackView||'medial',onPick); if(out.onReady) out.onReady(); }
  setTimeout(function(){ if(!window.NUBrain) fallback(); },10000);
- withBrain(function(){ if(done) return; window.NUBrain.create(host,{structures:A.structures,autoRotate:hostId!=='lzBrain',onPick:onPick,onHover:function(id,e){ if(!tip) return; if(!id){ tip.style.opacity=0; return; }
+ withBrain(function(){ if(done) return; window.NUBrain.create(host,{structures:A.structures,autoRotate:hostId!=='lzBrain',frame:hostId==='atlas3d',assemble:hostId!=='lzBrain',onPick:onPick,onHover:function(id,e){ if(!tip) return; if(!id){ tip.style.opacity=0; return; }
    var r=host.getBoundingClientRect(); tip.textContent=sname(id); tip.style.left=(e.clientX-r.left)+'px'; tip.style.top=(e.clientY-r.top)+'px'; tip.style.opacity=1; }})
   .then(function(b){ if(done) return; done=true; out.b=b; msg.style.display='none'; if(out.onReady) out.onReady(); })
   .catch(function(){ fallback(); }); });
@@ -1166,7 +1174,7 @@ function atlasApply(){ var f={}, main=null;
  at.sel.forEach(function(s,i){ var l=A.structures[s].lobe, j=(seenL[l]=(seenL[l]==null?0:seenL[l]+1));
   f[s]=at.mode!=='struct'?'#d98a00':(at.sel.length<2?LOBEC[l]:(oneLobe?MPAL[i%MPAL.length]:shadeC(LOBEC[l],j))); main=s; });
  at.focus=f;
- if(at.v&&at.v.b){ at.v.b.setFocus(f,main); at.v.b.setNetwork(at.mode==='net'?(at.net||'all'):null); ntFlows(); }
+ if(at.v&&at.v.b){ at.v.b.setFocus(f,main); at.v.b.setNetwork(at.mode==='net'?(at.net||'all'):null); ntFlows(); atlasNodes(); }
  if(SL.vw!=='3d'&&SL.m){ slAuto(); slRender(); }
  if(at.v&&at.v.svg){ var rs=[]; Object.keys(f).forEach(function(s){ var r=(A.structures[s.split('@')[0]]||{}).region; if(r&&rs.indexOf(r)<0) rs.push(r); }); markMap(at.v.svg,null,rs,rs.length>0); }
  if(at.mode==='struct') at.sel.forEach(function(k){ at.open[A.structures[k].lobe]=true; });
@@ -1183,6 +1191,11 @@ function info(html){ var ri=document.getElementById('regionInfo'); ri.innerHTML=
  [].forEach.call(ri.querySelectorAll('[data-gosys]'),function(b){ b.addEventListener('click',function(){ atlasSystem(b.dataset.gosys); }); });
  [].forEach.call(ri.querySelectorAll('[data-gos]'),function(b){ b.addEventListener('click',function(){ atlasPick(b.dataset.gos,true); }); });
  [].forEach.call(ri.querySelectorAll('[data-tour]'),function(b){ b.addEventListener('click',tourStart); });
+ [].forEach.call(ri.querySelectorAll('[data-itab]'),function(b){ b.addEventListener('click',function(){ var k=b.dataset.itab; [].forEach.call(ri.querySelectorAll('[data-itab]'),function(x){ x.setAttribute('aria-selected',x===b); }); [].forEach.call(ri.querySelectorAll('[data-ipane]'),function(p_){ p_.hidden=p_.dataset.ipane!==k; }); }); });
+ [].forEach.call(ri.querySelectorAll('.pnav [data-nt]'),function(b){ b.addEventListener('click',function(){ atlasNT(b.dataset.nt); }); });
+ [].forEach.call(ri.querySelectorAll('.pnav [data-pdz]'),function(b){ b.addEventListener('click',function(){ atlasDisease(b.dataset.pdz); }); });
+ [].forEach.call(ri.querySelectorAll('.pnav [data-psys]'),function(b){ b.addEventListener('click',function(){ atlasSystem(b.dataset.psys); }); });
+ ri.classList.remove('swap'); void ri.offsetWidth; ri.classList.add('swap');
  if(phone()) ri.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'}); }
 function atlasPick(id,inGroup){ if(!A.structures[id]){ if(A.regions[id]){ atlasRegions([id]); } return; }
  if(at.mode==='struct'||!inGroup){ if(at.mode!=='struct'&&!inGroup&&!(at.focus[id])){ setMode('struct'); } }
@@ -1191,13 +1204,13 @@ function atlasPick(id,inGroup){ if(!A.structures[id]){ if(A.regions[id]){ atlasR
 var KINDN={pathway:'Anatomical pathway',circuit:'Textbook circuit',network:'Network defined from brain imaging',model:'Proposed functional model'};
 function atlasSystem(k){ setMode('system',true); at.sys=k; at.sel=[]; atlasApply(); var s=SYS[k];
  info('<div class="mono" style="color:'+s.c+'">'+KINDN[s.kind]+'</div><h3>'+esc(s.n)+'</h3><p>'+esc(s.d)+'</p><div class="sec"><span class="mono">Structures (tap one to single it out)</span><div class="slist" style="margin-top:6px">'+
-  s.s.map(function(x,i){ return '<button type="button" class="chip" data-gos="'+x+'"><span class="dot" style="background:'+shadeC(s.c,i)+'"></span>'+esc(sname(x).replace(' (approximate)',''))+'</button>'; }).join('')+'</div></div>'+(s.left?'<p><button type="button" class="chip" id="aBoth">'+(at.both?'Show left side only':'Show the right side too')+'</button></p>':'')+'<p class="mono" style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)">Systems are simplified groupings; real networks overlap and differ between studies.</p>');
+  s.s.map(function(x,i){ return '<button type="button" class="chip" data-gos="'+x+'"><span class="dot" style="background:'+shadeC(s.c,i)+'"></span>'+esc(sname(x).replace(' (approximate)',''))+'</button>'; }).join('')+'</div></div>'+(s.left?'<p><button type="button" class="chip" id="aBoth">'+(at.both?'Show left side only':'Show the right side too')+'</button></p>':'')+'<p class="mono" style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)">Systems are simplified groupings; real networks overlap and differ between studies.</p>'+pnav(A.systems.map(function(x){ return x.id; }),k,'psys',function(q){ return SYS[q].n; }));
  var bb=document.getElementById('aBoth'); if(bb) bb.addEventListener('click',function(){ at.both=!at.both; atlasSystem(k); }); }
 function atlasDisease(id){ setMode('disease',true); at.dz=id; at.sel=[]; atlasApply(); var d=DZ[id];
  info('<div class="mono" style="color:'+d.color+'">Disease &middot; schematic, not a lesion map</div><h3>'+esc(d.name)+'</h3>'+
   ((d.structs||[]).length?'<p>Structures commonly involved, each with the reason it is shown. Tap one to read about it.</p>'+d.structs.map(function(x){ return '<div class="sec" style="margin:8px 0"><button type="button" class="chip" data-gos="'+x.s+'"><span class="dot" style="background:'+d.color+'"></span>'+esc(sname(x.s).replace(' (approximate)',''))+'</button><p style="margin:4px 0 0;font-size:14.5px">'+esc(x.why)+'</p></div>'; }).join('')
    :'<p>No brain structure is highlighted: autism reflects differences in how the whole brain develops, not damage to one area.</p>')+
-  '<p><a class="chip" href="#/diseases/'+id+'">Open the '+esc(d.short)+' page &rarr;</a></p>'); }
+  '<p><a class="chip" href="#/diseases/'+id+'">Open the '+esc(d.short)+' page &rarr;</a></p>'+pnav(A.diseases.map(function(x){ return x.id; }),id,'pdz',function(k){ return DZ[k].short; })); }
 function atlasRegions(rids){ setMode('struct',true); at.multi=false; at.sel=regStructs(rids); atlasApply(); var g=A.regions[rids[0]];
  info(regionHTML(rids[0])+'<div class="sec"><span class="mono">Structures</span><div class="slist" style="margin-top:4px">'+at.sel.map(function(x){ return '<button type="button" class="chip" data-gos="'+x+'">'+esc(sname(x).replace(' (approximate)',''))+'</button>'; }).join('')+'</div></div>'); }
 function pickerRender(){ var p=document.getElementById('atPick');
@@ -1258,19 +1271,29 @@ function tourStart(){ tourEnd(); TS.ring=document.createElement('div'); TS.ring.
 var NTD={}; (A.nt||[]).forEach(function(n){ NTD[n.id]=n; });
 function firstSent(t){ var m=(t||'').match(/^.*?[.;](\s|$)/); return m?m[0].replace(/;\s*$/,'.').trim():t; }
 function mk(id,sign){ var p=A.markers[id].p; return [sign*p[0],p[1],p[2]]; }
+function atlasNodes(){ var b=at.v&&at.v.b; if(!b) return; var L=[], seen={};
+ function add(id,side,c){ var k=id+'@'+side; if(seen[k]) return; seen[k]=1; if(A.markers&&A.markers[id]) L.push({p:mk(id,side==='L'?-1:1),color:c}); else L.push({id:id,side:side,color:c}); }
+ function both(id,c,leftOnly){ var st=A.structures[id]; if(st&&st.lobe==='brainstem'&&!st.approx){ add(id,'M',c); return; } add(id,'L',c); if(!leftOnly) add(id,'R',c); }
+ if(at.mode==='system'&&at.sys){ var S_=SYS[at.sys]; S_.s.forEach(function(x,i){ both(x,shadeC(S_.c,i),S_.left&&!at.both); }); }
+ else if(at.mode==='disease'&&at.dz){ (DZ[at.dz].structs||[]).forEach(function(x){ both(x.s,DZ[at.dz].color); }); }
+ else if(at.mode==='nt'&&at.nt){ var n=NTD[at.nt]; n.routes.forEach(function(r){ [r.a].concat(r.b).forEach(function(x){ both(x,n.c); }); }); }
+ b.setNodes(L); }
 function ntFlows(){ var b=at.v&&at.v.b; if(!b) return; if(at.mode!=='nt'||!at.nt){ b.setFlows(null); return; }
  var n=NTD[at.nt], fl=[], mks=[], seen={};
  function end(id,side,sign){ if(A.markers[id]){ if(!seen[id+side]){ seen[id+side]=1; mks.push({p:mk(id,sign),color:n.c}); } return {p:mk(id,sign)}; } return {id:id,side:side}; }
  n.routes.forEach(function(r){ [['L',-1],['R',1]].forEach(function(sd){ r.b.forEach(function(t){ fl.push({a:end(r.a,sd[0],sd[1]),b:end(t,sd[0],sd[1]),color:n.c}); }); }); });
- b.setFlows(fl,mks); }
+ b.setFlows(fl,[]); }
 function refList(ids){ return '<ol class="mono" style="text-transform:none;letter-spacing:0;font-size:12px;padding-left:18px;color:var(--muted)">'+ids.map(function(p){ var r=A.ncrefs[p]; return '<li>'+esc(r.a)+' et al. ('+r.y+') '+esc(r.t)+' <i>'+esc(r.j)+'</i>. <a href="https://doi.org/'+r.doi+'" target="_blank" rel="noopener">doi</a> &middot; <a href="https://pubmed.ncbi.nlm.nih.gov/'+p+'/" target="_blank" rel="noopener">PMID '+p+'</a></li>'; }).join('')+'</ol>'; }
+function pnav(list,cur,attr,label){ var i=list.indexOf(cur), p=list[(i-1+list.length)%list.length], n=list[(i+1)%list.length];
+ return '<div class="pnav"><button type="button" class="chip" data-'+attr+'="'+p+'">&larr; '+esc(label(p))+'</button><span class="mono">'+(i+1)+' / '+list.length+'</span><button type="button" class="chip" data-'+attr+'="'+n+'">'+esc(label(n))+' &rarr;</button></div>'; }
+function itabs(tabs){ return '<div class="itabs" role="tablist">'+tabs.map(function(t,i){ return '<button type="button" role="tab" data-itab="'+i+'" aria-selected="'+(i===0)+'">'+t[0]+'</button>'; }).join('')+'</div>'+tabs.map(function(t,i){ return '<div class="ipane" data-ipane="'+i+'"'+(i?' hidden':'')+'>'+t[1]+'</div>'; }).join(''); }
 function atlasNT(id){ setMode('nt',true); at.nt=id; at.sel=[]; atlasApply(); var n=NTD[id];
  function nm(x){ return A.markers[x]?A.markers[x].n:sname(x).replace(' (approximate)',''); }
  info('<div class="mono" style="color:'+n.c+'">Neurotransmitter system &middot; '+esc(n.ab)+'</div><h3>'+esc(n.n)+'</h3><p>'+esc(n.d)+'</p>'+
-  '<div class="sec"><span class="mono">Pathways (moving lines in the 3D view; schematic arcs, not tractography)</span>'+n.routes.map(function(r){ return '<p style="margin:6px 0"><b>'+esc(r.n)+':</b> '+esc(nm(r.a))+' &rarr; '+r.b.map(function(x){ return esc(nm(x)); }).join(', ')+'. '+esc(r.d)+'</p>'; }).join('')+'</div>'+
-  '<div class="sec"><span class="mono">Receptors</span><p>'+esc(n.rec)+'</p></div><div class="sec"><span class="mono">Drug examples</span><p>'+esc(n.drugs)+'</p></div>'+
-  '<div class="sec"><span class="mono">Source structures (tap to read)</span><div class="slist" style="margin-top:4px">'+n.src.filter(function(x){ return A.structures[x]; }).map(function(x){ return '<button type="button" class="chip" data-gos="'+x+'"><span class="dot" style="background:'+n.c+'"></span>'+esc(nm(x))+'</button>'; }).join('')+'</div></div>'+
-  '<div class="sec"><span class="mono">Review references (checked in PubMed)</span>'+refList(n.refs)+'</div>'); }
+  itabs([['Pathways',n.routes.map(function(r){ return '<p style="margin:6px 0"><b>'+esc(r.n)+':</b> '+esc(nm(r.a))+' &rarr; '+r.b.map(function(x){ return esc(nm(x)); }).join(', ')+'. '+esc(r.d)+'</p>'; }).join('')+'<p style="font-size:12.5px;color:var(--muted)">Moving lines in the 3D view are schematic arcs from source to target, not tractography.</p>'+
+    '<div class="slist" style="margin-top:4px">'+n.src.filter(function(x){ return A.structures[x]; }).map(function(x){ return '<button type="button" class="chip" data-gos="'+x+'"><span class="dot" style="background:'+n.c+'"></span>'+esc(nm(x))+'</button>'; }).join('')+'</div>'],
+   ['Receptors','<p>'+esc(n.rec)+'</p>'],['Drugs','<p>'+esc(n.drugs)+'</p><p style="font-size:12.5px;color:var(--muted)">Examples for teaching, not prescribing advice.</p>'],['Sources',refList(n.refs)]])+
+  pnav(A.nt.map(function(x){ return x.id; }),id,'nt',function(k){ return NTD[k].n; })); }
 function atlasNet(k){ setMode('net',true); at.net=k; at.sel=[]; atlasApply(); var n=k==='all'?null:A.networks.filter(function(x){ return x.i===k; })[0];
  info('<div class="mono">Resting-state network'+(n?' &middot; '+esc(n.ab):'s')+'</div><h3>'+(n?esc(n.n):'Seven large-scale networks')+'</h3>'+(n?'<p>'+esc(n.d)+'</p>':'<div class="slist">'+A.networks.map(function(x){ return '<button type="button" class="chip" data-gonet="'+x.i+'"><span class="dot" style="background:'+x.c+'"></span>'+esc(x.n)+'</button>'; }).join('')+'</div>')+
   '<p style="font-size:12.5px;color:var(--muted)">'+esc(A.network_note)+'</p><div class="sec"><span class="mono">References (checked in PubMed)</span>'+refList(['21653723','28981612'])+'</div>');
@@ -1284,7 +1307,7 @@ function atlasFunc(id){ setMode('func',true); at.fn=id; at.sel=[]; atlasApply();
 function atlasInit(){
  [].forEach.call(document.querySelectorAll('[data-amode]'),function(b){ b.addEventListener('click',function(){ setMode(b.dataset.amode); }); });
  document.getElementById('aMulti').addEventListener('click',function(){ at.multi=!at.multi; this.setAttribute('aria-pressed',at.multi); });
- document.getElementById('aClear').addEventListener('click',function(){ at.sel=[]; at.sys=null; at.dz=null; atlasApply(); info(atlasIntro()); });
+ document.getElementById('aClear').addEventListener('click',function(){ at.sel=[]; at.sys=null; at.dz=null; at.nt=null; at.net=null; atlasApply(); info(atlasIntro()); if(at.v&&at.v.b) at.v.b.assemble(); });
  info(atlasIntro()); pickerRender(); slInit();
  at.v=make3D('atlas3d','atlasMsg','atlasTip',function(id){ atlasPick(id,true); },'atlasFallback','medial'); at.v.onReady=function(){ if(at.v.b){ at.v.b.setNerves(at.nerves); at.v.b.setLayers(at.layers); } atlasApply();
   var seen=false; try{ seen=!!localStorage.getItem('nu-tour-done'); }catch(e){ seen=true; } if(!seen) setTimeout(function(){ if(location.hash.indexOf('#/atlas')===0&&!TS.card) tourStart(); },1200); };

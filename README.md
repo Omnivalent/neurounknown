@@ -108,6 +108,13 @@ Content is computational hypotheses only — no discovery claims.
 - Feedback bar on every page: opens a prefilled GitHub issue (`.github/ISSUE_TEMPLATE/feedback.yml`).
 - Rollback: version 2.2 is site commit `d63d64a`.
 
+## Version 2.6 (23 Nov 2026)
+
+- Viewer (`brain3d.js`): `apply()` cross-fades colour and opacity (`applyNow()` is the instant version), `assemble()` fly-in,
+  `fly()` camera glide and `frameFocus()` (atlas only, `opts.frame`), `setNodes()` glowing circuit nodes, particles on flows.
+- Atlas cards: tabs (`itabs`) and previous/next (`pnav`) for systems, diseases and neurotransmitters.
+- Rollback: version 2.5 is site commit `fb628ae`.
+
 ## Version 2.5 (23 Nov 2026)
 
 - Realistic cortex and cerebellum (`src/neurounknown/cortex_surface.py`): continuous field = smoothed 0.5 mm T1 (level 165,

@@ -37,6 +37,23 @@ function geometryFor(me, buf) {
   return g;
 }
 // Yeo 7 networks (Yeo et al. 2011; Schaefer et al. 2018 parcellation), conventional colours
+const NODE_TEX = {};
+function nodeTex(col) {
+  if (NODE_TEX[col]) return NODE_TEX[col];
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const halo = g.createRadialGradient(32, 32, 10, 32, 32, 31); halo.addColorStop(0, col + '88'); halo.addColorStop(1, col + '00');
+  g.fillStyle = halo; g.beginPath(); g.arc(32, 32, 31, 0, 7); g.fill();
+  g.fillStyle = '#ffffff'; g.beginPath(); g.arc(32, 32, 17, 0, 7); g.fill();
+  g.fillStyle = col; g.beginPath(); g.arc(32, 32, 13, 0, 7); g.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return (NODE_TEX[col] = t);
+}
+function glowTex(col) {
+  const key = 'g' + col; if (NODE_TEX[key]) return NODE_TEX[key];
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const r = g.createRadialGradient(32, 32, 0, 32, 32, 31); r.addColorStop(0, '#ffffff'); r.addColorStop(0.3, col + 'ee'); r.addColorStop(1, col + '00');
+  g.fillStyle = r; g.beginPath(); g.arc(32, 32, 31, 0, 7); g.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return (NODE_TEX[key] = t);
+}
 export const NETCOL = ['#000000', '#781180', '#4682b4', '#00760e', '#c43afa', '#b8cf6e', '#e69422', '#cd3e4e'];
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888'; }
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
@@ -82,7 +99,7 @@ class Brain {
     // calm rotation while nobody touches the brain (off for reduced-motion users and where opts.autoRotate is false)
     const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.idleOK = this.opts.autoRotate !== false && !still; c.autoRotateSpeed = 0.55; this.lastTouch = performance.now();
-    const touch = () => { this.lastTouch = performance.now(); c.autoRotate = false; };
+    const touch = () => { this.lastTouch = performance.now(); c.autoRotate = false; this.flight = null; };
     c.addEventListener('start', touch); c.addEventListener('end', touch);
     r.domElement.addEventListener('wheel', touch, { passive: true });
     this.view('left');
@@ -94,7 +111,8 @@ class Brain {
     r.domElement.addEventListener('pointerleave', () => { this.hover(null); });
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(this.el);
     window.addEventListener('nu-theme', () => this.apply());
-    this.apply();
+    this.apply(); this.ready = true;
+    if (this.opts.assemble && !still) this.assemble();
     let prev = performance.now();
     const loop = () => {
       this.raf = requestAnimationFrame(loop); if (this.paused) return;
@@ -103,6 +121,10 @@ class Brain {
       c.update(dt);
       this.key.position.copy(this.camera.position).add(this.camera.up.clone().multiplyScalar(this.radius * 1.2)); this.key.target.position.copy(c.target);
       if (this.flows) this.tickFlows(dt);
+      if (this.tweening) this.tickTween(now);
+      if (this.assembling) this.tickAssemble(now);
+      if (this.flight) this.tickFly(now);
+      if (this.nodeGroup) this.tickNodes(now);
       r.render(s, this.camera);
     };
     loop();
@@ -112,8 +134,10 @@ class Brain {
   view(name) {
     const d = this.radius * 2.6, c = this.center;
     const v = { left: [-d, 0, 0], right: [d, 0, 0], top: [0, d, 0.01], front: [0, 0, -d], back: [0, 0, d], below: [0, -d, 0.01], medial: [d, 0, 0] }[name] || [-d, 0, 0];
-    this.camera.position.set(c.x + v[0], c.y + v[1] + (name === 'left' || name === 'right' || name === 'medial' ? d * 0.1 : 0), c.z + v[2]);
-    this.camera.up.set(0, 1, 0); this.camera.lookAt(c); if (this.controls) { this.controls.target.copy(c); this.controls.update(); }
+    const off = new THREE.Vector3(v[0], v[1] + (name === 'left' || name === 'right' || name === 'medial' ? d * 0.1 : 0), v[2]);
+    this.camera.up.set(0, 1, 0);
+    if (this.ready && this.controls) { this.fly(c, off.length(), off, 1000); this.framed = false; return; }
+    this.camera.position.copy(c).add(off); this.camera.lookAt(c); if (this.controls) { this.controls.target.copy(c); this.controls.update(); }
     this.touch();
   }
   // stop the idle rotation for a while (e.g. after a programmatic view change)
@@ -171,7 +195,7 @@ class Brain {
   // animated pathway lines. flows: [{a: {id, side} | {p:[x,y,z] MNI}, b: same, color}], markers: [{p:[x,y,z] MNI, color}]
   setFlows(flows, markers) {
     if (this.flowGroup) { this.flowGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); this.scene.remove(this.flowGroup); }
-    this.flows = null; this.flowGroup = null;
+    this.flows = null; this.flowGroup = null; this.parts = [];
     if (!flows || !flows.length) return;
     const G = this.flowGroup = new THREE.Group(); this.scene.add(G); this.flows = [];
     const pos = e => e.p ? new THREE.Vector3(e.p[0], e.p[2], -e.p[1]) : this.centroid(e.id, e.side);
@@ -190,13 +214,20 @@ class Brain {
         transparent: true, depthWrite: false, depthTest: false
       });
       const t = new THREE.Mesh(g, mat); t.renderOrder = 5; G.add(t); this.flows.push(mat);
+      for (let k = 0; k < 2; k++) { // particles travelling from source to target
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(f.color), depthTest: false, transparent: true, sizeAttenuation: false }));
+        sp.scale.set(0.022, 0.022, 1); sp.renderOrder = 8; sp.userData = { curve, ph: k / 2 + Math.random() * 0.2, sp: 0.16 + 6 / Math.max(20, L) }; G.add(sp); this.parts = this.parts || []; this.parts.push(sp);
+      }
     }
     for (const mk of markers || []) {
-      const s = new THREE.Mesh(new THREE.SphereGeometry(1.6, 20, 14), new THREE.MeshStandardMaterial({ color: mk.color, emissive: mk.color, emissiveIntensity: 0.45, roughness: 0.4 }));
+      const s = new THREE.Mesh(new THREE.SphereGeometry(1.4, 20, 14), new THREE.MeshStandardMaterial({ color: mk.color, emissive: mk.color, emissiveIntensity: 0.45, roughness: 0.4 }));
       s.position.set(mk.p[0], mk.p[2], -mk.p[1]); s.renderOrder = 4; G.add(s);
     }
   }
-  tickFlows(dt) { for (const m of this.flows) m.uniforms.uT.value += dt * 0.55; }
+  tickFlows(dt) {
+    for (const m of this.flows) m.uniforms.uT.value += dt * 0.55;
+    for (const p of this.parts || []) { const u = p.userData; u.ph = (u.ph + dt * u.sp) % 1; p.position.copy(u.curve.getPoint(u.ph)); p.material.opacity = Math.sin(Math.PI * u.ph); }
+  }
   // Yeo networks on the cortex: null = off, 'all' = every network in its colour, 1..7 = one network
   setNetwork(n) { this.net = n == null ? null : n; this.apply(); }
   paintNet(m) {
@@ -212,7 +243,97 @@ class Brain {
   }
   // focus: {structureId: color}; empty = natural view
   setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null; this.apply(); }
+  // apply() with a soft cross-fade: compute the new look, then animate colour and opacity from the old one
   apply() {
+    if (!this.meshes.length || this.noTween || !this.ready) return this.applyNow();
+    const before = this.meshes.map(m => ({ c: m.material.color.clone(), o: m.visible ? m.material.opacity : 0, v: m.visible }));
+    this.applyNow();
+    const now = performance.now(); let n = 0;
+    this.meshes.forEach((m, i) => {
+      const b = before[i], mat = m.material, to = { c: mat.color.clone(), o: m.visible ? mat.opacity : 0, v: m.visible, tr: mat.transparent, dw: mat.depthWrite };
+      if (b.c.equals(to.c) && Math.abs(b.o - to.o) < 0.01 && b.v === to.v) { m.userData.tw = null; return; }
+      m.userData.tw = { t0: now, from: b, to }; n++;
+      mat.color.copy(b.c); mat.opacity = b.o; mat.transparent = true; m.visible = b.v || to.v; mat.needsUpdate = true;
+    });
+    this.tweening = n > 0;
+    this.frameFocus();
+  }
+  tickTween(now) {
+    let live = false;
+    for (const m of this.meshes) {
+      const tw = m.userData.tw; if (!tw) continue;
+      const k = Math.min(1, (now - tw.t0) / 480), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2, mat = m.material;
+      mat.color.copy(tw.from.c).lerp(tw.to.c, e); mat.opacity = tw.from.o + (tw.to.o - tw.from.o) * e;
+      if (k >= 1) { mat.opacity = tw.to.o; mat.transparent = tw.to.tr; mat.depthWrite = tw.to.dw; m.visible = tw.to.v; mat.needsUpdate = true; m.userData.tw = null; }
+      else live = true;
+    }
+    this.tweening = live;
+  }
+  // regions fly in from around the brain and settle into place (first load, and when returning to the whole brain)
+  assemble() {
+    if (!this.center) return; const now = performance.now(), c = this.center0 || this.center, R = this.radius0 || this.radius;
+    this.meshes.forEach(m => {
+      if (!m.visible) return;
+      const box = new THREE.Box3().setFromObject(m), mc = box.getCenter(new THREE.Vector3()), d = mc.clone().sub(c);
+      const dist = d.length(); if (dist < 1) d.set(0, 1, 0); d.normalize();
+      m.userData.as = { t0: now + 40 + (dist / R) * 380 + Math.random() * 160, off: d.multiplyScalar(R * (0.45 + Math.random() * 0.25)) };
+      m.position.copy(m.userData.as.off);
+    });
+    this.assembling = true;
+  }
+  tickAssemble(now) {
+    let live = false;
+    for (const m of this.meshes) {
+      const a = m.userData.as; if (!a) continue;
+      const k = Math.max(0, Math.min(1, (now - a.t0) / 950)), e = 1 - Math.pow(1 - k, 4);
+      m.position.copy(a.off).multiplyScalar(1 - e);
+      if (k >= 1) { m.position.set(0, 0, 0); m.userData.as = null; } else live = true;
+    }
+    this.assembling = live;
+  }
+  // camera glide to a target point and distance (keeps the viewing direction unless one is given)
+  fly(target, dist, dir, ms) {
+    const c = this.controls, cam = this.camera, ft = c.target.clone(), d0 = cam.position.clone().sub(ft);
+    this.flight = { t0: performance.now(), ms: ms || 900, ft, tt: target.clone(), dist, d0: d0.length(), u0: d0.clone().normalize(), u1: (dir ? dir.clone() : d0.clone()).normalize() };
+    this.touch();
+  }
+  tickFly(now) {
+    const f = this.flight, k = Math.min(1, (now - f.t0) / f.ms), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    const t = f.ft.clone().lerp(f.tt, e), u = f.u0.clone().lerp(f.u1, e).normalize(), dist = f.d0 + (f.dist - f.d0) * e;
+    this.controls.target.copy(t); this.camera.position.copy(t).add(u.multiplyScalar(dist)); this.camera.lookAt(t);
+    if (k >= 1) this.flight = null;
+    this.lastTouch = now;
+  }
+  // frame the focused structures (atlas only)
+  frameFocus() {
+    if (!this.opts.frame || this.fitted || !this.controls) return;
+    const keys = Object.keys(this.focus), c0 = this.center0 || this.center, R = this.radius0 || this.radius;
+    if (!keys.length) { if (this.framed) { this.framed = false; this.fly(c0, R * 2.6); } return; }
+    const box = new THREE.Box3(); let n = 0;
+    for (const k of keys) { const [id, side] = k.split('@'); for (const m of this.byId[id] || []) if (!side || m.userData.side === side) { box.expandByObject(m); n++; } }
+    if (!n) return;
+    const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2;
+    const dist = Math.max(R * 1.45, Math.min(R * 2.6, r * 3.4)), tgt = c.clone().lerp(c0, 0.35);
+    if (tgt.distanceTo(this.controls.target) < 2 && Math.abs(dist - this.camera.position.distanceTo(this.controls.target)) < 4) return;
+    this.framed = true; this.fly(tgt, dist);
+  }
+  // glowing circuit nodes at structure centres: [{id, side, color} | {p:[x,y,z] MNI, color}]
+  setNodes(list) {
+    if (this.nodeGroup) { this.nodeGroup.traverse(o => { if (o.material) o.material.dispose(); }); this.scene.remove(this.nodeGroup); this.nodeGroup = null; }
+    if (!list || !list.length) return;
+    const G = this.nodeGroup = new THREE.Group(); this.scene.add(G);
+    for (const nd of list) {
+      const p = nd.p ? new THREE.Vector3(nd.p[0], nd.p[2], -nd.p[1]) : this.centroid(nd.id, nd.side); if (!p) continue;
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: nodeTex(nd.color), depthTest: false, transparent: true, sizeAttenuation: false }));
+      sp.scale.set(0.036, 0.036, 1); sp.position.copy(p); sp.renderOrder = 9; sp.userData.ph = Math.random() * 6.28; G.add(sp);
+    }
+    G.userData.t0 = performance.now();
+  }
+  tickNodes(now) {
+    const k = Math.min(1, (now - (this.nodeGroup.userData.t0 || 0)) / 500);
+    for (const sp of this.nodeGroup.children) { const s = (0.03 + 0.004 * Math.sin(now / 420 + sp.userData.ph)) * (0.3 + 0.7 * (1 - Math.pow(1 - k, 3))); sp.scale.set(s, s, 1); sp.material.opacity = k; }
+  }
+  applyNow() {
     const any = Object.keys(this.focus).length > 0, grey = css('--line-strong');
     const approxOn = Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).inner);
     const planes = this.cut ? [this.clip] : [];
