@@ -108,6 +108,17 @@ Content is computational hypotheses only — no discovery claims.
 - Feedback bar on every page: opens a prefilled GitHub issue (`.github/ISSUE_TEMPLATE/feedback.yml`).
 - Rollback: version 2.2 is site commit `d63d64a`.
 
+## Licence of the 3D anatomy
+
+The brain meshes (`assets/brain3d/brain.bin`) and slice labels are derived from the Neuromorphometrics atlas (CC BY-NC):
+non-commercial reuse only, with attribution. Other sources and their terms: see `cite.html`. The Juelich atlas terms (as
+distributed with FSL) and the MASSP and Schaefer licences should be re-checked before any reuse outside this site.
+
+## Version 2.6.3 (23 Nov 2026)
+
+- Review corrections (Grok): limbic network wording, XI and trigeminal ganglion notes, footer licence note, question grammar
+  fix, `sch` flag on questions involving schematic structures, `proposal/expert_review_sample_100.csv` (schematic first).
+
 ## Version 2.6 (23 Nov 2026)
 
 - Viewer (`brain3d.js`): `apply()` cross-fades colour and opacity (`applyNow()` is the instant version), `assemble()` fly-in,
