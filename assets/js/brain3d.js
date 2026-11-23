@@ -27,6 +27,7 @@ function geometryFor(me, buf) {
 }
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888'; }
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
+const HIDDEN = { 'white matter': 1, ventricles: 1 }; // shown only when selected
 
 class Brain {
   constructor(el, opts) {
@@ -93,6 +94,7 @@ class Brain {
       const id = m.userData.id, mat = m.material, inf = this.info[id] || {}, isCortex = CORTEX[inf.lobe];
       m.visible = !(this.cut && m.userData.side === 'R');
       mat.clippingPlanes = m.userData.side === 'M' ? planes : [];
+      if (HIDDEN[inf.lobe] && !(this.focus[id] || this.focus[id + '@' + m.userData.side])) { m.visible = false; continue; }
       const f = this.focus[id + '@' + m.userData.side] || this.focus[id];
       if (any && f) {
         mat.color.set(f); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true;
