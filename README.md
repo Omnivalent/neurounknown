@@ -108,6 +108,19 @@ Content is computational hypotheses only — no discovery claims.
 - Feedback bar on every page: opens a prefilled GitHub issue (`.github/ISSUE_TEMPLATE/feedback.yml`).
 - Rollback: version 2.2 is site commit `d63d64a`.
 
+## Version 2.5 (23 Nov 2026)
+
+- Realistic cortex and cerebellum (`src/neurounknown/cortex_surface.py`): continuous field = smoothed 0.5 mm T1 (level 165,
+  mid grey matter) combined with a smoothed hemisphere mask, enclosed CSF filled; surface nets with linear edge interpolation on a
+  0.75 mm grid; Taubin smoothing; nearest-label split into structures; shipped normals (no seams), a sulcal-shading byte and a
+  Yeo network byte per vertex (`brain.json` fields `xo`, `wo`).
+- Cranial nerves rebuilt (`src/neurounknown/nerves3d.py`): exits ray-marched to the template brainstem surface, radius profiles,
+  elliptical sections, rootlets (IX to XII), trigeminal ganglion and divisions. Still schematic courses.
+- Viewer: image-based lighting (three.js RoomEnvironment), idle auto-rotation (off for reduced motion and in the lesion game),
+  network painting, animated neurotransmitter pathway lines. Guided tour (`localStorage` key `nu-tour-done`).
+- Data: `neurochem.py` (neurotransmitters, pathway groups, networks) exported into `atlas.json`.
+- Rollback: version 2.4 is site commit `4aafa1b`.
+
 ## Version 2.4 (23 Nov 2026)
 
 - 3D cortex and cerebellum carved from the 0.5 mm ICBM 2009b template (label AND tissue mask, threshold between CSF and grey

@@ -2,6 +2,7 @@
 // several atlases in ICBM 2009 space; cranial nerve nuclei are schematic ellipsoids). Population-average anatomy.
 import * as THREE from 'three';
 import { OrbitControls } from './three/OrbitControls.js';
+import { RoomEnvironment } from './three/RoomEnvironment.js';
 
 let DATA = null;
 async function loadData() {
@@ -22,9 +23,21 @@ function geometryFor(me, buf) {
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   g.setIndex(new THREE.BufferAttribute(idx, 1));
-  g.computeVertexNormals();
+  if (me.xo !== undefined) { // realistic cortex: shipped normals (no seams between structures) + baked sulcal shading
+    const x = new Int8Array(buf, me.xo, me.nv * 4), u = new Uint8Array(buf, me.xo, me.nv * 4);
+    const nrm = new Float32Array(me.nv * 3), ao = new Float32Array(me.nv), col = new Float32Array(me.nv * 3);
+    for (let i = 0; i < me.nv; i++) {
+      nrm[3 * i] = x[4 * i] / 127; nrm[3 * i + 1] = x[4 * i + 2] / 127; nrm[3 * i + 2] = -x[4 * i + 1] / 127;
+      ao[i] = u[4 * i + 3] / 255; col[3 * i] = col[3 * i + 1] = col[3 * i + 2] = ao[i];
+    }
+    g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    g.userData = { ao, net: new Uint8Array(buf.slice(me.wo, me.wo + me.nv)) };
+  } else g.computeVertexNormals();
   return g;
 }
+// Yeo 7 networks (Yeo et al. 2011; Schaefer et al. 2018 parcellation), conventional colours
+export const NETCOL = ['#000000', '#781180', '#4682b4', '#00760e', '#c43afa', '#b8cf6e', '#e69422', '#cd3e4e'];
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888'; }
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
 const HIDDEN = { 'white matter': 1, ventricles: 1 }; // shown only when selected
@@ -46,17 +59,19 @@ class Brain {
     this.el.appendChild(r.domElement); r.domElement.style.touchAction = 'none';
     const s = this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(30, W / H, 1, 3000);
-    s.add(new THREE.HemisphereLight(0xffffff, 0x50505a, 1.5));
-    const d1 = new THREE.DirectionalLight(0xffffff, 1.5); d1.position.set(-300, 400, 300); s.add(d1);
-    const d2 = new THREE.DirectionalLight(0xffffff, 0.8); d2.position.set(300, -100, -300); s.add(d2);
-    const d3 = new THREE.DirectionalLight(0xffffff, 0.5); d3.position.set(300, 200, 200); s.add(d3);
+    // soft studio lighting: image-based light from a neutral room + a key light that follows the camera
+    try { const pm = new THREE.PMREMGenerator(r); s.environment = pm.fromScene(new RoomEnvironment(r), 0.04).texture; s.environmentIntensity = 0.4; pm.dispose(); } catch (e) { /* older GPUs: lights only */ }
+    s.add(new THREE.HemisphereLight(0xfffaf2, 0x5a5550, 0.9));
+    const key = this.key = new THREE.DirectionalLight(0xffffff, 1.4); s.add(key); s.add(key.target);
+    const d2 = new THREE.DirectionalLight(0xffffff, 0.45); d2.position.set(300, -100, -300); s.add(d2);
     this.clip = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
     const group = this.group = new THREE.Group(); s.add(group);
     for (const me of manifest.meshes) {
       const g = geometryFor(me, buf);
-      const mat = new THREE.MeshStandardMaterial({ color: '#bbb', roughness: 0.62, metalness: 0.02, transparent: true, opacity: 1 });
+      const real = me.xo !== undefined, nerve = (this.info[me.id] || {}).lobe === 'cranial nerves';
+      const mat = new THREE.MeshStandardMaterial({ color: '#bbb', roughness: real ? 0.72 : nerve ? 0.42 : 0.6, metalness: 0, transparent: true, opacity: 1, vertexColors: real });
       if (me.side === 'M') mat.side = THREE.DoubleSide;
-      const m = new THREE.Mesh(g, mat); m.userData = { id: me.id, side: me.side };
+      const m = new THREE.Mesh(g, mat); m.userData = { id: me.id, side: me.side, real };
       group.add(m); this.meshes.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
     }
     const box = new THREE.Box3().setFromObject(group);
@@ -64,6 +79,12 @@ class Brain {
     const c = this.controls = new OrbitControls(this.camera, r.domElement);
     c.enableDamping = true; c.dampingFactor = 0.08; c.target.copy(this.center); c.minDistance = this.radius * 0.7; c.maxDistance = this.radius * 6;
     c.rotateSpeed = 0.7; c.zoomSpeed = 0.9;
+    // calm rotation while nobody touches the brain (off for reduced-motion users and where opts.autoRotate is false)
+    const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.idleOK = this.opts.autoRotate !== false && !still; c.autoRotateSpeed = 0.55; this.lastTouch = performance.now();
+    const touch = () => { this.lastTouch = performance.now(); c.autoRotate = false; };
+    c.addEventListener('start', touch); c.addEventListener('end', touch);
+    r.domElement.addEventListener('wheel', touch, { passive: true });
     this.view('left');
     this.ray = new THREE.Raycaster(); this.ptr = new THREE.Vector2();
     let down = null;
@@ -74,7 +95,16 @@ class Brain {
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(this.el);
     window.addEventListener('nu-theme', () => this.apply());
     this.apply();
-    const loop = () => { this.raf = requestAnimationFrame(loop); if (!this.paused) { c.update(); r.render(s, this.camera); } };
+    let prev = performance.now();
+    const loop = () => {
+      this.raf = requestAnimationFrame(loop); if (this.paused) return;
+      const now = performance.now(), dt = Math.min(0.1, (now - prev) / 1000); prev = now;
+      c.autoRotate = this.idleOK && !this.holdRotate && now - this.lastTouch > 5000 && !document.hidden;
+      c.update(dt);
+      this.key.position.copy(this.camera.position).add(this.camera.up.clone().multiplyScalar(this.radius * 1.2)); this.key.target.position.copy(c.target);
+      if (this.flows) this.tickFlows(dt);
+      r.render(s, this.camera);
+    };
     loop();
     return this;
   }
@@ -84,7 +114,11 @@ class Brain {
     const v = { left: [-d, 0, 0], right: [d, 0, 0], top: [0, d, 0.01], front: [0, 0, -d], back: [0, 0, d], below: [0, -d, 0.01], medial: [d, 0, 0] }[name] || [-d, 0, 0];
     this.camera.position.set(c.x + v[0], c.y + v[1] + (name === 'left' || name === 'right' || name === 'medial' ? d * 0.1 : 0), c.z + v[2]);
     this.camera.up.set(0, 1, 0); this.camera.lookAt(c); if (this.controls) { this.controls.target.copy(c); this.controls.update(); }
+    this.touch();
   }
+  // stop the idle rotation for a while (e.g. after a programmatic view change)
+  touch() { this.lastTouch = performance.now(); if (this.controls) this.controls.autoRotate = false; }
+  setAutoRotate(on) { this.holdRotate = !on; this.touch(); }
   setCut(on) { this.cut = on; this.apply(); if (on) this.view('medial'); }
   setCortex(mode) { this.cortexMode = mode; this.apply(); }
   // MRI planes inside the 3D scene. planes: [{ax:'ax'|'co'|'sa', mm, canvas, flip}], ext: {x0,x1,y0,y1,z0,z1} (MNI mm),
@@ -128,6 +162,54 @@ class Brain {
     this.center = c; this.radius = r; this.controls.minDistance = r * 0.6; this.view(name || 'front');
   }
   unfit() { if (!this.center0) return; this.center = this.center0; this.radius = this.radius0; this.controls.minDistance = this.radius * 0.7; this.fitted = false; this.view('left'); }
+  // centre of a structure (three coords); side 'L'/'R'/'M' or any
+  centroid(id, side) {
+    const box = new THREE.Box3(); let n = 0;
+    for (const m of this.byId[id] || []) if (!side || m.userData.side === side || m.userData.side === 'M') { box.expandByObject(m); n++; }
+    return n ? box.getCenter(new THREE.Vector3()) : null;
+  }
+  // animated pathway lines. flows: [{a: {id, side} | {p:[x,y,z] MNI}, b: same, color}], markers: [{p:[x,y,z] MNI, color}]
+  setFlows(flows, markers) {
+    if (this.flowGroup) { this.flowGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); this.scene.remove(this.flowGroup); }
+    this.flows = null; this.flowGroup = null;
+    if (!flows || !flows.length) return;
+    const G = this.flowGroup = new THREE.Group(); this.scene.add(G); this.flows = [];
+    const pos = e => e.p ? new THREE.Vector3(e.p[0], e.p[2], -e.p[1]) : this.centroid(e.id, e.side);
+    const mid0 = this.center0 || this.center;
+    for (const f of flows) {
+      const A = pos(f.a), B = pos(f.b); if (!A || !B) continue;
+      const L = A.distanceTo(B); if (L < 2) continue;
+      const M = A.clone().add(B).multiplyScalar(0.5), dir = M.clone().sub(mid0); if (dir.length() < 1) dir.set(0, 1, 0);
+      M.add(dir.normalize().multiplyScalar(L * 0.16));
+      const curve = new THREE.QuadraticBezierCurve3(A, M, B);
+      const g = new THREE.TubeGeometry(curve, Math.max(24, Math.round(L * 1.5)), 0.8, 10, false);
+      const mat = new THREE.ShaderMaterial({
+        uniforms: { uT: { value: Math.random() }, uC: { value: new THREE.Color(f.color) }, uR: { value: Math.max(1, L / 14) } },
+        vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        fragmentShader: 'uniform float uT; uniform vec3 uC; uniform float uR; varying vec2 vUv; void main(){ float k = fract(vUv.x * uR - uT); float h = smoothstep(0.35, 0.96, k) * (1.0 - smoothstep(0.96, 1.0, k)); gl_FragColor = vec4(mix(uC, vec3(1.0), h * 0.6), 0.6 + 0.4 * h); }',
+        transparent: true, depthWrite: false, depthTest: false
+      });
+      const t = new THREE.Mesh(g, mat); t.renderOrder = 5; G.add(t); this.flows.push(mat);
+    }
+    for (const mk of markers || []) {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(1.6, 20, 14), new THREE.MeshStandardMaterial({ color: mk.color, emissive: mk.color, emissiveIntensity: 0.45, roughness: 0.4 }));
+      s.position.set(mk.p[0], mk.p[2], -mk.p[1]); s.renderOrder = 4; G.add(s);
+    }
+  }
+  tickFlows(dt) { for (const m of this.flows) m.uniforms.uT.value += dt * 0.55; }
+  // Yeo networks on the cortex: null = off, 'all' = every network in its colour, 1..7 = one network
+  setNetwork(n) { this.net = n == null ? null : n; this.apply(); }
+  paintNet(m) {
+    const g = m.geometry, u = g.userData; if (!u || !u.ao) return; const key = this.net == null ? 'ao' : String(this.net);
+    if (u.key === key) return; u.key = key;
+    const col = g.attributes.color.array, cs = NETCOL.map(c => new THREE.Color(c)), neutral = new THREE.Color('#e9e3d8');
+    for (let i = 0; i < u.ao.length; i++) {
+      const a = u.ao[i]; let c = null;
+      if (this.net != null) { const k = u.net[i]; c = k && (this.net === 'all' || this.net === k) ? cs[k] : neutral; }
+      col[3 * i] = (c ? c.r : 1) * a; col[3 * i + 1] = (c ? c.g : 1) * a; col[3 * i + 2] = (c ? c.b : 1) * a;
+    }
+    g.attributes.color.needsUpdate = true;
+  }
   // focus: {structureId: color}; empty = natural view
   setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null; this.apply(); }
   apply() {
@@ -151,7 +233,9 @@ class Brain {
       if (!f && nm !== 'iso' && Ly.ventricles && inf.lobe === 'ventricles') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#8fb3c9'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.needsUpdate = true; continue; }
       if (nm === 'iso' && !any) { // nerve view: nerves and nuclei in matching colours, see-through brainstem
         m.visible = !(this.cut && m.userData.side === 'R') || isNerve;
-        const c = inf.ncol || (id === 'optic_chiasm' || id === 'lgn' ? '#e9c46a' : null);
+        let c = inf.ncol || (id === 'optic_chiasm' || id === 'lgn' ? '#e9c46a' : null);
+        // natural ivory nerves with a light tint of their key colour; nuclei keep the key colour (softened)
+        if (c) c = isNerve || id === 'optic_chiasm' ? new THREE.Color('#efe6cf').lerp(new THREE.Color(c), 0.38) : new THREE.Color(c).lerp(new THREE.Color('#ffffff'), 0.12);
         if (c) { mat.color.set(c); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; }
         else { mat.color.set(inf.tint || '#bbb'); mat.opacity = 0.26; mat.transparent = true; mat.depthWrite = false; m.renderOrder = 3; }
         mat.emissive.set('#000000'); mat.needsUpdate = true; continue;
@@ -172,6 +256,8 @@ class Brain {
         if (isCortex && this.cortexMode === 0) m.visible = false;
       }
       if (planeView && !cp.length && !f) { mat.transparent = true; mat.depthWrite = false; mat.opacity = Math.min(mat.opacity, isCortex ? 0.12 : 0.25); m.renderOrder = 3; }
+      if (m.userData.real) this.paintNet(m);
+      if (this.net != null && m.userData.real && !any) { mat.color.set(isCortex ? '#ffffff' : (inf.tint || '#bbb')); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; m.visible = isCortex || inf.lobe === 'cerebellum'; }
       mat.needsUpdate = true;
     }
   }
