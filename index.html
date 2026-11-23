@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-BHPIyQv4MeWxVA0wUxLYSzLli9hZ91si0b2c5K+lnyY=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-hESPMlUwn+d8PqMUXwW/8AfB9b4H9kGv2AklV9N6FmQ=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeuroUnknown — the brain's overlooked genes</title>
 <meta name="description" content="An open computational screen for brain-disease genes that are strongly linked to illness yet barely studied, with a brain atlas, a disease explorer and a deep dive into the disturbed sense of self in schizophrenia. No discovery claims.">
@@ -475,8 +475,10 @@ html[data-layout="phone"] .b3wrap.txb{height:300px}
 .triinfo{display:block;background:#15171c;color:#e8e6e1;padding:14px 16px;aspect-ratio:auto}
 .triinfo .mono{color:#f2a93b}.triinfo .tric{font:600 15px var(--mono);margin:6px 0}.triinfo .trin{font-size:16px;margin:10px 0 8px}.triinfo .trih{font-size:12.5px;color:#9c9890;margin-top:10px}
 .triinfo .chip{color:#e8e6e1;border-color:#3a3d44}
-html[data-layout="phone"] .trigrid{grid-template-columns:1fr}
-@media(max-width:640px){.trigrid{grid-template-columns:1fr}.p3row .mono{display:none}}
+html[data-layout="phone"] .trigrid{gap:6px}
+.tricell.in3d{box-shadow:inset 0 0 0 2px var(--signal)}
+.tribox{margin-top:10px}
+@media(max-width:640px){.trigrid{gap:6px}.triinfo{padding:10px 12px}.triinfo .tric{font-size:12px}.triinfo .trin{font-size:13px}.triinfo .trih{display:none}.p3row .mono{display:none}}
 .slbox{border:1px solid var(--line);border-radius:14px;background:#0b0c0f;padding:10px}
 .slcv{position:relative;height:min(72vh,680px);display:flex;align-items:center;justify-content:center}
 html[data-layout="phone"] .slcv{height:440px}
@@ -610,6 +612,9 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
      <div class="grp"><button type="button" id="aCut" aria-pressed="false">Cut in half</button><button type="button" id="aCortex">Cortex: solid</button></div></div>
      <div class="b3ctl b3nv" role="group" aria-label="Cranial nerves"><div class="grp"><button type="button" data-nv="show" aria-pressed="true">Nerves</button><button type="button" data-nv="hide" aria-pressed="false">No nerves</button><button type="button" data-nv="iso" aria-pressed="false">Nerves + brainstem</button></div></div>
     </div>
+    <div class="tribox" id="triBox" hidden>
+     <div class="trigrid"><div class="tricell" data-tv="ax"><canvas aria-label="Axial slice"></canvas><span class="trilab">Axial</span></div><div class="tricell" data-tv="co"><canvas aria-label="Coronal slice"></canvas><span class="trilab">Coronal</span></div><div class="tricell" data-tv="sa"><canvas aria-label="Sagittal slice"></canvas><span class="trilab">Sagittal</span></div><div class="tricell triinfo" id="triInfo"></div></div>
+    </div>
     <div class="p3panel lypanel" id="lyPanel"><div class="p3head"><span class="mono">Layers</span></div>
      <div class="lyrow"><button type="button" class="chip" data-ly="cortex" aria-pressed="true">Cortex</button><button type="button" class="chip" data-ly="deep" aria-pressed="true">Deep structures</button><button type="button" class="chip" data-ly="brainstem" aria-pressed="true">Brainstem</button><button type="button" class="chip" data-ly="cerebellum" aria-pressed="true">Cerebellum</button><button type="button" class="chip" data-ly="tracts" aria-pressed="false">Fibre tracts</button><button type="button" class="chip" data-ly="ventricles" aria-pressed="false">Ventricles</button></div></div>
     <div class="p3panel" id="p3panel">
@@ -618,9 +623,6 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
      <div class="p3row" data-pl="co"><button type="button" class="chip" data-plt="co" aria-pressed="false">Coronal</button><input type="range" data-plr="co" min="0" max="217" value="108" aria-label="Coronal plane position"><span class="mono" data-plv="co"></span><button type="button" class="chip p3f" data-plf="co" aria-pressed="false" title="Cut away the other side">Flip</button></div>
      <div class="p3row" data-pl="sa"><button type="button" class="chip" data-plt="sa" aria-pressed="false">Sagittal</button><input type="range" data-plr="sa" min="0" max="181" value="90" aria-label="Sagittal plane position"><span class="mono" data-plv="sa"></span><button type="button" class="chip p3f" data-plf="sa" aria-pressed="false" title="Cut away the other side">Flip</button></div>
      <label class="p3cut"><input type="checkbox" id="p3cut" checked> Cut the brain at the slices (one slice cuts it in half; two or three cut out a corner)</label>
-    </div>
-    <div class="tribox" id="triBox" hidden>
-     <div class="trigrid"><div class="tricell" data-tv="ax"><canvas aria-label="Axial slice"></canvas><span class="trilab">Axial</span></div><div class="tricell" data-tv="co"><canvas aria-label="Coronal slice"></canvas><span class="trilab">Coronal</span></div><div class="tricell" data-tv="sa"><canvas aria-label="Sagittal slice"></canvas><span class="trilab">Sagittal</span></div><div class="tricell triinfo" id="triInfo"></div></div>
     </div>
     <div class="slbox" id="sliceBox" hidden>
      <div class="slcv"><canvas id="slc" tabindex="0" aria-label="MRI-style slice; use arrow keys to move through slices"></canvas><div class="b3tip" id="slTip"></div>
@@ -1081,6 +1083,7 @@ function triRender(){ if(!SL.m) return; var d=SL.m.dims; ['ax','co','sa'].forEac
   (s?'<p class="trin">'+esc(lc(sname(s.sid)).replace(/^./,function(c){ return c.toUpperCase(); }))+' <span class="mono" style="text-transform:none">('+(s.side==='R'?'right':'left')+')</span></p><button type="button" class="chip" id="triSel">Select this structure</button>':'<p class="trin" style="color:var(--muted)">Not labelled</p>')+
   '<p class="trih">Click or tap any slice to move the crosshair; the other two follow. Scroll on a slice to step through it.</p>';
  var b=document.getElementById('triSel'); if(b) b.onclick=function(){ atlasPick(s.sid,true); };
+ ['ax','co','sa'].forEach(function(v){ var c=document.querySelector('[data-tv='+v+']'); c.classList.toggle('in3d',SL.vw==='3d'&&P3.on.indexOf(v)>=0); });
  if(P3.on.length) p3Update(); }
 function slSidAt(xi,yi,zi){ var H=SL.h; if(H){ var o=H.m.origin, st=H.m.step, dm=H.m.dims, a=Math.round((mm(0,xi)-o[0])/st), b=Math.round((mm(1,yi)-o[1])/st), c=Math.round((mm(2,zi)-o[2])/st);
   if(a<0||b<0||c<0||a>=dm[0]||b>=dm[1]||c>=dm[2]) return null; return slSid(H.l[a+dm[0]*(b+dm[1]*c)]); } return slSid(SL.l[slIdx(xi,yi,zi)]); }
@@ -1101,8 +1104,9 @@ function p3Update(){ if(!at.v||!at.v.b||!SL.m) return; clearTimeout(P3.t); P3.t=
   [].forEach.call(document.querySelectorAll('[data-plr]'),function(r){ var v=r.dataset.plr, D=slDims(v); r.max=D.n-1; r.value=SL.pos[v]; var lab=document.querySelector('[data-plv='+v+']'); if(lab){ var n=mm({ax:2,co:1,sa:0}[v],SL.pos[v]); lab.textContent=({ax:'z',co:'y',sa:'x'})[v]+' '+(n>0?'+':'')+n.toFixed(0)+' mm'; } }); },30); }
 function p3Init(){ [].forEach.call(document.querySelectorAll('[data-plt]'),function(b){ b.addEventListener('click',function(){ var v=b.dataset.plt, i=P3.on.indexOf(v);
    if(i>=0) P3.on.splice(i,1); else P3.on.push(v); b.setAttribute('aria-pressed',i<0); document.querySelector('[data-pl='+v+']').classList.toggle('on',i<0);
-   if(P3.on.length) slLoad(function(){ p3Update(); }); else if(at.v&&at.v.b) at.v.b.setPlanes([],{x0:0,x1:1,y0:0,y1:1,z0:0,z1:1},false); }); });
- [].forEach.call(document.querySelectorAll('[data-plr]'),function(r){ r.addEventListener('input',function(){ SL.pos[r.dataset.plr]=+r.value; p3Update(); }); });
+   var tb=document.getElementById('triBox'); if(SL.vw==='3d') tb.hidden=P3.on.length===0;
+   if(P3.on.length) slLoad(function(){ p3Update(); if(!tb.hidden) triRender(); }); else if(at.v&&at.v.b) at.v.b.setPlanes([],{x0:0,x1:1,y0:0,y1:1,z0:0,z1:1},false); }); });
+ [].forEach.call(document.querySelectorAll('[data-plr]'),function(r){ r.addEventListener('input',function(){ SL.pos[r.dataset.plr]=+r.value; p3Update(); if(!document.getElementById('triBox').hidden) triRender(); }); });
  [].forEach.call(document.querySelectorAll('[data-plf]'),function(b){ b.addEventListener('click',function(){ var v=b.dataset.plf; P3.flip[v]=!P3.flip[v]; b.setAttribute('aria-pressed',!!P3.flip[v]); p3Update(); }); });
  document.getElementById('p3cut').addEventListener('change',function(){ P3.cut=this.checked; p3Update(); });
  [].forEach.call(document.querySelectorAll('[data-p3all]'),function(b){ b.addEventListener('click',function(){ var want=b.dataset.p3all==='on';
@@ -1112,8 +1116,8 @@ function slAt(e){ var cv=document.getElementById('slc'), b=cv.getBoundingClientR
  if(M.P<0||M.P>=dm[M.px]||a<0||bb<0||a>=dm[M.ax]||bb>=dm[M.bx]) return null; var st=[1,dm[0],dm[0]*dm[1]];
  return slSid(M.L[M.P*st[M.px]+a*st[M.ax]+bb*st[M.bx]]); }
 function setView(vw){ SL.vw=vw; [].forEach.call(document.querySelectorAll('[data-vw]'),function(b){ b.setAttribute('aria-selected',b.dataset.vw===vw); });
- var is3=vw==='3d'; document.getElementById('atlas3d').hidden=!is3; document.getElementById('p3panel').hidden=!is3; document.getElementById('lyPanel').hidden=!is3; document.getElementById('sliceBox').hidden=is3||vw==='tri'; document.getElementById('triBox').hidden=vw!=='tri'; if(at.v&&at.v.b) at.v.b.pause(!is3);
- if(!is3) slLoad(function(){ slAuto(); slRender(); }); }
+ var is3=vw==='3d'; document.getElementById('atlas3d').hidden=!is3; document.getElementById('p3panel').hidden=!is3; document.getElementById('lyPanel').hidden=!is3; document.getElementById('sliceBox').hidden=is3||vw==='tri'; document.getElementById('triBox').hidden=!(vw==='tri'||(is3&&P3.on.length>0)); if(at.v&&at.v.b) at.v.b.pause(!is3);
+ if(!is3) slLoad(function(){ slAuto(); slRender(); }); else if(P3.on.length) slLoad(function(){ triRender(); }); }
 function slInit(){ window.addEventListener('resize',function(){ if(SL.vw!=='3d') slRender(); }); [].forEach.call(document.querySelectorAll('[data-vw]'),function(b){ b.addEventListener('click',function(){ setView(b.dataset.vw); }); });
  var cv=document.getElementById('slc'), tip=document.getElementById('slTip'), r=document.getElementById('slr');
  r.addEventListener('input',function(){ SL.pos[SL.vw]=+r.value; slRender(); });
