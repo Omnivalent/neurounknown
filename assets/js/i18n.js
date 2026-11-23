@@ -12,6 +12,7 @@
       tabs: {"home": "Start", "screen": "Studie", "atlas": "3D-Anatomie", "diseases": "Krankheiten", "genome": "Gene", "study": "Teste dich"},
       today: 'Heute',
       note: 'Die Benutzeroberfläche ist übersetzt; die wissenschaftlichen Inhalte (Krankheitsseiten, Gentabellen, Fragen) sind derzeit auf Englisch. Übersetzung KI-erstellt, noch nicht fachlich geprüft.',
+      fb_t: 'Helfen Sie, NeuroUnknown zu verbessern: Was ist falsch, unklar oder fehlt?', fb_open: 'Feedback geben',
       hero_eyebrow: 'Offene computergestützte Forschung · aktualisiert Nov. 2026',
       hero_h1: 'Die <em>übersehenen</em> Gene des Gehirns.',
       hero_aside: 'Manche Gene sind eindeutig mit Erkrankungen des Gehirns verbunden, doch kaum jemand hat untersucht, was ihre Proteine tun. Wir finden sie, prüfen sie anhand der Literatur und ordnen sie dem Gehirn zu.',
@@ -31,6 +32,7 @@
       tabs: {"home": "Accueil", "screen": "Étude", "atlas": "Anatomie 3D", "diseases": "Maladies", "genome": "Gènes", "study": "Testez-vous"},
       today: "Aujourd'hui",
       note: "L'interface est traduite ; le contenu scientifique (pages des maladies, tableaux de gènes, questions) est pour l'instant en anglais. Traduction rédigée par IA, pas encore relue par des spécialistes.",
+      fb_t: 'Aidez-nous à améliorer NeuroUnknown : qu\'est-ce qui est faux, flou ou manquant ?', fb_open: 'Donner un avis',
       hero_eyebrow: 'Recherche computationnelle ouverte · mise à jour nov. 2026',
       hero_h1: 'Les gènes <em>négligés</em> du cerveau.',
       hero_aside: "Certains gènes sont clairement liés aux maladies du cerveau, mais presque personne n'a étudié ce que font leurs protéines. Nous les identifions, les vérifions dans la littérature et les situons dans le cerveau.",
@@ -50,6 +52,7 @@
       tabs: {"home": "Inicio", "screen": "Estudio", "atlas": "Anatomía 3D", "diseases": "Enfermedades", "genome": "Genes", "study": "Ponte a prueba"},
       today: 'Hoy',
       note: 'La interfaz está traducida; el contenido científico (páginas de enfermedades, tablas de genes, preguntas) está por ahora en inglés. Traducción hecha con IA, aún no revisada por especialistas.',
+      fb_t: 'Ayude a mejorar NeuroUnknown: ¿qué está mal, poco claro o falta?', fb_open: 'Enviar comentarios',
       hero_eyebrow: 'Investigación computacional abierta · actualizado nov. 2026',
       hero_h1: 'Los genes <em>olvidados</em> del cerebro.',
       hero_aside: 'Algunos genes están claramente ligados a enfermedades del cerebro, pero casi nadie ha estudiado qué hacen sus proteínas. Los encontramos, los contrastamos con la literatura y los situamos en el cerebro.',
@@ -69,6 +72,7 @@
       tabs: {"home": "Home", "screen": "Studio", "atlas": "Anatomia 3D", "diseases": "Malattie", "genome": "Geni", "study": "Mettiti alla prova"},
       today: 'Oggi',
       note: "L'interfaccia è tradotta; i contenuti scientifici (pagine delle malattie, tabelle dei geni, domande) sono per ora in inglese. Traduzione redatta con IA, non ancora revisionata da specialisti.",
+      fb_t: 'Aiutaci a migliorare NeuroUnknown: cosa è sbagliato, poco chiaro o mancante?', fb_open: 'Lascia un commento',
       hero_eyebrow: 'Ricerca computazionale aperta · aggiornato nov. 2026',
       hero_h1: 'I geni <em>trascurati</em> del cervello.',
       hero_aside: 'Alcuni geni sono chiaramente legati alle malattie del cervello, eppure quasi nessuno ha studiato cosa fanno le loro proteine. Li troviamo, li verifichiamo nella letteratura e li collochiamo nel cervello.',
@@ -88,6 +92,7 @@
       tabs: {"home": "الرئيسية", "screen": "دراستنا", "atlas": "التشريح 3D", "diseases": "الأمراض", "genome": "الجينات", "study": "اختبر نفسك"},
       today: 'اليوم',
       note: 'تمت ترجمة الواجهة؛ أما المحتوى العلمي (صفحات الأمراض وجداول الجينات والأسئلة) فهو حاليًا بالإنجليزية. الترجمة مُعدّة بالذكاء الاصطناعي ولم يراجعها مختصون بعد.',
+      fb_t: 'ساعدنا في تحسين NeuroUnknown: ما الخطأ أو غير الواضح أو الناقص؟', fb_open: 'أرسل ملاحظاتك',
       hero_eyebrow: 'بحث حاسوبي مفتوح · تحديث نوفمبر 2026',
       hero_h1: 'الجينات <em>المُهمَلة</em> في الدماغ.',
       hero_aside: 'بعض الجينات مرتبطة بوضوح بأمراض الدماغ، ومع ذلك لم يدرس أحد تقريبًا ما تفعله بروتيناتها. نحن نجدها ونتحقق منها في الأدبيات العلمية ونحدد موقعها في الدماغ.',
@@ -107,6 +112,7 @@
       tabs: {"home": "首页", "screen": "研究", "atlas": "三维解剖", "diseases": "疾病", "genome": "基因", "study": "自测"},
       today: '今日',
       note: '界面已翻译；科学内容（疾病页面、基因表格、题目）目前为英文。译文由人工智能生成，尚未经专业人员审校。',
+      fb_t: '帮助改进 NeuroUnknown：哪些内容有误、不清楚或缺失？', fb_open: '提交反馈',
       hero_eyebrow: '开放的计算研究 · 2026年11月更新',
       hero_h1: '大脑中<em>被忽视</em>的基因。',
       hero_aside: '有些基因与脑部疾病明确相关，却几乎没有人研究它们编码的蛋白质有什么功能。我们找出这些基因，对照文献加以核查，并将它们定位到大脑中。',
@@ -132,7 +138,7 @@
     function tag(el, k) { if (el && !el.dataset.i18nK) el.dataset.i18nK = k; }
     document.querySelectorAll('header.site nav.mainnav a, header.site details.more summary, header.site .more-menu a').forEach(function (a) { var i = NAV.indexOf(a.dataset.nav); if (i >= 0) tag(a, 'nav.' + i); });
     document.querySelectorAll('#tabbar a').forEach(function (a) { tag(a.lastChild && a.lastChild.nodeType === 3 ? a : null, 'tab.' + a.dataset.tab); });
-    tag(q('.ticker .tk-live'), 'today');
+    tag(q('.ticker .tk-live'), 'today'); tag(q('.fb-bar .fb-t'), 'fb_t'); tag(q('#fbOpen'), 'fb_open');
     tag(q('[data-view=home] .hero .eyebrow'), 'hero_eyebrow'); tag(q('[data-view=home] h1.display'), 'hero_h1');
     tag(q('[data-view=home] .hero-aside'), 'hero_aside'); tag(q('[data-view=home] .mission .big'), 'big');
     document.querySelectorAll('.doors .door').forEach(function (d, i) { tag(d.querySelector('h3'), 'door.' + i + '.0'); tag(d.querySelector('p'), 'door.' + i + '.1'); });

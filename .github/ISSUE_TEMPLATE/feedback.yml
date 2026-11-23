@@ -1,0 +1,44 @@
+name: Feedback on NeuroUnknown
+description: Tell us what is wrong, unclear or missing on the website.
+title: "[Feedback] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve NeuroUnknown. This issue is **public**. Please do not include personal, health or patient information.
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: Which page or section is this about?
+      placeholder: "e.g. 3D Neuroanatomy, slice view"
+  - type: dropdown
+    id: rating
+    attributes:
+      label: How useful is this page?
+      options:
+        - "5 - Very useful"
+        - "4 - Useful"
+        - "3 - OK"
+        - "2 - Not very useful"
+        - "1 - Not useful"
+        - "Not rated"
+  - type: dropdown
+    id: role
+    attributes:
+      label: You are (optional)
+      options:
+        - "Medical student"
+        - "Physician"
+        - "Researcher"
+        - "Other student"
+        - "Patient or family member"
+        - "Other"
+        - "Prefer not to say"
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Your feedback
+      description: What is wrong, unclear or missing? If you found an error, what should it say instead (with a source if you have one)?
+    validations:
+      required: true

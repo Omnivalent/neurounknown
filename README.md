@@ -91,3 +91,19 @@ Content is computational hypotheses only — no discovery claims.
   (`clash` map in `quiz.json`). A 3D "spot the lesion" game highlights a random structure on the brain.
 - Sections renamed: Our study, 3D Neuroanatomy, Disease atlas, Gene atlas, Test yourself; less-used pages under "More".
 - Rollback: version 2.1 is site commit `379ba0a`.
+
+## Version 2.3 (23 Nov 2026)
+
+- One common space for all anatomy: ICBM 2009 nonlinear asymmetric (MNI152NLin2009). Neuromorphometrics and Juelich labels are
+  moved into it with 12-parameter affines fitted on brain masks (`src/neurounknown/atlas_affines.json`; Neuromorphometrics
+  whole-brain Dice 0.942 -> 0.966, putamen agreement with MASSP 0.69/0.79 -> 0.88/0.85).
+- Slices: the same 1 mm slice positions (182 x 218 x 182) as before, but each slice is drawn from the ICBM 2009b template at
+  0.5 mm (`assets/brain3d/t1_hd_*.png`, `labels_hd_*.png`, 8 chunks, about 14 MB, loaded after a 1 mm preview).
+- 91 structures. New: midbrain, pons, medulla (approximate landmark planes); MASSP 2.0 nuclei (substantia nigra, subthalamic
+  nucleus, VTA and red nucleus now real segmentations, plus periaqueductal grey, pedunculopontine nucleus, colliculi, raphe
+  nuclei, habenula, geniculate nuclei, claustrum, internal capsule, fornix); Juelich tracts; 12 schematic cranial nerve nuclei.
+- Quiz rules: wrong answers never contain or are contained by the right one (e.g. pons vs abducens nucleus), never share a
+  lesion-effect family, and imaging-defined networks only take wrong answers from other regions. "Which is NOT involved"
+  questions were removed. `tools/site_check.py` runs data, link and browser checks before publishing.
+- Feedback bar on every page: opens a prefilled GitHub issue (`.github/ISSUE_TEMPLATE/feedback.yml`).
+- Rollback: version 2.2 is site commit `d63d64a`.

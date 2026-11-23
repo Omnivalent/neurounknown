@@ -1,5 +1,5 @@
 // NeuroUnknown 3D brain viewer, version 2. Meshes: website/assets/brain3d (built by src/neurounknown/build_brain3d.py from the
-// Neuromorphometrics labels in MNI space; four small nuclei are approximate ellipsoids). Population-average anatomy.
+// several atlases in ICBM 2009 space; cranial nerve nuclei are schematic ellipsoids). Population-average anatomy.
 import * as THREE from 'three';
 import { OrbitControls } from './three/OrbitControls.js';
 
@@ -88,7 +88,7 @@ class Brain {
   setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null; this.apply(); }
   apply() {
     const any = Object.keys(this.focus).length > 0, grey = css('--line-strong');
-    const approxOn = Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).approx);
+    const approxOn = Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).inner);
     const planes = this.cut ? [this.clip] : [];
     for (const m of this.meshes) {
       const id = m.userData.id, mat = m.material, inf = this.info[id] || {}, isCortex = CORTEX[inf.lobe];

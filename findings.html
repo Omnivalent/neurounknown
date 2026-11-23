@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-VgIPj9hcLHbu1g5BdliWT0k+q7/k/FHCnCkRnh72zu0=' 'sha256-tc9QNv7YqOMFRGTU0n2Rvvl6DKx0gl9o5ZN41UQSUxM=' 'sha256-xDuXE1tNlJB5kPgHZwmeImjig1c0Jv0MYWrlbucu/Sw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-VgIPj9hcLHbu1g5BdliWT0k+q7/k/FHCnCkRnh72zu0=' 'sha256-xDuXE1tNlJB5kPgHZwmeImjig1c0Jv0MYWrlbucu/Sw=' 'sha256-zQsRK0PNziITnn2ehQh6rrdj1OxcEAW/AdNwI7mj+Ho='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23060b1d%27/%3E%3Cpath d=%27M9 5c0 8 14 14 14 22M23 5c0 8-14 14-14 22%27 stroke=%27%2393c5fd%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NeuroUnknown — findings</title>
@@ -171,7 +171,7 @@ section,figure,.card,.lead-box{transition:opacity .6s ease,transform .6s ease}
  <a href="#c11orf87">C11orf87</a><a href="#structures">3D</a><a href="#biology">Biology</a><a href="#missing">Gaps</a>
  <a href="#library">Library</a><a href="#reviews">Reviews</a><a href="#downloads">Reports</a>
 </div></div>
-</header>
+</header><div class="fb-bar" id="nuFb"><div class="wrap fb-row"><span class="fb-t">Help improve NeuroUnknown: tell us what is wrong, unclear or missing.</span><button type="button" class="fb-btn" id="fbOpen" aria-expanded="false" aria-controls="fbPanel">Give feedback</button></div><div class="wrap fb-panel" id="fbPanel" hidden><label class="fb-l" for="fbText">Your feedback</label><textarea id="fbText" rows="4" maxlength="2000" placeholder="What is wrong, unclear or missing? If something is incorrect, what should it say (with a source if you have one)?"></textarea><div class="fb-sel"><label class="fb-l">How useful is this page? <select id="fbRate"><option value="">Choose</option><option>5 - Very useful</option><option>4 - Useful</option><option>3 - OK</option><option>2 - Not very useful</option><option>1 - Not useful</option></select></label><label class="fb-l">You are (optional) <select id="fbRole"><option value="">Choose</option><option>Medical student</option><option>Physician</option><option>Researcher</option><option>Other student</option><option>Patient or family member</option><option>Other</option></select></label></div><p class="fb-note">Your feedback opens as a <b>public</b> GitHub issue (a free GitHub account is needed); you can review it before posting. Please do not include personal, health or patient information.</p><div class="fb-act"><button type="button" class="fb-btn" id="fbSend">Continue on GitHub &rarr;</button><button type="button" class="fb-x" id="fbCancel">Cancel</button></div></div></div>
 
 <div class="hero"><div class="wrap">
  <p class="kicker" style="color:var(--violet);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px">Full findings</p>
@@ -618,6 +618,17 @@ section,figure,.card,.lead-box{transition:opacity .6s ease,transform .6s ease}
 })();
 </script>
 <script>
+(function(){ var o=document.getElementById('fbOpen'), p=document.getElementById('fbPanel'); if(!o||!p) return;
+ function tog(show){ p.hidden=!show; o.setAttribute('aria-expanded',show); if(show) document.getElementById('fbText').focus(); }
+ o.addEventListener('click',function(){ tog(p.hidden); });
+ document.getElementById('fbCancel').addEventListener('click',function(){ tog(false); });
+ document.getElementById('fbSend').addEventListener('click',function(){
+  var t=document.getElementById('fbText').value.trim(); if(!t){ document.getElementById('fbText').focus(); return; }
+  var page=(document.title||'')+' | '+location.pathname.split('/').pop()+location.hash;
+  var q='template=feedback.yml&title='+encodeURIComponent('[Feedback] '+t.slice(0,60))+'&page='+encodeURIComponent(page)+'&feedback='+encodeURIComponent(t);
+  var r=document.getElementById('fbRate').value, ro=document.getElementById('fbRole').value; if(r) q+='&rating='+encodeURIComponent(r); if(ro) q+='&role='+encodeURIComponent(ro);
+  window.open('https://github.com/Omnivalent/neurounknown/issues/new?'+q,'_blank','noopener'); tog(false); });
+})();
 
 (function(){ var run=document.getElementById('nuTickerRun'); if(!run) return;
  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
