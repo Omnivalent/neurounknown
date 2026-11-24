@@ -36,7 +36,45 @@ function geometryFor(me, buf) {
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
     g.userData = { ao, net: new Uint8Array(buf.slice(me.wo, me.wo + me.nv)) };
   } else g.computeVertexNormals();
+  if (me.no !== undefined) { // v2.9 nerve fibres: distance along the nerve, angle around it (cos, sin) and radius
+    const sv = new Uint16Array(buf, me.no, me.nv), o2 = me.no + me.nv * 2 + ((me.nv * 2) % 4 ? 2 : 0);
+    const x = new Int8Array(buf, o2, me.nv * 4), u = new Uint8Array(buf, o2, me.nv * 4);
+    const aS = new Float32Array(me.nv), aCS = new Float32Array(me.nv * 2), aR = new Float32Array(me.nv);
+    for (let i = 0; i < me.nv; i++) { aS[i] = sv[i] / 10 - 3; aCS[2 * i] = x[4 * i] / 127; aCS[2 * i + 1] = x[4 * i + 1] / 127; aR[i] = u[4 * i + 2] / 40; }
+    g.setAttribute('aS', new THREE.BufferAttribute(aS, 1)); g.setAttribute('aCS', new THREE.BufferAttribute(aCS, 2)); g.setAttribute('aRad', new THREE.BufferAttribute(aR, 1));
+  }
   return g;
+}
+// v2.9 nerves as bundles of fibres: fascicles that twist gently along the nerve, fine fibres inside each fascicle, and soft
+// signals travelling along the fibres: away from the brainstem in motor nerves, towards it in sensory nerves, both ways in mixed.
+const NV_U = { uTime: { value: 0 }, uFlow: { value: 1 } };
+const NERVE_DIR = { nerve1: 1, nerve2: -1, optic_tract: 1, nerve3: 1, nerve4: 1, nerve5: -1, nerve6: 1, nerve7: 1, nerve8: -1, nerve9: 0, nerve10: 0, nerve11: 1, nerve12: 1 };
+function nerveMaterial(id) {
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#efe6cf', roughness: 0.52, metalness: 0, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#fff2d6'), transparent: true, opacity: 1 });
+  const dir = NERVE_DIR[id] === undefined ? 1 : NERVE_DIR[id];
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.uTime = NV_U.uTime; sh.uniforms.uFlow = NV_U.uFlow; sh.uniforms.uDir = { value: dir };
+    sh.vertexShader = 'attribute float aS; attribute vec2 aCS; attribute float aRad; varying float vS; varying vec2 vCS; varying float vRad;\n' +
+      sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vS = aS; vCS = aCS; vRad = aRad;');
+    sh.fragmentShader = 'uniform float uTime; uniform float uFlow; uniform float uDir; varying float vS; varying vec2 vCS; varying float vRad;\n' +
+      sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+      float uu = atan(vCS.y, vCS.x) / 6.2831853;
+      float nf = max(5.0, floor(vRad * 9.0 + 0.5));            // fascicles around the nerve (more in thick nerves)
+      float a = (uu + vS * 0.028) * nf;                          // gentle twist along the nerve
+      float fi = floor(a), fr = fract(a);
+      float wa = fwidth(a);                                      // fade the pattern where it gets finer than a pixel (no shimmer)
+      float groove = mix(smoothstep(0.0, 0.2, fr) * smoothstep(1.0, 0.8, fr), 0.8, clamp((wa - 0.12) * 4.0, 0.0, 1.0));
+      float fine = mix(0.5 + 0.5 * sin(6.2831853 * (a * 3.0 + 0.35 * sin(vS * 0.7 + fi * 1.9))), 0.5, clamp((wa * 3.0 - 0.15) * 3.0, 0.0, 1.0));
+      float hh = fract(sin(fi * 127.1 + nf * 3.7) * 43758.5453);
+      diffuseColor.rgb *= mix(0.8, 1.0, groove) * mix(0.94, 1.03, fine);`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      float d = uDir == 0.0 ? (hh < 0.5 ? 1.0 : -1.0) : uDir;
+      float ph = fract(d * (vS / 26.0) - uTime * (0.22 + 0.16 * hh) + hh);
+      float sig = smoothstep(0.0, 0.06, ph) * (1.0 - smoothstep(0.06, 0.34, ph));
+      totalEmissiveRadiance += diffuseColor.rgb * sig * 0.5 * uFlow * groove * fine;`);
+  };
+  mat.customProgramCacheKey = () => 'nerve-v2-' + dir;
+  return mat;
 }
 // Yeo 7 networks (Yeo et al. 2011; Schaefer et al. 2018 parcellation), conventional colours
 const NODE_TEX = {};
@@ -103,12 +141,42 @@ function fiberObject(fe, buf) {
   const L = new THREE.LineSegments(g, fiberMaterial()); L.renderOrder = 6; L.frustumCulled = false; L.visible = false; L.userData.kind = fe.kind;
   return L;
 }
+// v2.9 arteries: separate file, loaded the first time they are shown. Flow coordinate per vertex (mm along the vessel from the
+// internal carotid or vertebral artery) drives a soft travelling pulse, so the blood visibly flows from the heart outwards.
+let ART = null;
+async function loadArteries(m) {
+  if (ART) return ART;
+  if (!m.arteries) return null;
+  const r = await fetch('assets/brain3d/' + m.arteries.file); if (!r.ok) throw new Error('arteries ' + r.status);
+  ART = { mf: m.arteries, buf: await r.arrayBuffer() }; return ART;
+}
+function arteryGeometry(me, buf) {
+  const g = geometryFor(me, buf), q = new Uint16Array(buf, me.so, me.nv), f = new Float32Array(me.nv);
+  for (let i = 0; i < me.nv; i++) f[i] = q[i] / 10;
+  g.setAttribute('aFlow', new THREE.BufferAttribute(f, 1)); return g;
+}
+const ART_U = { uTime: { value: 0 }, uPulse: { value: 1 } };
+function arteryMaterial() {
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#b3262e', roughness: 0.34, metalness: 0, clearcoat: 0.55, clearcoatRoughness: 0.28, sheen: 0.25, sheenColor: new THREE.Color('#ff9a8a'), transparent: true, opacity: 1 });
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.uTime = ART_U.uTime; sh.uniforms.uPulse = ART_U.uPulse;
+    sh.vertexShader = 'attribute float aFlow; varying float vFlow;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vFlow = aFlow;');
+    sh.fragmentShader = 'uniform float uTime; uniform float uPulse; varying float vFlow;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
+      `#include <emissivemap_fragment>
+      // a pulse wave every second, travelling outwards at about 90 mm/s, plus a faint steady glow
+      float ph = fract(uTime * 1.0 - vFlow / 90.0);
+      float wave = smoothstep(0.0, 0.08, ph) * (1.0 - smoothstep(0.08, 0.42, ph));
+      totalEmissiveRadiance += diffuseColor.rgb * (0.10 + 0.55 * wave) * uPulse;`);
+  };
+  mat.customProgramCacheKey = () => 'artery-v1';
+  return mat;
+}
 export const NETCOL = ['#000000', '#781180', '#4682b4', '#00760e', '#c43afa', '#b8cf6e', '#e69422', '#cd3e4e'];
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888'; }
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
 const HIDDEN = { 'white matter': 1, ventricles: 1 }; // shown only when selected
 // structures kept in the 'cranial nerves + brainstem' view
-const LAYER_OF = { frontal: 'cortex', parietal: 'cortex', temporal: 'cortex', occipital: 'cortex', limbic: 'cortex', insula: 'cortex', 'basal ganglia': 'deep', subcortical: 'deep', brainstem: 'brainstem', cerebellum: 'cerebellum', 'cranial nerves': 'nerves' };
+const LAYER_OF = { frontal: 'cortex', parietal: 'cortex', temporal: 'cortex', occipital: 'cortex', limbic: 'cortex', insula: 'cortex', 'basal ganglia': 'deep', subcortical: 'deep', brainstem: 'brainstem', cerebellum: 'cerebellum', 'cranial nerves': 'nerves', arteries: 'arteries' };
 const ISO = { midbrain: 1, pons: 1, medulla: 1, ventral_dc: 1, optic_chiasm: 1, lgn: 1 };
 
 class Brain {
@@ -136,7 +204,7 @@ class Brain {
     for (const me of manifest.meshes) {
       const g = geometryFor(me, buf);
       const real = me.xo !== undefined, nerve = (this.info[me.id] || {}).lobe === 'cranial nerves';
-      const mat = new THREE.MeshStandardMaterial({ color: '#bbb', roughness: real ? 0.72 : nerve ? 0.42 : 0.6, metalness: 0, transparent: true, opacity: 1, vertexColors: real });
+      const mat = me.no !== undefined ? nerveMaterial(me.id) : new THREE.MeshStandardMaterial({ color: '#bbb', roughness: real ? 0.72 : nerve ? 0.42 : 0.6, metalness: 0, transparent: true, opacity: 1, vertexColors: real });
       if (me.side === 'M') mat.side = THREE.DoubleSide;
       const m = new THREE.Mesh(g, mat); m.userData = { id: me.id, side: me.side, real };
       group.add(m); this.meshes.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
@@ -152,7 +220,7 @@ class Brain {
     c.rotateSpeed = 0.7; c.zoomSpeed = 0.9;
     // calm rotation while nobody touches the brain (off for reduced-motion users and where opts.autoRotate is false)
     const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.idleOK = this.opts.autoRotate !== false && !still; c.autoRotateSpeed = 0.55; this.lastTouch = performance.now();
+    this.idleOK = this.opts.autoRotate !== false && !still; NV_U.uFlow.value = still ? 0 : 1; c.autoRotateSpeed = 0.55; this.lastTouch = performance.now();
     const touch = () => { this.lastTouch = performance.now(); c.autoRotate = false; this.flight = null; };
     c.addEventListener('start', touch); c.addEventListener('end', touch);
     r.domElement.addEventListener('wheel', touch, { passive: true });
@@ -180,6 +248,8 @@ class Brain {
       if (this.flight) this.tickFly(now);
       if (this.nodeGroup) this.tickNodes(now);
       if (this.fibs) this.tickFibs(now, dt);
+      if (this.arts) ART_U.uTime.value = now / 1000;
+      NV_U.uTime.value = now / 1000;
       if (this.netTw) this.tickNet(now);
       if (this.lab) this.placeLabel();
       r.render(s, this.camera);
@@ -190,12 +260,18 @@ class Brain {
   resize() { const W = this.el.clientWidth, H = this.el.clientHeight; if (!W || !H) return; this.renderer.setSize(W, H); this.camera.aspect = W / H; this.camera.updateProjectionMatrix(); }
   view(name) {
     const d = this.radius * 2.6, c = this.center;
-    const v = { left: [-d, 0, 0], right: [d, 0, 0], top: [0, d, 0.01], front: [0, 0, -d], back: [0, 0, d], below: [0, -d, 0.01], medial: [d, 0, 0] }[name] || [-d, 0, 0];
+    const v = { left: [-d, 0, 0], right: [d, 0, 0], top: [0, d, 0.01], front: [0, 0, -d], back: [0, 0, d], below: [0, -d, -0.01], medial: [d, 0, 0] }[name] || [-d, 0, 0];
     const off = new THREE.Vector3(v[0], v[1] + (name === 'left' || name === 'right' || name === 'medial' ? d * 0.1 : 0), v[2]);
     this.camera.up.set(0, 1, 0);
     if (this.ready && this.controls) { this.fly(c, off.length(), off, 1000); this.framed = false; return; }
     this.camera.position.copy(c).add(off); this.camera.lookAt(c); if (this.controls) { this.controls.target.copy(c); this.controls.update(); }
     this.touch();
+  }
+  // turn to a named viewing direction while keeping the current (or planned) target and distance
+  look(name) {
+    const v = { left: [-1, 0.1, 0], right: [1, 0.1, 0], top: [0, 1, 0.01], front: [0, 0, -1], back: [0, 0, 1], below: [0, -1, -0.01] }[name]; if (!v || !this.controls) return;
+    const t = this.flight ? this.flight.tt : this.controls.target.clone(), d = this.flight ? this.flight.dist : this.camera.position.distanceTo(this.controls.target);
+    this.fly(t, d, new THREE.Vector3(v[0], v[1], v[2]).normalize(), 1100);
   }
   // stop the idle rotation for a while (e.g. after a programmatic view change)
   touch() { this.lastTouch = performance.now(); if (this.controls) this.controls.autoRotate = false; }
@@ -232,7 +308,22 @@ class Brain {
   // cranial nerves: 'show' (with the brain), 'hide', 'iso' (nerves and their nuclei with a see-through brainstem only)
   setNerves(mode) { this.nerveMode = mode; this.apply(); if (mode === 'iso') this.fit('front'); else if (this.fitted) this.unfit(); }
   // layers: {cortex, deep, brainstem, cerebellum, nerves, tracts, ventricles} -> false hides that group (focused structures stay visible)
-  setLayers(L) { this.layers = L || {}; this.apply(); }
+  setLayers(L) { this.layers = L || {}; if (this.layers.arteries) this.ensureArteries(); this.apply(); }
+  // v2.9: load the artery meshes on first use (about 3 MB), then fade them in like any other structure
+  ensureArteries() {
+    if (this.arts || this.artLoading || !this.mf.arteries) return this.artLoading || Promise.resolve();
+    this.artLoading = loadArteries(this.mf).then(A => {
+      if (!A || this.disposed) return;
+      this.arts = [];
+      for (const me of A.mf.meshes) {
+        const m = new THREE.Mesh(arteryGeometry(me, A.buf), arteryMaterial()); m.userData = { id: me.id, side: me.side, art: true };
+        m.visible = false; this.group.add(m); this.meshes.push(m); this.arts.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
+      }
+      ART_U.uPulse.value = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1;
+      this.apply(); if (this.opts.onArteries) this.opts.onArteries();
+    }).catch(() => { this.artLoading = null; });
+    return this.artLoading;
+  }
   // frame the currently visible meshes (used for the nerves + brainstem view)
   fit(name) {
     const box = new THREE.Box3(); let n = 0;
@@ -332,7 +423,9 @@ class Brain {
     this.lab.classList.remove('pop'); void this.lab.offsetWidth; this.lab.classList.add('pop');
   }
   // focus: {structureId: color}; empty = natural view
-  setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null; this.apply();
+  setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null;
+    if (Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).lobe === 'arteries')) this.ensureArteries();
+    this.apply();
     if (this.lab) this.setLabel(this.sel, this.sel ? (this.focus[this.sel] || this.focus[this.sel + '@L'] || this.focus[this.sel + '@R'] || this.focus[this.sel + '@M']) : null); }
   // apply() with a soft cross-fade: compute the new look, then animate colour and opacity from the old one
   apply() {
@@ -436,18 +529,19 @@ class Brain {
       const Lz = this.layers || {}, showHidden = (Lz.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') || (Lz.ventricles && inf.lobe === 'ventricles');
       if (HIDDEN[inf.lobe] && !showHidden && !(this.focus[id] || this.focus[id + '@' + m.userData.side])) { m.visible = false; continue; }
       const f = this.focus[id + '@' + m.userData.side] || this.focus[id];
-      const isNerve = inf.lobe === 'cranial nerves', nm = this.nerveMode;
+      const isNerve = inf.lobe === 'cranial nerves', nm = this.nerveMode, isArt = m.userData.art;
       if (isNerve && nm === 'hide' && !f) { m.visible = false; continue; }
-      if (nm === 'iso' && !f && !(isNerve || ISO[id] || inf.nerveof)) { m.visible = false; continue; }
+      if (isArt && !f && !Lz.arteries) { m.visible = false; continue; }
+      if (nm === 'iso' && !f && !(isNerve || ISO[id] || inf.nerveof || isArt)) { m.visible = false; continue; }
       const Ly = this.layers || {}, grp = LAYER_OF[inf.lobe];
       if (!f && nm !== 'iso' && grp && Ly[grp] === false) { m.visible = false; continue; }
       if (!f && !any && nm !== 'iso' && Ly.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#e6e0d2'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.clippingPlanes = cp.length ? cp : mat.clippingPlanes; mat.needsUpdate = true; continue; }
       if (!f && nm !== 'iso' && Ly.ventricles && inf.lobe === 'ventricles') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#8fb3c9'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.needsUpdate = true; continue; }
       if (nm === 'iso' && !any) { // nerve view: nerves and nuclei in matching colours, see-through brainstem
         m.visible = !(this.cut && m.userData.side === 'R') || isNerve;
-        let c = inf.ncol || (id === 'optic_chiasm' || id === 'lgn' ? '#e9c46a' : null);
+        let c = isArt ? (inf.tint || '#b3262e') : inf.ncol || (id === 'optic_chiasm' || id === 'lgn' ? '#e9c46a' : null);
         // natural ivory nerves with a light tint of their key colour; nuclei keep the key colour (softened)
-        if (c) c = isNerve || id === 'optic_chiasm' ? new THREE.Color('#efe6cf').lerp(new THREE.Color(c), 0.38) : new THREE.Color(c).lerp(new THREE.Color('#ffffff'), 0.12);
+        if (c && !isArt) c = isNerve || id === 'optic_chiasm' ? new THREE.Color('#efe6cf').lerp(new THREE.Color(c), 0.38) : new THREE.Color(c).lerp(new THREE.Color('#ffffff'), 0.12);
         if (c) { mat.color.set(c); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; }
         else { mat.color.set(inf.tint || '#bbb'); mat.opacity = 0.26; mat.transparent = true; mat.depthWrite = false; m.renderOrder = 3; }
         mat.emissive.set('#000000'); mat.needsUpdate = true; continue;
@@ -458,8 +552,8 @@ class Brain {
         m.renderOrder = 1;
       } else if (any) {
         if (approxOn && id === 'ventral_dc') m.visible = false;
-        mat.color.set(grey); mat.emissive.set('#000000'); mat.transparent = true; mat.depthWrite = false;
-        mat.opacity = isCortex ? 0.07 : 0.12; m.renderOrder = 3;
+        mat.color.set(isArt ? '#d8a7a7' : grey); mat.emissive.set('#000000'); mat.transparent = true; mat.depthWrite = false;
+        mat.opacity = isCortex ? 0.07 : isArt ? 0.06 : 0.12; m.renderOrder = 3;
         if (isCortex && this.cortexMode === 0) m.visible = false;
       } else {
         mat.color.set(inf.tint || '#bbb'); mat.emissive.set('#000000');
