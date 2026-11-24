@@ -48,7 +48,7 @@ function geometryFor(me, buf) {
 // v2.9 nerves as bundles of fibres: fascicles that twist gently along the nerve, fine fibres inside each fascicle, and soft
 // signals travelling along the fibres: away from the brainstem in motor nerves, towards it in sensory nerves, both ways in mixed.
 const NV_U = { uTime: { value: 0 }, uFlow: { value: 1 } };
-const NERVE_DIR = { nerve1: 1, nerve2: -1, optic_tract: 1, nerve3: 1, nerve4: 1, nerve5: -1, nerve6: 1, nerve7: 1, nerve8: -1, nerve9: 0, nerve10: 0, nerve11: 1, nerve12: 1 };
+const NERVE_DIR = { nerve1: 1, nerve2: -1, optic_tract: 1, nerve3: 1, nerve4: 1, nerve5: 0, nerve6: 1, nerve7: 0, nerve8: -1, nerve9: 0, nerve10: 0, nerve11: 1, nerve12: 1 };
 function nerveMaterial(id) {
   const mat = new THREE.MeshPhysicalMaterial({ color: '#efe6cf', roughness: 0.52, metalness: 0, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#fff2d6'), transparent: true, opacity: 1 });
   const dir = NERVE_DIR[id] === undefined ? 1 : NERVE_DIR[id];
