@@ -259,6 +259,13 @@ class Brain {
     }
     const box = new THREE.Box3().setFromObject(group);
     this.center = box.getCenter(new THREE.Vector3()); this.radius = box.getSize(new THREE.Vector3()).length() / 2;
+    // v2.11 soft contact shadow under the brain: grounds the model; fades out when the camera looks from below
+    { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g2 = cv.getContext('2d');
+      const gr = g2.createRadialGradient(64, 64, 4, 64, 64, 63); gr.addColorStop(0, 'rgba(40,30,20,0.55)'); gr.addColorStop(0.55, 'rgba(40,30,20,0.18)'); gr.addColorStop(1, 'rgba(40,30,20,0)');
+      g2.fillStyle = gr; g2.fillRect(0, 0, 128, 128); const tx = new THREE.CanvasTexture(cv);
+      const sz = box.getSize(new THREE.Vector3());
+      const sh = this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(sz.x * 1.5, sz.z * 1.35), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false, opacity: 0.6, toneMapped: false }));
+      sh.rotation.x = -Math.PI / 2; sh.position.set(this.center.x, box.min.y - this.radius * 0.06, this.center.z); sh.renderOrder = -1; s.add(sh); }
     const c = this.controls = new OrbitControls(this.camera, r.domElement);
     c.enableDamping = true; c.dampingFactor = 0.08; c.target.copy(this.center); c.minDistance = this.radius * 0.7; c.maxDistance = this.radius * 6;
     c.rotateSpeed = 0.7; c.zoomSpeed = 0.9;
@@ -275,6 +282,30 @@ class Brain {
     r.domElement.addEventListener('pointerup', e => { if (down && Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) < 6) { this.pick(e, true); this.hover(null); } down = null; });
     r.domElement.addEventListener('pointermove', e => { if (!down && e.pointerType === 'mouse') this.pick(e, false); });
     r.domElement.addEventListener('pointerleave', () => { this.hover(null); });
+    // v2.11 double-click a structure: glide in close to it; double-click empty space: back to the whole brain
+    r.domElement.addEventListener('dblclick', e => {
+      const bb = r.domElement.getBoundingClientRect(); this.ptr.set(((e.clientX - bb.left) / bb.width) * 2 - 1, -((e.clientY - bb.top) / bb.height) * 2 + 1);
+      this.ray.setFromCamera(this.ptr, this.camera);
+      const h = this.ray.intersectObjects(this.meshes.filter(m => m.visible && m.material.opacity > 0.05), false)[0];
+      if (h) this.fly(h.point, Math.max(c.minDistance, this.radius * 0.75), null, 900); else this.fly(this.center, this.radius * 2.6, null, 900);
+    });
+    // v2.11 keyboard: arrow keys turn the brain, + and - zoom, 0 returns to the start view (canvas must have focus)
+    r.domElement.tabIndex = 0; r.domElement.setAttribute('role', 'img');
+    r.domElement.setAttribute('aria-label', '3D brain. Drag or use the arrow keys to turn it, scroll or + and - to zoom, double-click a structure to zoom in, 0 to reset.');
+    r.domElement.addEventListener('keydown', e => {
+      const k = e.key, cam = this.camera, t = c.target; let used = true;
+      if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'ArrowUp' || k === 'ArrowDown') {
+        const off = cam.position.clone().sub(t), sp = new THREE.Spherical().setFromVector3(off), a = 0.12;
+        if (k === 'ArrowLeft') sp.theta -= a; if (k === 'ArrowRight') sp.theta += a;
+        if (k === 'ArrowUp') sp.phi = Math.max(0.05, sp.phi - a); if (k === 'ArrowDown') sp.phi = Math.min(Math.PI - 0.05, sp.phi + a);
+        cam.position.copy(t).add(new THREE.Vector3().setFromSpherical(sp)); cam.lookAt(t);
+      } else if (k === '+' || k === '=' || k === '-' || k === '_') {
+        const off = cam.position.clone().sub(t), d = THREE.MathUtils.clamp(off.length() * (k === '+' || k === '=' ? 0.85 : 1.18), c.minDistance, c.maxDistance);
+        cam.position.copy(t).add(off.setLength(d));
+      } else if (k === '0') this.view('left');
+      else used = false;
+      if (used) { e.preventDefault(); this.touch(); this.flight = k === '0' ? this.flight : null; }
+    });
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(this.el);
     window.addEventListener('nu-theme', () => this.apply());
     this.apply(); this.ready = true;
@@ -296,6 +327,8 @@ class Brain {
       NV_U.uTime.value = now / 1000; TS_U.uTime.value = now / 1000;
       if (this.netTw) this.tickNet(now);
       if (this.lab) this.placeLabel();
+      if (this.shadow) { const dy = this.camera.position.y - this.shadow.position.y, dd = this.camera.position.distanceTo(c.target) || 1;
+        this.shadow.visible = dy > 0; this.shadow.material.opacity = 0.6 * THREE.MathUtils.clamp(dy / dd * 1.6, 0, 1) * (this.shadowOn === false ? 0 : 1); }
       r.render(s, this.camera);
     };
     loop();
