@@ -355,6 +355,7 @@ class Brain {
   setAutoRotate(on) { this.holdRotate = !on; this.touch(); }
   setCut(on) { this.cut = on; this.apply(); if (on) this.view('medial'); }
   setCortex(mode) { this.cortexMode = mode; this.apply(); }
+  setGhost(v) { this.ghost = v == null ? null : Math.max(0, Math.min(1, v)); this.apply(); }
   // MRI planes inside the 3D scene. planes: [{ax:'ax'|'co'|'sa', mm, canvas, flip}], ext: {x0,x1,y0,y1,z0,z1} (MNI mm),
   // cut: remove the brain on one side of every plane (with several planes, the removed part is their intersection: a corner).
   setPlanes(planes, ext, cut) {
@@ -646,7 +647,12 @@ class Brain {
         if (approxOn && id === 'ventral_dc') m.visible = false;
         mat.color.set(isArt ? '#d8a7a7' : grey); mat.emissive.set('#000000'); mat.transparent = true; mat.depthWrite = false;
         mat.opacity = isCortex ? 0.07 : isArt ? 0.06 : 0.12; m.renderOrder = 3;
-        if (isCortex && this.cortexMode === 0) m.visible = false;
+        if (this.ghost != null && !isArt) { // v2.14: how see-through the rest of the brain is (picture questions): 0 hidden .. 1 solid
+          const gh = this.ghost; mat.opacity = isCortex ? gh : Math.max(0.12, gh * 0.7);
+          if (gh >= 0.5) mat.color.set(inf.tint || '#bbb');
+          if (mat.opacity >= 0.97) { mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; }
+          if (isCortex && gh < 0.02) m.visible = false;
+        } else if (isCortex && this.cortexMode === 0) m.visible = false;
       } else {
         mat.color.set(inf.tint || '#bbb'); mat.emissive.set('#000000');
         const op = isCortex ? [0, 0.22, 1][this.cortexMode] : 1;

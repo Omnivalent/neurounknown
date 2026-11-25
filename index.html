@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-glgtoGnt1KZh6ucxON8zuxr0mYaisyAUdNkj2HgvUyA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-gnAndayEDujl4nwn3gxAAjRyRWiNs3eRT09SEQiPEC8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeuroUnknown — learn the brain in 3D, from symptom to lesion</title>
 <meta name="description" content="A free, open 3D brain atlas for medical students and trainees: 127 structures, arteries and cranial nerves in one MRI space, MRI slices, diagnoses and exam-style questions. Educational only, not medical advice. With a separate open research screen for overlooked brain-disease genes.. No discovery claims.">
@@ -710,6 +710,13 @@ html[data-layout="phone"] .extop{grid-template-columns:minmax(0,1fr) 70px 40px}
 .qfig{margin:0 0 14px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--bg-soft)}.qfig.mri{background:#000;border-color:#000}
 .qfig img{display:block;width:100%;max-width:560px;height:auto;margin:0 auto}.qfig figcaption{font-size:12.5px;color:var(--muted);padding:6px 10px;background:var(--surface);border-top:1px solid var(--line)}
 .qfig.sm img{max-width:300px}
+.b3wrap.q3d{height:min(56vh,440px);margin:0 0 6px}
+.q3d .q3op{position:absolute;left:12px;top:12px;z-index:3;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--hdr-bg);border:1px solid var(--line);font:600 12px var(--sans);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.q3d .q3op .mono{font-size:10.5px;text-transform:none;letter-spacing:0;color:var(--muted)}.q3d .q3op input{width:min(170px,30vw)}
+.q3d .q3hint{position:absolute;right:12px;top:14px;margin:0;font-size:12px;color:var(--muted);pointer-events:none}
+.q3d #q3Cut[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.q3dcap{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+html[data-layout="phone"] .b3wrap.q3d{height:340px}html[data-layout="phone"] .q3d .q3hint{display:none}
 .qres{font-size:16px}.qres b{font:600 40px var(--serif);display:block}
 .tself{margin-left:6px}
 .b3wrap.lzb{height:420px;margin-bottom:14px}
@@ -765,7 +772,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
  </div>
  <div class="wrap"><div class="doors doors-learn">
    <a class="door" href="#/atlas"><span class="n">01</span><h3>3D Neuroanatomy</h3><p>127 structures, 20 systems, the circle of Willis and the cranial nerves, in 3D and as MRI slices. Single out any structure, its artery or what happens when it is damaged.</p><span class="arr">&rarr;</span></a>
-   <a class="door" href="#/study"><span class="n">02</span><h3>Test yourself</h3><p>1,136 exam-style questions, an anatomy bank and a 3D "spot the lesion" game, each answer explained. Your score stays on your device.</p><span class="arr">&rarr;</span></a>
+   <a class="door" href="#/study"><span class="n">02</span><h3>Test yourself</h3><p>1,164 exam-style questions, an anatomy bank and a 3D "spot the lesion" game, each answer explained. Your score stays on your device.</p><span class="arr">&rarr;</span></a>
    <a class="door" href="#/diseases"><span class="n">03</span><h3>Diagnoses</h3><p>18 neurological, psychiatric and neurodevelopmental conditions: where they affect the brain, causes, guideline treatment lines and where each drug acts.</p><span class="arr">&rarr;</span></a>
  </div>
  <p class="purpose">Educational atlas and self-study tool for students and trainees. It is not a medical device, is not intended to diagnose, treat, prevent or monitor any disease, and must not be used in the care of a patient.</p></div>
@@ -901,7 +908,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
    <div class="eyebrow"><b>05</b> Test yourself</div>
    <h2 class="title">Test yourself</h2>
    <p class="lede">Exam-style questions (in the style of medical licensing exams such as the USMLE), a separate neuroanatomy bank, a 3D game where you find the lesion, and timed exams with a score card you can save. Answer and confirm: every option is explained, and each question ends with its learning objective and sources.</p>
-   <div class="atmodes" role="tablist" aria-label="Question bank" id="qBanks"><button type="button" role="tab" data-bank="clinical" aria-selected="true">Clinical questions (420)</button><button type="button" role="tab" data-bank="anatomy" aria-selected="false">Anatomy bank (716)</button><button type="button" role="tab" data-bank="lesion" aria-selected="false">Spot the lesion (3D)</button><button type="button" role="tab" data-bank="exam" aria-selected="false">Timed exam</button><button type="button" role="tab" data-bank="review" aria-selected="false">Arteries (preview, 43)</button></div>
+   <div class="atmodes" role="tablist" aria-label="Question bank" id="qBanks"><button type="button" role="tab" data-bank="clinical" aria-selected="true">Clinical questions (420)</button><button type="button" role="tab" data-bank="anatomy" aria-selected="false">Anatomy bank (744)</button><button type="button" role="tab" data-bank="lesion" aria-selected="false">Spot the lesion (3D)</button><button type="button" role="tab" data-bank="exam" aria-selected="false">Timed exam</button><button type="button" role="tab" data-bank="review" aria-selected="false">Arteries (preview, 43)</button></div>
    <div class="qtopics" id="qTopics"></div>
   </div>
   <div class="qwrap"><div class="b3wrap lzb" id="lzBrain" hidden><div class="b3msg" id="lzMsg">Loading the 3D brain&hellip;</div><div class="b3tip" id="lzTip"></div><div class="b3ctl"><div class="grp"><button type="button" data-lzv="left">Left</button><button type="button" data-lzv="right">Right</button><button type="button" data-lzv="top">Top</button><button type="button" data-lzv="front">Front</button></div></div></div><div id="lzFallback"></div><div class="panel qcard" id="qCard" aria-live="polite"></div></div>
@@ -1176,7 +1183,8 @@ function make3D(hostId,msgId,tipId,onPick,fallbackId,fallbackView){
  function fallback(){ if(done) return; done=true; msg.textContent='The 3D brain could not start here (it needs WebGL). Showing the schematic map instead.';
   var fb=document.getElementById(fallbackId); if(fb) out.svg=makeMap(fb,fallbackView||'medial',onPick); if(out.onReady) out.onReady(); }
  setTimeout(function(){ if(!window.NUBrain) fallback(); },10000);
- withBrain(function(){ if(done) return; window.NUBrain.create(host,{structures:A.structures,autoRotate:hostId!=='lzBrain',frame:hostId==='atlas3d',labels:hostId==='atlas3d',assemble:hostId!=='lzBrain',onPick:onPick,onHover:function(id,e){ if(!tip) return; if(!id){ tip.style.opacity=0; return; }
+ withBrain(function(){ if(done) return; window.NUBrain.create(host,{structures:A.structures,autoRotate:hostId!=='lzBrain'&&hostId!=='q3dBrain',frame:hostId==='atlas3d',labels:hostId==='atlas3d',assemble:hostId!=='lzBrain'&&hostId!=='q3dBrain',onPick:onPick,onHover:function(id,e){ if(!tip) return;
+   if(hostId==='lzBrain'&&!QZ.done){ tip.style.opacity=0; return; } // v2.14: names only after answering (hover gave the answer away) if(!id){ tip.style.opacity=0; return; }
    var r=host.getBoundingClientRect(); tip.textContent=sname(id); tip.style.left=(e.clientX-r.left)+'px'; tip.style.top=(e.clientY-r.top)+'px'; tip.style.opacity=1; }})
   .then(function(b){ if(done) return; done=true; out.b=b; msg.style.display='none'; if(out.onReady) out.onReady(); })
   .catch(function(){ fallback(); }); });
@@ -1884,7 +1892,8 @@ function qTopics(){ var t=document.getElementById('qTopics'), cnt={}, tp=QZ.bank
  [].forEach.call(t.querySelectorAll('[data-qt]'),function(b){ b.addEventListener('click',function(){ qStart(b.dataset.qt); }); }); }
 // v2.13 picture questions: an MRI slice or a view of the 3D model above the options
 var QFIG='assets/'+'quizfig/';
-function qFig(q,small){ if(!q.img) return ''; var mri=q.img.indexOf('m3d_')!==0;
+function qFig(q,small){ if(q.kind==='img-3d'&&!small) return '<div class="q3dslot"></div><p class="q3dcap">'+esc(q.cap||'')+'</p>';
+ if(!q.img) return ''; var mri=q.img.indexOf('m3d_')!==0;
  return '<figure class="qfig'+(mri?' mri':'')+(small?' sm':'')+'"><img src="'+QFIG+esc(q.img)+'" alt="'+(mri?'MRI slice for this question':'3D brain model for this question')+'" loading="lazy" decoding="async"><figcaption>'+esc(q.cap||'')+'</figcaption></figure>'; }
 function qRefs(ps){ return (ps||[]).map(function(p){ var r=QZ.d.refs[p]; return r?'<a class="cite" href="https://pubmed.ncbi.nlm.nih.gov/'+p+'/" target="_blank" rel="noopener" title="'+esc(r.t)+'">'+esc(r.a)+' '+esc(r.y)+'</a>':''; }).join(''); }
 /* spot the lesion: questions generated from the structure data */
@@ -1927,7 +1936,7 @@ function qRender(){ var c=document.getElementById('qCard'), n=QZ.round.length;
  [].forEach.call(c.querySelectorAll('.qopt'),function(b){ b.addEventListener('click',function(){ if(QZ.done) return; QZ.sel=+b.dataset.k; qRender(); }); });
  var ok=document.getElementById('qOk'); if(ok) ok.onclick=function(){ if(QZ.sel==null) return; QZ.done=true; if(QZ.sel===q.a) QZ.score++; else QZ.wrong.push(q); qRender(); };
  var nx=document.getElementById('qNext'); if(nx) nx.onclick=function(){ QZ.i++; QZ.sel=null; QZ.done=false; qRender(); c.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'}); };
- var qb=document.getElementById('qBrain'); if(qb) qb.onclick=function(){ var sid=q.s; location.hash='#/atlas'; setTimeout(function(){ setMode('struct',true); at.multi=false; atlasPick(sid); },inited.atlas?60:600); }; }
+ q3dMount(q); var qb=document.getElementById('qBrain'); if(qb) qb.onclick=function(){ var sid=q.s; location.hash='#/atlas'; setTimeout(function(){ setMode('struct',true); at.multi=false; atlasPick(sid); },inited.atlas?60:600); }; }
 function studyInit(){ qLoad(function(){ [].forEach.call(document.querySelectorAll('[data-bank]'),function(b){ b.addEventListener('click',function(){ qBank(b.dataset.bank); }); });
   qRoute(location.hash.split('/')[2]||'all'); }); }
 function qRoute(t){ if(t==='lesion'){ if(QZ.bank!=='lesion') qBank('lesion'); return; }
@@ -1941,7 +1950,7 @@ function exHist(){ try{ return JSON.parse(localStorage.getItem('nu-exams')||'[]'
 function exFmt(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), r=s%60; return (m<10?'0':'')+m+':'+(r<10?'0':'')+r; }
 function exSrcN(src){ return {clinical:'Clinical',anatomy:'Anatomy',both:'Clinical and anatomy'}[src]; }
 function exPool(src){ return QZ.d.questions.filter(function(q){ return (src==='both'?(q.bank==='clinical'||q.bank==='anatomy'):q.bank===src); }); }
-function exSetup(){ var c=document.getElementById('qCard'), C=EX.cfg, H=exHist();
+function exSetup(){ var c=document.getElementById('qCard'), C=EX.cfg, H=exHist(); q3dMount(null);
  function ch(k,v,l){ return '<button type="button" class="chip" data-ex="'+k+'" data-v="'+v+'" aria-pressed="'+(String(C[k])===String(v))+'">'+l+'</button>'; }
  var best=H.length?H.reduce(function(m,h){ return Math.max(m,h.p); },0):null;
  c.innerHTML='<div class="exsetup"><h3>Timed exam</h3><p>Answer against the clock, then see your score, a breakdown by topic, and every question explained. Questions come from the clinical and anatomy banks ('+exPool('both').length.toLocaleString('en')+' questions); the artery preview questions are not used until a clinician has checked them.</p>'+
@@ -1979,7 +1988,7 @@ function exRender(){ var c=document.getElementById('qCard'), it=EX.list[EX.i], q
  var pv=document.getElementById('exPrev'); if(pv&&EX.i) pv.onclick=function(){ EX.i--; exRender(); };
  var nx=document.getElementById('exNext'); if(nx) nx.onclick=function(){ EX.i++; exRender(); c.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'}); };
  function fin(){ var un=EX.list.filter(function(x){ return x.sel==null; }).length; if(un&&!confirm(un+' question'+(un>1?'s are':' is')+' not answered yet. Finish anyway?')) return; exFinish(false); }
- var e1=document.getElementById('exEnd'); if(e1) e1.onclick=fin; var e2=document.getElementById('exEnd2'); if(e2) e2.onclick=fin; }
+ q3dMount(q); var e1=document.getElementById('exEnd'); if(e1) e1.onclick=fin; var e2=document.getElementById('exEnd2'); if(e2) e2.onclick=fin; }
 document.addEventListener('keydown',function(e){ if(!EX.on||EX.done||QZ.bank!=='exam'||!document.querySelector('[data-view=study].on')) return; var tg=e.target&&e.target.tagName; if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'||e.ctrlKey||e.metaKey||e.altKey) return;
  var it=EX.list[EX.i], k=e.key.toUpperCase(), j='ABCDE'.indexOf(k); if(j<0&&/^[1-5]$/.test(k)) j=+k-1;
  if(j>=0&&j<it.ord.length){ it.sel=it.ord[j]; exRender(); e.preventDefault(); }
@@ -1999,6 +2008,7 @@ function exResult(){ var c=document.getElementById('qCard'), R=EX.res, C=EX.cfg,
   '<div class="exrev"><div class="mono" style="margin-bottom:8px">Review every question</div>'+EX.list.map(function(x,j){ var q=x.q, ok=x.sel===q.a;
    return '<details><summary><b class="'+(ok?'okt':'badt')+'">'+(j+1)+(ok?' ✓':' ✗')+'</b>'+esc(q.stem)+'</summary>'+qFig(q,1)+'<p class="ans">Your answer: <b class="'+(ok?'okt':'badt')+'">'+(x.sel==null?'none':esc(q.o[x.sel]))+'</b>'+(ok?'':'<br>Correct answer: <b class="okt">'+esc(q.o[q.a])+'</b>')+'</p>'+
     '<p class="ans">'+esc(String(q.e[q.a]).replace(/^Correct[.:]\s*/,''))+'</p>'+(x.sel!=null&&!ok?'<p class="ans" style="color:var(--muted)">About your answer: '+esc(q.e[x.sel])+'</p>':'')+'<div class="qobj"><b>Educational objective</b>'+esc(q.obj)+'</div>'+(q.refs.length?'<p style="font-size:13px;color:var(--muted)">Sources: '+qRefs(q.refs)+'</p>':'')+'</details>'; }).join('')+'</div></div>';
+ q3dMount(null);
  document.getElementById('exNew').onclick=function(){ EX.on=false; EX.done=false; exSetup(); };
  document.getElementById('exCard').onclick=function(){ var u=exCardURL(); var a=document.createElement('a'); a.href=u; a.download='neurounknown-exam-'+new Date(R.d).toISOString().slice(0,10)+'.png'; document.body.appendChild(a); a.click(); a.remove();
   if(!document.getElementById('exPrev2')){ var im=document.createElement('img'); im.id='exPrev2'; im.className='exprev'; im.alt='Your score card'; im.src=u; this.parentNode.parentNode.insertAdjacentElement('afterend',im); } };
@@ -2019,6 +2029,31 @@ function exCardURL(){ var R=EX.res, C=EX.cfg, W=1200, H=675, cv=document.createE
  g.fillStyle=MUT; g.font='400 16px '+SAN; g.fillText(new Date(R.d).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})+'  ·  omnivalent.github.io/neurounknown', 70, H-78);
  g.font='400 14px '+SAN; g.fillText('Self-assessment on an educational website. Not a certificate of competence; no CME/CPD credit.', 70, H-54);
  return cv.toDataURL('image/png'); }
+
+/* ---------------- v2.14 live 3D model for picture questions: turn, zoom, cut in half, set how see-through the rest of the brain is ---------------- */
+var Q3={host:null,v:null,cur:null,ready:false};
+function q3dEnsure(){ if(Q3.host) return; var h=document.createElement('div'); h.className='b3wrap q3d'; h.id='q3dBrain'; h.hidden=true;
+ h.innerHTML='<div class="b3msg" id="q3dMsg">Loading the 3D brain&hellip;</div><div id="q3dFb"></div>'+
+  '<div class="q3op"><label for="q3Op">Rest of the brain</label><span class="mono">hidden</span><input type="range" id="q3Op" min="0" max="100" value="10" aria-label="How see-through the rest of the brain is"><span class="mono">solid</span></div>'+
+  '<div class="b3ctl"><div class="grp" role="group" aria-label="Viewpoint"><button type="button" data-q3v="left">Left</button><button type="button" data-q3v="right">Right</button><button type="button" data-q3v="top">Top</button><button type="button" data-q3v="front">Front</button><button type="button" data-q3v="below">Below</button></div>'+
+  '<div class="grp"><button type="button" id="q3Cut" aria-pressed="false">Cut in half</button><button type="button" id="q3Reset">Start view</button></div></div>'+
+  '<p class="q3hint">Drag to turn &middot; scroll or pinch to zoom</p>';
+ document.body.appendChild(h); Q3.host=h;
+ Q3.v=make3D('q3dBrain','q3dMsg',null,function(){},'q3dFb','lateral');
+ Q3.v.onReady=function(){ Q3.ready=true; if(Q3.cur) q3dShow(Q3.cur); };
+ h.querySelector('#q3Op').addEventListener('input',function(){ if(Q3.v.b) Q3.v.b.setGhost(this.value/100); });
+ [].forEach.call(h.querySelectorAll('[data-q3v]'),function(b){ b.addEventListener('click',function(){ if(!Q3.v.b) return; var c=document.getElementById('q3Cut'); if(c.getAttribute('aria-pressed')==='true'){ c.setAttribute('aria-pressed','false'); Q3.v.b.setCut(false); } Q3.v.b.view(b.dataset.q3v); }); });
+ h.querySelector('#q3Cut').addEventListener('click',function(){ if(!Q3.v.b) return; var on=this.getAttribute('aria-pressed')!=='true'; this.setAttribute('aria-pressed',on); Q3.v.b.setCut(on); if(!on) Q3.v.b.view('left'); });
+ h.querySelector('#q3Reset').addEventListener('click',function(){ if(Q3.cur) q3dShow(Q3.cur); }); }
+function q3dShow(q){ var b=Q3.v&&Q3.v.b; if(!b||!q) return; var c=q.v3||{}, f={}; f[q.s]='#e11d48';
+ b.setNerves(c.nerves?'show':'hide'); var g=c.ghost==null?0.1:c.ghost; b.setGhost(g); document.getElementById('q3Op').value=Math.round(g*100);
+ b.setFocus(f,q.s); var cut=!!c.cut; document.getElementById('q3Cut').setAttribute('aria-pressed',cut); b.setCut(cut);
+ if(!cut) b.view(c.view==='deep'?'left':(c.view||'left')); }
+function q3dMount(q){ var slot=q&&q.kind==='img-3d'?document.querySelector('#qCard .q3dslot'):null;
+ if(!slot){ if(Q3.host){ Q3.host.hidden=true; document.body.appendChild(Q3.host); } if(Q3.v&&Q3.v.b) Q3.v.b.pause(true); return; }
+ q3dEnsure(); slot.appendChild(Q3.host); Q3.host.hidden=false; if(Q3.v.b){ Q3.v.b.pause(false); Q3.v.b.resize(); }
+ if(Q3.cur!==q){ Q3.cur=q; if(Q3.ready) q3dShow(q); } }
+window.addEventListener('hashchange',function(){ if(location.hash.indexOf('#/study')!==0&&Q3.v&&Q3.v.b) Q3.v.b.pause(true); });
 function testBtn(topic,label){ return '<a class="chip tself" href="#/study/'+topic+'">'+(label||'Test yourself')+' &rarr;</a>'; }
 
 /* ---------------- daily literature watch (home) ---------------- */
