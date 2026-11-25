@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-ak5+G0lYlAl6nbI733KwG0X/VAPFEKU2XjCOC1UEeb4='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-glgtoGnt1KZh6ucxON8zuxr0mYaisyAUdNkj2HgvUyA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeuroUnknown — learn the brain in 3D, from symptom to lesion</title>
 <meta name="description" content="A free, open 3D brain atlas for medical students and trainees: 127 structures, arteries and cranial nerves in one MRI space, MRI slices, diagnoses and exam-style questions. Educational only, not medical advice. With a separate open research screen for overlooked brain-disease genes.. No discovery claims.">
@@ -707,6 +707,9 @@ html[data-layout="phone"] .slcv{height:440px}
 .exprev{max-width:100%;border:1px solid var(--line);border-radius:12px;margin:12px 0 0;display:block}
 html[data-layout="phone"] .exbar{top:56px}
 html[data-layout="phone"] .extop{grid-template-columns:minmax(0,1fr) 70px 40px}
+.qfig{margin:0 0 14px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--bg-soft)}.qfig.mri{background:#000;border-color:#000}
+.qfig img{display:block;width:100%;max-width:560px;height:auto;margin:0 auto}.qfig figcaption{font-size:12.5px;color:var(--muted);padding:6px 10px;background:var(--surface);border-top:1px solid var(--line)}
+.qfig.sm img{max-width:300px}
 .qres{font-size:16px}.qres b{font:600 40px var(--serif);display:block}
 .tself{margin-left:6px}
 .b3wrap.lzb{height:420px;margin-bottom:14px}
@@ -762,7 +765,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
  </div>
  <div class="wrap"><div class="doors doors-learn">
    <a class="door" href="#/atlas"><span class="n">01</span><h3>3D Neuroanatomy</h3><p>127 structures, 20 systems, the circle of Willis and the cranial nerves, in 3D and as MRI slices. Single out any structure, its artery or what happens when it is damaged.</p><span class="arr">&rarr;</span></a>
-   <a class="door" href="#/study"><span class="n">02</span><h3>Test yourself</h3><p>1,038 exam-style questions, an anatomy bank and a 3D "spot the lesion" game, each answer explained. Your score stays on your device.</p><span class="arr">&rarr;</span></a>
+   <a class="door" href="#/study"><span class="n">02</span><h3>Test yourself</h3><p>1,136 exam-style questions, an anatomy bank and a 3D "spot the lesion" game, each answer explained. Your score stays on your device.</p><span class="arr">&rarr;</span></a>
    <a class="door" href="#/diseases"><span class="n">03</span><h3>Diagnoses</h3><p>18 neurological, psychiatric and neurodevelopmental conditions: where they affect the brain, causes, guideline treatment lines and where each drug acts.</p><span class="arr">&rarr;</span></a>
  </div>
  <p class="purpose">Educational atlas and self-study tool for students and trainees. It is not a medical device, is not intended to diagnose, treat, prevent or monitor any disease, and must not be used in the care of a patient.</p></div>
@@ -898,7 +901,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
    <div class="eyebrow"><b>05</b> Test yourself</div>
    <h2 class="title">Test yourself</h2>
    <p class="lede">Exam-style questions (in the style of medical licensing exams such as the USMLE), a separate neuroanatomy bank, a 3D game where you find the lesion, and timed exams with a score card you can save. Answer and confirm: every option is explained, and each question ends with its learning objective and sources.</p>
-   <div class="atmodes" role="tablist" aria-label="Question bank" id="qBanks"><button type="button" role="tab" data-bank="clinical" aria-selected="true">Clinical questions (394)</button><button type="button" role="tab" data-bank="anatomy" aria-selected="false">Anatomy bank (644)</button><button type="button" role="tab" data-bank="lesion" aria-selected="false">Spot the lesion (3D)</button><button type="button" role="tab" data-bank="exam" aria-selected="false">Timed exam</button><button type="button" role="tab" data-bank="review" aria-selected="false">Arteries (preview, 43)</button></div>
+   <div class="atmodes" role="tablist" aria-label="Question bank" id="qBanks"><button type="button" role="tab" data-bank="clinical" aria-selected="true">Clinical questions (420)</button><button type="button" role="tab" data-bank="anatomy" aria-selected="false">Anatomy bank (716)</button><button type="button" role="tab" data-bank="lesion" aria-selected="false">Spot the lesion (3D)</button><button type="button" role="tab" data-bank="exam" aria-selected="false">Timed exam</button><button type="button" role="tab" data-bank="review" aria-selected="false">Arteries (preview, 43)</button></div>
    <div class="qtopics" id="qTopics"></div>
   </div>
   <div class="qwrap"><div class="b3wrap lzb" id="lzBrain" hidden><div class="b3msg" id="lzMsg">Loading the 3D brain&hellip;</div><div class="b3tip" id="lzTip"></div><div class="b3ctl"><div class="grp"><button type="button" data-lzv="left">Left</button><button type="button" data-lzv="right">Right</button><button type="button" data-lzv="top">Top</button><button type="button" data-lzv="front">Front</button></div></div></div><div id="lzFallback"></div><div class="panel qcard" id="qCard" aria-live="polite"></div></div>
@@ -1241,25 +1244,6 @@ function slMap(v,k){ var d=SL.m.dims, o=SL.m.origin, H=SL.h, org=H?H.m.origin:o,
 /* cut face of the 3D model on a plane: the same labels the meshes are built from, in the model's colours (not the MRI image).
    Cortex and cerebellum keep only tissue inside their surface (T1 >= 160, the level the surfaces are drawn at); ventricles are open. */
 var CUTW={cerebral_wm:1,cerebellar_wm:1}, CUTC={frontal:1,parietal:1,temporal:1,occipital:1,limbic:1,insula:1,cerebellum:1};
-function slDrawCut(v,k,cv,W,H){ var D=slDims(v); cv.width=W; cv.height=H;
- var x=cv.getContext('2d'), img=x.createImageData(W,H), px=img.data, sx=D.w/W, sy=D.h/H, anyF=Object.keys(at.focus).length>0, cache={};
- var M=slMap(v,k), dm=M.dims, T=M.T, Lb=M.L, sB=dm[0]*dm[1], P=M.P, inPlane=P>=0&&P<dm[M.px];
- var strA=[1,dm[0],sB][M.ax], strB=[1,dm[0],sB][M.bx], base=inPlane?P*[1,dm[0],sB][M.px]:0, nA=dm[M.ax], nB=dm[M.bx];
- if(!inPlane){ x.putImageData(img,0,0); return; }
- function lab(a,b){ a=Math.round(a); b=Math.round(b); if(a<0||b<0||a>=nA||b>=nB) return 0; return Lb[base+a*strA+b*strB]; }
- function t1(a,b){ a=Math.round(a); b=Math.round(b); if(a<0||b<0||a>=nA||b>=nB) return 0; return T[base+a*strA+b*strB]; }
- function info(lv){ if(lv in cache) return cache[lv]; var s=slSid(lv), st=A.structures[s.sid]||{}, f=slColor(s.sid,s.side), out;
-  if(st.lobe==='ventricles') out=null;
-  else { var c=f?f:(anyF?'#b8b2a6':(CUTW[s.sid]||st.lobe==='white matter'?'#ece5d6':(st.tint||'#c9c2b4'))); out={c:hex(c),cx:!!CUTC[st.lobe],w:!!CUTW[s.sid]}; }
-  return cache[lv]=out; }
- var eA=Math.abs(M.A1)*sx*1.1, eB=Math.abs(M.B1)*sy*1.1;
- for(var r=0;r<H;r++){ var bb=M.B0+M.B1*((r+.5)*sy-.5);
-  for(var c=0;c<W;c++){ var aa=M.A0+M.A1*((c+.5)*sx-.5), o=4*(r*W+c), lv=lab(aa,bb); if(!lv){ px[o+3]=0; continue; }
-   var q=info(lv); if(!q){ px[o+3]=0; continue; } var g=t1(aa,bb); if(q.cx&&g<160){ px[o+3]=0; continue; }
-   var sh=q.w?0.93+0.07*g/255:0.80+0.2*g/255, edge=lab(aa+eA,bb)!==lv||lab(aa-eA,bb)!==lv||lab(aa,bb+eB)!==lv||lab(aa,bb-eB)!==lv;
-   if(edge&&!q.w) sh*=0.86;
-   px[o]=Math.min(255,q.c[0]*sh); px[o+1]=Math.min(255,q.c[1]*sh); px[o+2]=Math.min(255,q.c[2]*sh); px[o+3]=255; } }
- x.putImageData(img,0,0); }
 function slDraw(v,k,cv,W,H,bg){ var D=slDims(v); cv.width=W; cv.height=H;
  var x=cv.getContext('2d'), img=x.createImageData(W,H), px=img.data, sx=D.w/W, sy=D.h/H, anyF=Object.keys(at.focus).length>0, cache={};
  var M=slMap(v,k), dm=M.dims, T=M.T, Lb=M.L, sB=dm[0]*dm[1], P=M.P, inPlane=P>=0&&P<dm[M.px];
@@ -1386,9 +1370,15 @@ function slInit(){
 
 /* ---------------- MRI planes inside the 3D view ---------------- */
 var P3={on:[],flip:{},cut:true,show:true,cv:{},t:null};
+// v2.13: the slice shown inside the 3D model is the full MRI slice (same image as the slice pane) on a framed plane. The old cut face
+// drew only labelled pixels, and labels reach a little beyond the smoothed 3D surface, so near the edges of the brain small labelled
+// islands floated outside the model, and unlabelled gaps showed as stripes. A whole plane has neither problem.
+function slPlane(v,k,cv,W,H,cut){ slDraw(v,k,cv,W,H,true); var x=cv.getContext('2d'), im=x.getImageData(0,0,W,H), px=im.data, a=cut?200:110;
+ for(var i=0;i<px.length;i+=4){ if(px[i+3]===0){ px[i]=16; px[i+1]=16; px[i+2]=18; px[i+3]=a; } }
+ x.putImageData(im,0,0); var lw=Math.max(2,Math.round(Math.min(W,H)/160)); x.strokeStyle='#d98a00'; x.lineWidth=lw; x.strokeRect(lw/2,lw/2,W-lw,H-lw); }
 function p3Update(){ if(!at.v||!at.v.b||!SL.m) return; clearTimeout(P3.t); P3.t=setTimeout(function(){ var d=SL.m.dims, o=SL.m.origin;
   var planes=P3.on.map(function(v){ var D=slDims(v), k=SL.pos[v]==null?(SL.pos[v]=Math.floor(D.n/2)):SL.pos[v], sc=SL.h?2:1;
-   var cv=P3.cv[v]||(P3.cv[v]=document.createElement('canvas')); slDrawCut(v,k,cv,D.w*sc,D.h*sc);
+   var cv=P3.cv[v]||(P3.cv[v]=document.createElement('canvas')); slPlane(v,k,cv,D.w*sc,D.h*sc,P3.cut);
    return {ax:v,mm:mm(SECA[v],k),canvas:cv,flip:!!P3.flip[v]}; });
   at.v.b.setPlanes(planes,{x0:o[0]-.5,x1:o[0]+d[0]-.5,y0:o[1]-.5,y1:o[1]+d[1]-.5,z0:o[2]-.5,z1:o[2]+d[2]-.5},P3.cut&&planes.length>0); },30); }
 
@@ -1892,6 +1882,10 @@ function qTopics(){ var t=document.getElementById('qTopics'), cnt={}, tp=QZ.bank
  QZ.d.questions.forEach(function(q){ if(q.bank===QZ.bank) cnt[q.topic]=(cnt[q.topic]||0)+1; });
  t.innerHTML=(QZ.bank==='review'?t.innerHTML:'')+'<button type="button" class="chip" data-qt="all" aria-pressed="'+(QZ.topic==='all')+'">All ('+(QZ.bank==='anatomy'?QZ.d.n_anatomy:QZ.bank==='review'?QZ.d.n_review:QZ.d.n_clinical)+')</button>'+Object.keys(tp).filter(function(k){ return cnt[k]; }).map(function(k){ return '<button type="button" class="chip" data-qt="'+k+'" aria-pressed="'+(QZ.topic===k)+'">'+esc(tp[k])+' ('+cnt[k]+')</button>'; }).join('');
  [].forEach.call(t.querySelectorAll('[data-qt]'),function(b){ b.addEventListener('click',function(){ qStart(b.dataset.qt); }); }); }
+// v2.13 picture questions: an MRI slice or a view of the 3D model above the options
+var QFIG='assets/'+'quizfig/';
+function qFig(q,small){ if(!q.img) return ''; var mri=q.img.indexOf('m3d_')!==0;
+ return '<figure class="qfig'+(mri?' mri':'')+(small?' sm':'')+'"><img src="'+QFIG+esc(q.img)+'" alt="'+(mri?'MRI slice for this question':'3D brain model for this question')+'" loading="lazy" decoding="async"><figcaption>'+esc(q.cap||'')+'</figcaption></figure>'; }
 function qRefs(ps){ return (ps||[]).map(function(p){ var r=QZ.d.refs[p]; return r?'<a class="cite" href="https://pubmed.ncbi.nlm.nih.gov/'+p+'/" target="_blank" rel="noopener" title="'+esc(r.t)+'">'+esc(r.a)+' '+esc(r.y)+'</a>':''; }).join(''); }
 /* spot the lesion: questions generated from the structure data */
 /* classic textbook links only, each with distractors that have no recognised link to the structure */
@@ -1925,7 +1919,7 @@ function qRender(){ var c=document.getElementById('qCard'), n=QZ.round.length;
  var it=QZ.round[QZ.i], q=it.q; if(it.sid) lzShow(it.sid);
  var tlabel=QZ.bank==='lesion'?'Spot the lesion':QZ.bank==='anatomy'?(QZ.d.atopics[q.topic]||'Anatomy'):QZ.bank==='review'?'Arteries · preview, not yet reviewed':(QZ.d.topics[q.topic]||'')+(q.upd?' · new':'');
  c.innerHTML='<div class="qmeta"><span>Question '+(QZ.i+1)+' of '+n+'</span><span>'+esc(tlabel)+' &middot; score '+QZ.score+'</span></div><div class="qbar"><i style="width:'+(100*QZ.i/n)+'%"></i></div>'+
-  '<p class="stem">'+esc(q.stem)+'</p>'+it.ord.map(function(k,j){ var cls=QZ.done?(k===q.a?' ok':(k===QZ.sel?' bad':'')):'';
+  '<p class="stem">'+esc(q.stem)+'</p>'+qFig(q)+it.ord.map(function(k,j){ var cls=QZ.done?(k===q.a?' ok':(k===QZ.sel?' bad':'')):'';
    return '<button type="button" class="qopt'+cls+'" data-k="'+k+'" aria-pressed="'+(QZ.sel===k)+'"'+(QZ.done?' disabled':'')+'><span class="k">'+'ABCDE'[j]+'</span><span>'+esc(q.o[k])+'</span>'+(QZ.done?'<span class="why">'+(k===q.a?'<b>Correct.</b> ':'')+esc(String(q.e[k]).replace(/^Correct[.:]\s*/,''))+'</span>':'')+'</button>'; }).join('')+
   (QZ.done?'<div class="qobj"><b>Educational objective</b>'+esc(q.obj)+'</div>'+(q.refs.length?'<p style="font-size:13px;color:var(--muted)">Sources: '+qRefs(q.refs)+'</p>':'<p style="font-size:13px;color:var(--muted)">Source: '+(q.kind&&q.kind.indexOf('dz-')===0?'this site&rsquo;s disease pages (see their references).':'standard textbook neuroanatomy, as summarised in this site&rsquo;s atlas.')+'</p>'):'')+
   '<div class="qnav">'+(q.s?'<button type="button" class="chip" id="qBrain">Show the '+esc(lc(sname(q.s).replace(' (approximate)','')))+' in 3D and slices</button>':'<span></span>')+
@@ -1974,7 +1968,7 @@ function exTick(){ if(!EX.on||EX.done) return; var L=exLeft(), t=document.getEle
 function exRender(){ var c=document.getElementById('qCard'), it=EX.list[EX.i], q=it.q, n=EX.list.length, nans=EX.list.filter(function(x){ return x.sel!=null; }).length, L=exLeft();
  c.innerHTML='<div class="exbar"><span class="extime'+(L<=60?' low':'')+'" id="exTime" role="timer" aria-label="Time left">'+exFmt(L)+'</span><span class="exprog"><i id="exProg" style="width:'+(100*Math.max(0,L)/EX.dur)+'%"></i></span><span class="mono">'+nans+' / '+n+' answered</span></div>'+
   '<div class="qmeta"><span>Question '+(EX.i+1)+' of '+n+'</span><span>'+esc(q.bank==='anatomy'?(QZ.d.atopics[q.topic]||'Anatomy'):(QZ.d.topics[q.topic]||'Clinical'))+'</span></div>'+
-  '<p class="stem">'+esc(q.stem)+'</p>'+it.ord.map(function(k,j){ return '<button type="button" class="qopt" data-k="'+k+'" aria-pressed="'+(it.sel===k)+'"><span class="k">'+'ABCDE'[j]+'</span><span>'+esc(q.o[k])+'</span></button>'; }).join('')+
+  '<p class="stem">'+esc(q.stem)+'</p>'+qFig(q)+it.ord.map(function(k,j){ return '<button type="button" class="qopt" data-k="'+k+'" aria-pressed="'+(it.sel===k)+'"><span class="k">'+'ABCDE'[j]+'</span><span>'+esc(q.o[k])+'</span></button>'; }).join('')+
   '<div class="qnav"><span><button type="button" class="chip" id="exPrev"'+(EX.i?'':' disabled style="opacity:.4"')+'>&larr; Back</button> <button type="button" class="chip exflag" id="exFlag" aria-pressed="'+it.flag+'">'+(it.flag?'Flagged':'Flag for review')+'</button></span>'+
   (EX.i+1<n?'<button class="btn" type="button" id="exNext">Next &rarr;</button>':'<button class="btn" type="button" id="exEnd">Finish and see my score</button>')+'</div>'+
   '<div class="exnav" role="group" aria-label="Go to question">'+EX.list.map(function(x,j){ return '<button type="button" data-j="'+j+'" class="'+(x.sel!=null?'ans ':'')+(x.flag?'flg ':'')+(j===EX.i?'cur':'')+'" aria-label="Question '+(j+1)+(x.sel!=null?', answered':'')+(x.flag?', flagged':'')+'">'+(j+1)+'</button>'; }).join('')+'</div>'+
@@ -2003,7 +1997,7 @@ function exResult(){ var c=document.getElementById('qCard'), R=EX.res, C=EX.cfg,
   '<div class="qnav"><span><button class="btn ghost" type="button" id="exCard">Save my score card (image)</button> <button class="chip" type="button" id="exShare" hidden>Share</button></span><button class="btn" type="button" id="exNew">New exam &rarr;</button></div>'+
   '<p class="exnote" style="margin:10px 0 0">A self-assessment on an educational website. It is not a certificate of competence and gives no CME/CPD credit.</p>'+
   '<div class="exrev"><div class="mono" style="margin-bottom:8px">Review every question</div>'+EX.list.map(function(x,j){ var q=x.q, ok=x.sel===q.a;
-   return '<details><summary><b class="'+(ok?'okt':'badt')+'">'+(j+1)+(ok?' ✓':' ✗')+'</b>'+esc(q.stem)+'</summary><p class="ans">Your answer: <b class="'+(ok?'okt':'badt')+'">'+(x.sel==null?'none':esc(q.o[x.sel]))+'</b>'+(ok?'':'<br>Correct answer: <b class="okt">'+esc(q.o[q.a])+'</b>')+'</p>'+
+   return '<details><summary><b class="'+(ok?'okt':'badt')+'">'+(j+1)+(ok?' ✓':' ✗')+'</b>'+esc(q.stem)+'</summary>'+qFig(q,1)+'<p class="ans">Your answer: <b class="'+(ok?'okt':'badt')+'">'+(x.sel==null?'none':esc(q.o[x.sel]))+'</b>'+(ok?'':'<br>Correct answer: <b class="okt">'+esc(q.o[q.a])+'</b>')+'</p>'+
     '<p class="ans">'+esc(String(q.e[q.a]).replace(/^Correct[.:]\s*/,''))+'</p>'+(x.sel!=null&&!ok?'<p class="ans" style="color:var(--muted)">About your answer: '+esc(q.e[x.sel])+'</p>':'')+'<div class="qobj"><b>Educational objective</b>'+esc(q.obj)+'</div>'+(q.refs.length?'<p style="font-size:13px;color:var(--muted)">Sources: '+qRefs(q.refs)+'</p>':'')+'</details>'; }).join('')+'</div></div>';
  document.getElementById('exNew').onclick=function(){ EX.on=false; EX.done=false; exSetup(); };
  document.getElementById('exCard').onclick=function(){ var u=exCardURL(); var a=document.createElement('a'); a.href=u; a.download='neurounknown-exam-'+new Date(R.d).toISOString().slice(0,10)+'.png'; document.body.appendChild(a); a.click(); a.remove();

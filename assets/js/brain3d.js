@@ -257,7 +257,7 @@ class Brain {
       const host = (this.byId[fe.id] || []).find(m => m.userData.side === fe.side); if (!host) continue;
       const L = fiberObject(fe, DATA.fbuf); host.add(L); host.userData.fib = L; this.fibs = this.fibs || []; this.fibs.push(L);
     }
-    const box = new THREE.Box3().setFromObject(group);
+    const box = new THREE.Box3().setFromObject(group); this.box0 = box.clone();
     this.center = box.getCenter(new THREE.Vector3()); this.radius = box.getSize(new THREE.Vector3()).length() / 2;
     // v2.11 soft contact shadow under the brain: grounds the model; fades out when the camera looks from below
     { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g2 = cv.getContext('2d');
@@ -364,18 +364,32 @@ class Brain {
       const p = this.planes.find(q => q.ax === k); let o = this.planeObjs[k];
       if (!p) { if (o) o.visible = false; continue; }
       if (!o) {
-        const g = k === 'ax' ? new THREE.PlaneGeometry(ext.x1 - ext.x0, ext.y1 - ext.y0) : k === 'co' ? new THREE.PlaneGeometry(ext.x1 - ext.x0, ext.z1 - ext.z0) : new THREE.PlaneGeometry(ext.y1 - ext.y0, ext.z1 - ext.z0);
+        // v2.13: the plane is cropped to the brain (plus a small margin) instead of the whole MRI volume
+        const B = this.box0, m = 4, X0 = Math.max(ext.x0, B.min.x - m), X1 = Math.min(ext.x1, B.max.x + m), Y0 = Math.max(ext.y0, -B.max.z - m), Y1 = Math.min(ext.y1, -B.min.z + m),
+          Z0 = Math.max(ext.z0, B.min.y - m), Z1 = Math.min(ext.z1, B.max.y + m), fx = v => (v - ext.x0) / (ext.x1 - ext.x0), fy = v => (v - ext.y0) / (ext.y1 - ext.y0), fz = v => (v - ext.z0) / (ext.z1 - ext.z0);
+        const U = k === 'ax' ? [fx(X0), fx(X1), fy(Y0), fy(Y1)] : k === 'co' ? [fx(X0), fx(X1), fz(Z0), fz(Z1)] : [1 - fy(Y1), 1 - fy(Y0), fz(Z0), fz(Z1)];
+        const FW = k === 'sa' ? ext.y1 - ext.y0 : ext.x1 - ext.x0, FH = k === 'ax' ? ext.y1 - ext.y0 : ext.z1 - ext.z0;
+        const g = new THREE.PlaneGeometry(FW * (U[1] - U[0]), FH * (U[3] - U[2]));
+        g.translate(FW * ((U[0] + U[1]) / 2 - 0.5), FH * ((U[2] + U[3]) / 2 - 0.5), 0);
+        const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, U[0] + uv.getX(i) * (U[1] - U[0]), U[2] + uv.getY(i) * (U[3] - U[2]));
         if (k === 'ax') g.rotateX(-Math.PI / 2); else if (k === 'sa') g.rotateY(-Math.PI / 2);
         const tex = new THREE.CanvasTexture(p.canvas); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-        const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.5 });
+        const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }); // v2.13: full MRI plane, no alpha cut-outs
         o = this.planeObjs[k] = new THREE.Mesh(g, mat); o.renderOrder = 2; this.scene.add(o);
-      } else if (o.material.map.image !== p.canvas) { o.material.map.dispose(); o.material.map = new THREE.CanvasTexture(p.canvas); o.material.map.colorSpace = THREE.SRGBColorSpace; o.material.needsUpdate = true; }
-      else o.material.map.needsUpdate = true;
+      } else if (o.material.map.image !== p.canvas || o.userData.w !== p.canvas.width || o.userData.h !== p.canvas.height) {
+        // v2.13: a new texture whenever the canvas changes size (the 0.5 mm slices arrive later at twice the size; a WebGL texture
+        // cannot change size in place, so updating the old one left the plane dark or stale)
+        o.material.map.dispose(); o.material.map = new THREE.CanvasTexture(p.canvas); o.material.map.colorSpace = THREE.SRGBColorSpace; o.material.map.anisotropy = 4; o.material.needsUpdate = true;
+      } else o.material.map.needsUpdate = true;
+      o.userData.w = p.canvas.width; o.userData.h = p.canvas.height;
       if (k === 'ax') o.position.set(cx, p.mm, -cy); else if (k === 'co') o.position.set(cx, cz, -p.mm); else o.position.set(p.mm, cz, -cy);
       o.visible = true;
     }
+    // v2.13: by default keep the larger part of the brain (so moving a slice to the edge never leaves a thin floating sliver);
+    // "Flip" keeps the other part
+    const C = this.box0.getCenter(new THREE.Vector3()), big = { ax: p => p.mm < C.y, co: p => p.mm < -C.z, sa: p => p.mm > C.x };
     this.clipPlanes = this.planeCut ? this.planes.map(p => {
-      const f = p.flip ? -1 : 1;
+      const f = (!!p.flip !== big[p.ax](p)) ? -1 : 1;
       if (p.ax === 'ax') return new THREE.Plane(new THREE.Vector3(0, -f, 0), f * p.mm);   // keep below (flip: above)
       if (p.ax === 'co') return new THREE.Plane(new THREE.Vector3(0, 0, f), f * p.mm);    // keep behind (flip: in front)
       return new THREE.Plane(new THREE.Vector3(f, 0, 0), -f * p.mm);                       // keep right of the plane (flip: left)
