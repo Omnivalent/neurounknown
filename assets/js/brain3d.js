@@ -36,6 +36,11 @@ function geometryFor(me, buf) {
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
     g.userData = { ao, net: new Uint8Array(buf.slice(me.wo, me.wo + me.nv)) };
   } else g.computeVertexNormals();
+  if (me.ao !== undefined && me.xo === undefined) { // v2.10 crease shading baked per vertex for deep structures and brainstem
+    const u = new Uint8Array(buf, me.ao, me.nv), col = new Float32Array(me.nv * 3);
+    for (let i = 0; i < me.nv; i++) col[3 * i] = col[3 * i + 1] = col[3 * i + 2] = u[i] / 255;
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  }
   if (me.no !== undefined) { // v2.9 nerve fibres: distance along the nerve, angle around it (cos, sin) and radius
     const sv = new Uint16Array(buf, me.no, me.nv), o2 = me.no + me.nv * 2 + ((me.nv * 2) % 4 ? 2 : 0);
     const x = new Int8Array(buf, o2, me.nv * 4), u = new Uint8Array(buf, o2, me.nv * 4);
@@ -50,7 +55,7 @@ function geometryFor(me, buf) {
 const NV_U = { uTime: { value: 0 }, uFlow: { value: 1 } };
 const NERVE_DIR = { nerve1: 1, nerve2: -1, optic_tract: 1, nerve3: 1, nerve4: 1, nerve5: 0, nerve6: 1, nerve7: 0, nerve8: -1, nerve9: 0, nerve10: 0, nerve11: 1, nerve12: 1 };
 function nerveMaterial(id) {
-  const mat = new THREE.MeshPhysicalMaterial({ color: '#efe6cf', roughness: 0.52, metalness: 0, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#fff2d6'), transparent: true, opacity: 1 });
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#efe6cf', roughness: 0.5, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.4, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#fff2d6'), transparent: true, opacity: 1 });
   const dir = NERVE_DIR[id] === undefined ? 1 : NERVE_DIR[id];
   mat.onBeforeCompile = sh => {
     sh.uniforms.uTime = NV_U.uTime; sh.uniforms.uFlow = NV_U.uFlow; sh.uniforms.uDir = { value: dir };
@@ -66,14 +71,19 @@ function nerveMaterial(id) {
       float groove = mix(smoothstep(0.0, 0.2, fr) * smoothstep(1.0, 0.8, fr), 0.8, clamp((wa - 0.12) * 4.0, 0.0, 1.0));
       float fine = mix(0.5 + 0.5 * sin(6.2831853 * (a * 3.0 + 0.35 * sin(vS * 0.7 + fi * 1.9))), 0.5, clamp((wa * 3.0 - 0.15) * 3.0, 0.0, 1.0));
       float hh = fract(sin(fi * 127.1 + nf * 3.7) * 43758.5453);
-      diffuseColor.rgb *= mix(0.8, 1.0, groove) * mix(0.94, 1.03, fine);`)
+      diffuseColor.rgb *= mix(0.93, 1.0, groove) * mix(0.99, 1.01, fine);
+      float nvH = groove;`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+      { vec3 p = -vViewPosition; vec3 sx = dFdx(p), sy = dFdy(p); float hx = dFdx(nvH), hy = dFdy(nvH);
+        vec3 r1 = cross(sy, normal), r2 = cross(normal, sx); float det = dot(sx, r1);
+        normal = normalize(abs(det) * normal - sign(det) * (hx * r1 + hy * r2) * 0.22); }`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
       float d = uDir == 0.0 ? (hh < 0.5 ? 1.0 : -1.0) : uDir;
       float ph = fract(d * (vS / 26.0) - uTime * (0.22 + 0.16 * hh) + hh);
       float sig = smoothstep(0.0, 0.06, ph) * (1.0 - smoothstep(0.06, 0.34, ph));
       totalEmissiveRadiance += diffuseColor.rgb * sig * 0.5 * uFlow * groove * fine;`);
   };
-  mat.customProgramCacheKey = () => 'nerve-v2-' + dir;
+  mat.customProgramCacheKey = () => 'nerve-v5-' + dir;
   return mat;
 }
 // Yeo 7 networks (Yeo et al. 2011; Schaefer et al. 2018 parcellation), conventional colours
@@ -171,6 +181,39 @@ function arteryMaterial() {
   mat.customProgramCacheKey = () => 'artery-v1';
   return mat;
 }
+// v2.10 tissue look for every structure mesh (not arteries or nerves): a fine procedural micro-relief (bump from 3D noise in
+// millimetres), a slight colour mottling, a soft rim light (tissue looks a little translucent at grazing angles), and a gentle
+// breathing glow on the selected structure. Purely visual: it does not change any shape.
+const TS_U = { uTime: { value: 0 } };
+const GLSL_NOISE = `
+float nuH3(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float nuVN(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(nuH3(i), nuH3(i + vec3(1,0,0)), f.x), mix(nuH3(i + vec3(0,1,0)), nuH3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(nuH3(i + vec3(0,0,1)), nuH3(i + vec3(1,0,1)), f.x), mix(nuH3(i + vec3(0,1,1)), nuH3(i + vec3(1,1,1)), f.x), f.y), f.z); }
+vec3 nuBump(vec3 n, float h, float k){ vec3 p = -vViewPosition; vec3 sx = dFdx(p), sy = dFdy(p); float hx = dFdx(h), hy = dFdy(h);
+  vec3 r1 = cross(sy, n), r2 = cross(n, sx); float det = dot(sx, r1); vec3 g = sign(det) * (hx * r1 + hy * r2);
+  return normalize(abs(det) * n - g * k); }`;
+function tissueMaterial(mat, opts) {
+  const o = opts || {}, relief = o.relief == null ? 0.5 : o.relief, scale = o.scale || 1;
+  mat.userData.selAmp = { value: 0 };
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.uTime = TS_U.uTime; sh.uniforms.uSel = mat.userData.selAmp;
+    sh.vertexShader = 'varying vec3 vPosO;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vPosO = position;');
+    sh.fragmentShader = 'uniform float uTime; uniform float uSel; varying vec3 vPosO;\n' + sh.fragmentShader
+      .replace('#include <common>', '#include <common>\n' + GLSL_NOISE)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+      float tH = nuVN(vPosO * ${(0.55 * scale).toFixed(3)}) * 0.62 + nuVN(vPosO * ${(1.9 * scale).toFixed(3)}) * 0.38;
+      diffuseColor.rgb *= (0.95 + 0.09 * tH) * vec3(${o.tone || '1.0, 1.0, 1.0'});`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+      normal = nuBump(normal, tH, ${relief.toFixed(3)});`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      float rim = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 2.6);
+      totalEmissiveRadiance += diffuseColor.rgb * rim * 0.16;
+      totalEmissiveRadiance += diffuseColor.rgb * uSel * (0.16 + 0.12 * sin(uTime * 2.2));`);
+  };
+  mat.customProgramCacheKey = () => 'tissue-v3-' + relief + '-' + scale + '-' + (o.tone || '');
+  return mat;
+}
 export const NETCOL = ['#000000', '#781180', '#4682b4', '#00760e', '#c43afa', '#b8cf6e', '#e69422', '#cd3e4e'];
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888'; }
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
@@ -190,6 +233,7 @@ class Brain {
     const W = this.el.clientWidth, H = this.el.clientHeight;
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); r.setSize(W, H); r.localClippingEnabled = true;
+    r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.12; // v2.10: filmic response, no blown-out whites
     this.el.appendChild(r.domElement); r.domElement.style.touchAction = 'none';
     if (this.opts.labels) { const lb = this.lab = document.createElement('div'); lb.className = 'b3lab'; lb.innerHTML = '<i></i><b></b><span></span>'; this.el.appendChild(lb); }
     const s = this.scene = new THREE.Scene();
@@ -204,7 +248,7 @@ class Brain {
     for (const me of manifest.meshes) {
       const g = geometryFor(me, buf);
       const real = me.xo !== undefined, nerve = (this.info[me.id] || {}).lobe === 'cranial nerves';
-      const mat = me.no !== undefined ? nerveMaterial(me.id) : new THREE.MeshStandardMaterial({ color: '#bbb', roughness: real ? 0.72 : nerve ? 0.42 : 0.6, metalness: 0, transparent: true, opacity: 1, vertexColors: real });
+      const mat = me.no !== undefined ? nerveMaterial(me.id) : tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#bbb', roughness: real ? 0.7 : 0.6, metalness: 0, clearcoat: real ? 0 : 0.22, clearcoatRoughness: 0.5, sheen: real ? 0.15 : 0.2, sheenRoughness: 0.6, sheenColor: new THREE.Color('#fff4ea'), transparent: true, opacity: 1, vertexColors: real || me.ao !== undefined }), { relief: real ? 0.35 : 0.16, scale: real ? 1 : 0.6, tone: real ? null : '0.7, 0.66, 0.62' });
       if (me.side === 'M') mat.side = THREE.DoubleSide;
       const m = new THREE.Mesh(g, mat); m.userData = { id: me.id, side: me.side, real };
       group.add(m); this.meshes.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
@@ -249,7 +293,7 @@ class Brain {
       if (this.nodeGroup) this.tickNodes(now);
       if (this.fibs) this.tickFibs(now, dt);
       if (this.arts) ART_U.uTime.value = now / 1000;
-      NV_U.uTime.value = now / 1000;
+      NV_U.uTime.value = now / 1000; TS_U.uTime.value = now / 1000;
       if (this.netTw) this.tickNet(now);
       if (this.lab) this.placeLabel();
       r.render(s, this.camera);
@@ -548,7 +592,8 @@ class Brain {
       }
       if (any && f) {
         mat.color.set(f); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true;
-        mat.emissive.set(id === this.sel ? f : '#000000'); mat.emissiveIntensity = id === this.sel ? 0.28 : 0;
+        mat.emissive.set(id === this.sel ? f : '#000000'); mat.emissiveIntensity = id === this.sel ? 0.18 : 0;
+        if (mat.userData.selAmp) mat.userData.selAmp.value = id === this.sel && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 1 : 0;
         m.renderOrder = 1;
       } else if (any) {
         if (approxOn && id === 'ventral_dc') m.visible = false;
