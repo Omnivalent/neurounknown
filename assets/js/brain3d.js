@@ -190,6 +190,24 @@ async function loadPaths(m) {
   PTH = { mf: m.paths, buf: await r.arrayBuffer() }; return PTH;
 }
 export const PATHCOL = { L: '#2f7cf6', R: '#f08c12' };
+// v2.18 skull, teeth, eyes and the orbital optic nerves: separate file, loaded when the skull or the cranial nerves are shown
+let SKL = null;
+async function loadSkull(m) {
+  if (SKL) return SKL;
+  if (!m.skull) return null;
+  const r = await fetch('assets/brain3d/' + m.skull.file); if (!r.ok) throw new Error('skull ' + r.status);
+  SKL = { mf: m.skull, buf: await r.arrayBuffer() }; return SKL;
+}
+const SKULL_COL = { sclera: '#f3efe6', cornea: '#dfeef5', iris: '#5e4630', pupil: '#0d0d0f', tooth: '#f4efe0' };
+function skullMaterial(me) {
+  const k = me.kind;
+  if (k === 'nerve') return nerveMaterial(me.id, me.dir || 0);
+  if (k === 'cornea') { const m = new THREE.MeshPhysicalMaterial({ color: SKULL_COL.cornea, roughness: 0.05, metalness: 0, clearcoat: 1, transmission: 0, transparent: true, opacity: 0.28, depthWrite: false }); m.userData.glass = 0.28; return m; }
+  if (k === 'iris' || k === 'pupil') return new THREE.MeshPhysicalMaterial({ color: SKULL_COL[k], roughness: 0.6, metalness: 0, transparent: true, opacity: 1, side: THREE.DoubleSide });
+  if (k === 'sclera') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: SKULL_COL.sclera, roughness: 0.35, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.2, transparent: true, opacity: 1 }), { relief: 0.05, scale: 1.5 });
+  if (k === 'tooth') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: SKULL_COL.tooth, roughness: 0.25, metalness: 0, clearcoat: 0.8, clearcoatRoughness: 0.15, transparent: true, opacity: 1 }), { relief: 0.05, scale: 2.0 });
+  return spineMaterial({ kind: 'bone' });
+}
 // v2.16 spine (cord, roots, spinal arteries, vertebrae, discs): separate file, loaded the first time the spine is shown
 let SPN = null;
 async function loadSpine(m) {
@@ -300,6 +318,7 @@ function css(v) { return getComputedStyle(document.documentElement).getPropertyV
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
 const HIDDEN = { 'white matter': 1, ventricles: 1 }; // shown only when selected
 // structures kept in the 'cranial nerves + brainstem' view
+const SKULL_IDS = { skull: 1, mandible: 1, teeth: 1, eye: 1, nerve2: 1 };
 const SPINE_LOBES = { 'spinal cord': 1, 'spinal nerves': 1, 'vertebral column': 1, 'spinal arteries': 1, plexuses: 1, 'long pathways': 1 };
 const LAYER_OF = { frontal: 'cortex', parietal: 'cortex', temporal: 'cortex', occipital: 'cortex', limbic: 'cortex', insula: 'cortex', 'basal ganglia': 'deep', subcortical: 'deep', brainstem: 'brainstem', cerebellum: 'cerebellum', 'cranial nerves': 'nerves', arteries: 'arteries' };
 const ISO = { midbrain: 1, pons: 1, medulla: 1, ventral_dc: 1, optic_chiasm: 1, lgn: 1 };
@@ -396,6 +415,7 @@ class Brain {
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(this.el);
     window.addEventListener('nu-theme', () => this.apply());
     this.apply(); this.ready = true;
+    if (this.nerveMode !== 'hide' && this.opts.labels) setTimeout(() => this.ensureSkull(), 1200); // eyes on the optic nerves
     if (this.opts.assemble && !still) this.assemble();
     let prev = performance.now();
     const loop = () => {
@@ -486,11 +506,12 @@ class Brain {
     this.apply();
   }
   // cranial nerves: 'show' (with the brain), 'hide', 'iso' (nerves and their nuclei with a see-through brainstem only)
-  setNerves(mode) { this.nerveMode = mode; this.apply(); if (mode === 'iso') this.fit('front'); else if (this.fitted) this.unfit(); }
+  setNerves(mode) { this.nerveMode = mode; if (mode !== 'hide' && this.opts.labels) this.ensureSkull(); this.apply(); if (mode === 'iso') this.fit('front'); else if (this.fitted) this.unfit(); }
   // layers: {cortex, deep, brainstem, cerebellum, nerves, tracts, ventricles} -> false hides that group (focused structures stay visible)
   setLayers(L) {
     // the page passes the same (mutated) layers object each time, so remember the spine state here
     const was = !!this.spineOn; this.layers = L || {}; this.spineOn = !!this.layers.spine; if (this.layers.arteries) this.ensureArteries();
+    if (this.layers.skull) this.ensureSkull();
     if (this.spineOn && !was) this.ensureSpine().then(() => { if (this.spineOn) { this.spineView(true); this.frameFocus(); } }); else if (!this.spineOn && was) this.spineView(false);
     this.apply();
   }
@@ -546,6 +567,22 @@ class Brain {
     }).catch(() => { this.pthLoading = null; });
     return this.pthLoading;
   }
+  ensureSkull() {
+    if (this.skl || !this.mf.skull) return Promise.resolve();
+    if (this.sklLoading) return this.sklLoading;
+    this.sklLoading = loadSkull(this.mf).then(S => {
+      if (!S || this.disposed) return;
+      this.skl = [];
+      for (const me of S.mf.meshes) {
+        const m = new THREE.Mesh(geometryFor(me, S.buf), skullMaterial(me)); m.userData = { id: me.id, side: me.side, skull: me.kind };
+        if (me.kind === 'cornea') m.renderOrder = 5;
+        m.visible = false; this.group.add(m); this.meshes.push(m); this.skl.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
+      }
+      this.apply(); if (this.opts.onSkull) this.opts.onSkull();
+    }).catch(() => { this.sklLoading = null; });
+    return this.sklLoading;
+  }
+  setBones(mode) { this.boneMode = mode; this.apply(); }
   tickMarks(now) {
     for (const sp of this.pathMarks.children) { if (!sp.visible) continue; const k = sp.userData.on ? 1 : 0, o = sp.material.opacity + (k - sp.material.opacity) * 0.12;
       sp.material.opacity = o; const sc = 0.024 + 0.008 * Math.sin(now / 300 + sp.userData.ph); sp.scale.set(sc, sc, 1); if (!k && o < 0.02) sp.visible = false; }
@@ -668,6 +705,7 @@ class Brain {
     if (Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).lobe === 'arteries')) this.ensureArteries();
     if (Object.keys(this.focus).some(k => SPINE_LOBES[(this.info[k.split('@')[0]] || {}).lobe])) this.ensureSpine();
     if (Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).lobe === 'long pathways')) this.ensurePaths();
+    if (Object.keys(this.focus).some(k => SKULL_IDS[k.split('@')[0]])) this.ensureSkull();
     this.apply();
     if (this.lab) this.setLabel(this.sel, this.sel ? (this.focus[this.sel] || this.focus[this.sel + '@L'] || this.focus[this.sel + '@R'] || this.focus[this.sel + '@M']) : null); }
   // apply() with a soft cross-fade: compute the new look, then animate colour and opacity from the old one
@@ -783,9 +821,14 @@ class Brain {
       const isNerve = inf.lobe === 'cranial nerves', nm = this.nerveMode, isArt = m.userData.art;
       if (isNerve && nm === 'hide' && !f) { m.visible = false; continue; }
       if (isArt && !f && !Lz.arteries) { m.visible = false; continue; }
-      const sk = m.userData.spine;
-      if (sk && !f) { // v2.16 spine meshes: only with the Spine layer; bones and discs with Vertebrae; dura and grey matter only when chosen
-        if (!Lz.spine || nm === 'iso' || ((sk === 'bone' || sk === 'disc' || sk === 'cartilage') && Lz.bones === false) || sk === 'dura' || sk === 'grey') { m.visible = false; continue; }
+      const sk = m.userData.spine, bm = this.boneMode == null ? 2 : this.boneMode;
+      if (sk && !f) { // v2.16 spine meshes: only with the Spine layer; bones and discs follow the bone mode; dura and grey matter only when chosen
+        if (!Lz.spine || nm === 'iso' || ((sk === 'bone' || sk === 'disc' || sk === 'cartilage') && bm === 0) || sk === 'dura' || sk === 'grey') { m.visible = false; continue; }
+      }
+      const kk = m.userData.skull;
+      if (kk && !f) { // v2.18 skull and teeth with the Skull layer and the bone mode; eyes and orbital optic nerves with the nerves or the skull
+        if (kk === 'bone' || kk === 'tooth') { if (!Lz.skull || bm === 0) { m.visible = false; continue; } }
+        else if (nm === 'hide' && !Lz.skull) { m.visible = false; continue; }
       }
       if (nm === 'iso' && !f && !(isNerve || ISO[id] || inf.nerveof || isArt)) { m.visible = false; continue; }
       const Ly = this.layers || {}, grp = LAYER_OF[inf.lobe];
@@ -823,6 +866,9 @@ class Brain {
         if (isCortex && this.cortexMode === 0) m.visible = false;
       }
       if (planeView && !cp.length && !f) { mat.transparent = true; mat.depthWrite = false; mat.opacity = Math.min(mat.opacity, isCortex ? 0.12 : 0.25); m.renderOrder = 3; }
+      if (m.visible && !f && ((kk && (kk === 'bone' || kk === 'tooth')) || (sk && (sk === 'bone' || sk === 'disc' || sk === 'cartilage'))) && (this.boneMode == null ? 2 : this.boneMode) === 1 && !any) {
+        mat.opacity = 0.16; mat.transparent = true; mat.depthWrite = false; m.renderOrder = 4; }
+      if (m.visible && kk && SKULL_COL[kk] && !f && !any) mat.color.set(SKULL_COL[kk]);
       if (mat.userData.glass && m.visible) { mat.opacity = Math.min(mat.opacity, f ? 0.42 : mat.userData.glass); mat.transparent = true; mat.depthWrite = false; m.renderOrder = 4; }
       if (m.userData.real) this.paintNet(m);
       if (this.net != null && m.userData.real && !any) { mat.color.set(isCortex ? '#ffffff' : (inf.tint || '#bbb')); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; m.visible = isCortex || inf.lobe === 'cerebellum'; }
