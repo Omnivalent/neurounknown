@@ -54,9 +54,9 @@ function geometryFor(me, buf) {
 // signals travelling along the fibres: away from the brainstem in motor nerves, towards it in sensory nerves, both ways in mixed.
 const NV_U = { uTime: { value: 0 }, uFlow: { value: 1 } };
 const NERVE_DIR = { nerve1: 1, nerve2: -1, optic_tract: 1, nerve3: 1, nerve4: 1, nerve5: 0, nerve6: 1, nerve7: 0, nerve8: -1, nerve9: 0, nerve10: 0, nerve11: 1, nerve12: 1 };
-function nerveMaterial(id) {
+function nerveMaterial(id, dirOverride) {
   const mat = new THREE.MeshPhysicalMaterial({ color: '#efe6cf', roughness: 0.5, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.4, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#fff2d6'), transparent: true, opacity: 1 });
-  const dir = NERVE_DIR[id] === undefined ? 1 : NERVE_DIR[id];
+  const dir = dirOverride !== undefined ? dirOverride : NERVE_DIR[id] === undefined ? 1 : NERVE_DIR[id];
   mat.onBeforeCompile = sh => {
     sh.uniforms.uTime = NV_U.uTime; sh.uniforms.uFlow = NV_U.uFlow; sh.uniforms.uDir = { value: dir };
     sh.vertexShader = 'attribute float aS; attribute vec2 aCS; attribute float aRad; varying float vS; varying vec2 vCS; varying float vRad;\n' +
@@ -181,6 +181,25 @@ function arteryMaterial() {
   mat.customProgramCacheKey = () => 'artery-v1';
   return mat;
 }
+// v2.16 spine (cord, roots, spinal arteries, vertebrae, discs): separate file, loaded the first time the spine is shown
+let SPN = null;
+async function loadSpine(m) {
+  if (SPN) return SPN;
+  if (!m.spine) return null;
+  const r = await fetch('assets/brain3d/' + m.spine.file); if (!r.ok) throw new Error('spine ' + r.status);
+  SPN = { mf: m.spine, buf: await r.arrayBuffer() }; return SPN;
+}
+function spineMaterial(me) {
+  const k = me.kind;
+  if (k === 'artery') return arteryMaterial();
+  if (k.indexOf('root') === 0 || k === 'nerve' || k === 'plexus') return nerveMaterial(me.id, me.dir || 0);
+  if (k === 'cartilage') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#bcd4dd', roughness: 0.32, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25, transparent: true, opacity: 1 }), { relief: 0.1, scale: 1.2 });
+  if (k === 'muscle') { const m = tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#b5584a', roughness: 0.5, metalness: 0, clearcoat: 0.3, sheen: 0.3, sheenColor: new THREE.Color('#ffb0a0'), transparent: true, opacity: 0.4, depthWrite: false }), { relief: 0.25, scale: 1.6, tone: '1.0, 0.92, 0.9' }); m.userData.glass = 0.4; return m; }
+  if (k === 'bone') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#e7dcc4', roughness: 0.62, metalness: 0, clearcoat: 0.12, clearcoatRoughness: 0.6, sheen: 0.15, sheenColor: new THREE.Color('#fff6e8'), transparent: true, opacity: 1 }), { relief: 0.32, scale: 0.9, tone: '0.98, 0.95, 0.9' });
+  if (k === 'disc') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#c9dbe2', roughness: 0.38, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.3, sheen: 0.3, sheenColor: new THREE.Color('#f2fbff'), transparent: true, opacity: 1 }), { relief: 0.12, scale: 1.4 });
+  if (k === 'dura') { const m = new THREE.MeshPhysicalMaterial({ color: '#cbd8e2', roughness: 0.35, metalness: 0, clearcoat: 0.5, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }); m.userData.glass = 0.22; return m; }
+  return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#e9dfd0', roughness: 0.55, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.45, sheen: 0.25, sheenRoughness: 0.5, sheenColor: new THREE.Color('#fff4ea'), transparent: true, opacity: 1 }), { relief: 0.14, scale: 0.7, tone: '0.95, 0.92, 0.88' });
+}
 // v2.10 tissue look for every structure mesh (not arteries or nerves): a fine procedural micro-relief (bump from 3D noise in
 // millimetres), a slight colour mottling, a soft rim light (tissue looks a little translucent at grazing angles), and a gentle
 // breathing glow on the selected structure. Purely visual: it does not change any shape.
@@ -193,6 +212,59 @@ float nuVN(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
 vec3 nuBump(vec3 n, float h, float k){ vec3 p = -vViewPosition; vec3 sx = dFdx(p), sy = dFdy(p); float hx = dFdx(h), hy = dFdy(h);
   vec3 r1 = cross(sy, n), r2 = cross(n, sx); float det = dot(sx, r1); vec3 g = sign(det) * (hx * r1 + hy * r2);
   return normalize(abs(det) * n - g * k); }`;
+// v2.16 surface detail that the 0.5 mm template cannot resolve, drawn procedurally (purely visual, shapes unchanged; coordinates
+// in mm, three.js axes: x right, y up, z = -anterior). pH is 1 on a ridge and 0 in a groove; lines fade out where they would
+// be finer than a pixel.
+//  folia: cerebellar folia, about 1.8 mm apart, running from side to side, as arcs around the fourth ventricle in the sagittal
+//         plane, with deeper fissures between lobules every ~8 folia;
+//  pons:  transverse pontine fibres across the basilar pons;
+//  stria: longitudinal fibre bundles of the cerebral peduncles, pyramids and medulla.
+const PATTERN = {
+  folia: { k: '0.6', code: `
+      // fissures radiate from the centre (arbor vitae): the angle around the fourth ventricle in the sagittal plane sets
+      // the phase, so ridges run from side to side and bend gently forward on the hemispheres
+      vec2 fq = vec2(vPosO.z - 46.0, vPosO.y + 30.0);
+      float fa = atan(fq.y, fq.x) + 0.00045 * vPosO.x * vPosO.x;
+      float fph = fa * 34.0 / 2.3 + 0.55 * nuVN(vPosO * 0.25) + 0.25 * nuVN(vPosO * 0.8), fw = fwidth(fph);
+      float ff = fract(fph), crest = smoothstep(0.0, 0.3, ff) * smoothstep(1.0, 0.62, ff);
+      float lob = fract(fph / 7.0 + 0.3 * nuVN(vPosO * 0.12)), fis = smoothstep(0.0, 0.06, lob) * smoothstep(1.0, 0.94, lob);
+      float pH = mix(crest, 0.65, clamp((fw - 0.2) * 3.0, 0.0, 1.0)) * mix(0.45, 1.0, fis);
+      diffuseColor.rgb *= mix(0.74, 1.0, pH);` },
+  pons: { k: '0.22', code: `
+      float pph = (vPosO.y + 1.4 * nuVN(vPosO * 0.3) + 0.5 * nuVN(vPosO * 1.1) + 0.25 * vPosO.x * vPosO.x / 40.0) / 1.7, pw = fwidth(pph);
+      float pf = fract(pph);
+      float pH = mix(smoothstep(0.0, 0.3, pf) * smoothstep(1.0, 0.6, pf), 0.6, clamp((pw - 0.2) * 3.0, 0.0, 1.0));
+      diffuseColor.rgb *= mix(0.93, 1.01, pH);` },
+  stria: { k: '0.32', code: `
+      float sa = atan(vPosO.x, -vPosO.z - 38.0);
+      float sph = sa * 26.0 / 3.14159 + 0.8 * nuVN(vPosO * vec3(0.4, 0.08, 0.4)), sw = fwidth(sph);
+      float sf = fract(sph);
+      float pH = mix(smoothstep(0.0, 0.35, sf) * smoothstep(1.0, 0.55, sf), 0.6, clamp((sw - 0.2) * 3.0, 0.0, 1.0));
+      diffuseColor.rgb *= mix(0.9, 1.02, pH);` }
+};
+const PATTERN_OF = { cerebellum: 'folia', vermis: 'folia', pons: 'pons', midbrain: 'stria', medulla: 'stria' };
+// v2.16 one midpoint subdivision + Taubin smoothing for the small brainstem meshes (removes the faceted silhouette)
+function refineGeometry(g, iters) {
+  const P = g.attributes.position.array, C = g.attributes.color ? g.attributes.color.array : null, I = g.index.array;
+  const nv = P.length / 3, emap = new Map(), pos = Array.from(P), col = C ? Array.from(C) : null, F = [];
+  const mid = (a, b) => { const k = a < b ? a * nv + b : b * nv + a; let m = emap.get(k); if (m !== undefined) return m;
+    m = pos.length / 3; for (let j = 0; j < 3; j++) pos.push((pos[3 * a + j] + pos[3 * b + j]) / 2);
+    if (col) for (let j = 0; j < 3; j++) col.push((col[3 * a + j] + col[3 * b + j]) / 2); emap.set(k, m); return m; };
+  for (let i = 0; i < I.length; i += 3) { const a = I[i], b = I[i + 1], c = I[i + 2], ab = mid(a, b), bc = mid(b, c), ca = mid(c, a);
+    F.push(a, ab, ca, ab, b, bc, ca, bc, c, ab, bc, ca); }
+  const n = pos.length / 3, nb = Array.from({ length: n }, () => new Set());
+  for (let i = 0; i < F.length; i += 3) { const a = F[i], b = F[i + 1], c = F[i + 2]; nb[a].add(b).add(c); nb[b].add(a).add(c); nb[c].add(a).add(b); }
+  let v = Float32Array.from(pos);
+  for (let it = 0; it < (iters || 4); it++) for (const lam of [0.5, -0.53]) {
+    const w = new Float32Array(v.length);
+    for (let i = 0; i < n; i++) { let sx = 0, sy = 0, sz = 0; for (const j of nb[i]) { sx += v[3 * j]; sy += v[3 * j + 1]; sz += v[3 * j + 2]; }
+      const k = nb[i].size || 1; w[3 * i] = v[3 * i] + lam * (sx / k - v[3 * i]); w[3 * i + 1] = v[3 * i + 1] + lam * (sy / k - v[3 * i + 1]); w[3 * i + 2] = v[3 * i + 2] + lam * (sz / k - v[3 * i + 2]); }
+    v = w; }
+  const h = new THREE.BufferGeometry(); h.setAttribute('position', new THREE.BufferAttribute(v, 3));
+  if (col) h.setAttribute('color', new THREE.BufferAttribute(Float32Array.from(col), 3));
+  h.setIndex(n > 65535 ? new THREE.Uint32BufferAttribute(F, 1) : new THREE.Uint16BufferAttribute(F, 1)); h.computeVertexNormals();
+  return h;
+}
 function tissueMaterial(mat, opts) {
   const o = opts || {}, relief = o.relief == null ? 0.5 : o.relief, scale = o.scale || 1;
   mat.userData.selAmp = { value: 0 };
@@ -203,15 +275,15 @@ function tissueMaterial(mat, opts) {
       .replace('#include <common>', '#include <common>\n' + GLSL_NOISE)
       .replace('#include <color_fragment>', `#include <color_fragment>
       float tH = nuVN(vPosO * ${(0.55 * scale).toFixed(3)}) * 0.62 + nuVN(vPosO * ${(1.9 * scale).toFixed(3)}) * 0.38;
-      diffuseColor.rgb *= (0.95 + 0.09 * tH) * vec3(${o.tone || '1.0, 1.0, 1.0'});`)
+      diffuseColor.rgb *= (0.95 + 0.09 * tH) * vec3(${o.tone || '1.0, 1.0, 1.0'});${PATTERN[o.pattern] ? PATTERN[o.pattern].code : ''}`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
-      normal = nuBump(normal, tH, ${relief.toFixed(3)});`)
+      normal = nuBump(normal, tH, ${relief.toFixed(3)});${PATTERN[o.pattern] ? '\n      normal = nuBump(normal, pH, ' + PATTERN[o.pattern].k + ');' : ''}`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
       float rim = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 2.6);
       totalEmissiveRadiance += diffuseColor.rgb * rim * 0.16;
       totalEmissiveRadiance += diffuseColor.rgb * uSel * (0.16 + 0.12 * sin(uTime * 2.2));`);
   };
-  mat.customProgramCacheKey = () => 'tissue-v3-' + relief + '-' + scale + '-' + (o.tone || '');
+  mat.customProgramCacheKey = () => 'tissue-v4-' + relief + '-' + scale + '-' + (o.tone || '') + '-' + (o.pattern || '');
   return mat;
 }
 export const NETCOL = ['#000000', '#781180', '#4682b4', '#00760e', '#c43afa', '#b8cf6e', '#e69422', '#cd3e4e'];
@@ -219,6 +291,7 @@ function css(v) { return getComputedStyle(document.documentElement).getPropertyV
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
 const HIDDEN = { 'white matter': 1, ventricles: 1 }; // shown only when selected
 // structures kept in the 'cranial nerves + brainstem' view
+const SPINE_LOBES = { 'spinal cord': 1, 'spinal nerves': 1, 'vertebral column': 1, 'spinal arteries': 1, plexuses: 1 };
 const LAYER_OF = { frontal: 'cortex', parietal: 'cortex', temporal: 'cortex', occipital: 'cortex', limbic: 'cortex', insula: 'cortex', 'basal ganglia': 'deep', subcortical: 'deep', brainstem: 'brainstem', cerebellum: 'cerebellum', 'cranial nerves': 'nerves', arteries: 'arteries' };
 const ISO = { midbrain: 1, pons: 1, medulla: 1, ventral_dc: 1, optic_chiasm: 1, lgn: 1 };
 
@@ -246,9 +319,10 @@ class Brain {
     this.clip = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
     const group = this.group = new THREE.Group(); s.add(group);
     for (const me of manifest.meshes) {
-      const g = geometryFor(me, buf);
+      let g = geometryFor(me, buf);
+      if (PATTERN_OF[me.id] && me.xo === undefined && me.nv < 12000) g = refineGeometry(g, 3);
       const real = me.xo !== undefined, nerve = (this.info[me.id] || {}).lobe === 'cranial nerves';
-      const mat = me.no !== undefined ? nerveMaterial(me.id) : tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#bbb', roughness: real ? 0.7 : 0.6, metalness: 0, clearcoat: real ? 0 : 0.22, clearcoatRoughness: 0.5, sheen: real ? 0.15 : 0.2, sheenRoughness: 0.6, sheenColor: new THREE.Color('#fff4ea'), transparent: true, opacity: 1, vertexColors: real || me.ao !== undefined }), { relief: real ? 0.35 : 0.16, scale: real ? 1 : 0.6, tone: real ? null : '0.7, 0.66, 0.62' });
+      const mat = me.no !== undefined ? nerveMaterial(me.id) : tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#bbb', roughness: real ? 0.7 : 0.6, metalness: 0, clearcoat: real ? 0 : 0.22, clearcoatRoughness: 0.5, sheen: real ? 0.15 : 0.2, sheenRoughness: 0.6, sheenColor: new THREE.Color('#fff4ea'), transparent: true, opacity: 1, vertexColors: real || me.ao !== undefined }), { relief: real ? 0.35 : 0.16, scale: real ? 1 : 0.6, tone: real ? null : '0.7, 0.66, 0.62', pattern: PATTERN_OF[me.id] });
       if (me.side === 'M') mat.side = THREE.DoubleSide;
       const m = new THREE.Mesh(g, mat); m.userData = { id: me.id, side: me.side, real };
       group.add(m); this.meshes.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
@@ -323,7 +397,7 @@ class Brain {
       if (this.flight) this.tickFly(now);
       if (this.nodeGroup) this.tickNodes(now);
       if (this.fibs) this.tickFibs(now, dt);
-      if (this.arts) ART_U.uTime.value = now / 1000;
+      if (this.arts || this.spn) ART_U.uTime.value = now / 1000;
       NV_U.uTime.value = now / 1000; TS_U.uTime.value = now / 1000;
       if (this.netTw) this.tickNet(now);
       if (this.lab) this.placeLabel();
@@ -400,7 +474,41 @@ class Brain {
   // cranial nerves: 'show' (with the brain), 'hide', 'iso' (nerves and their nuclei with a see-through brainstem only)
   setNerves(mode) { this.nerveMode = mode; this.apply(); if (mode === 'iso') this.fit('front'); else if (this.fitted) this.unfit(); }
   // layers: {cortex, deep, brainstem, cerebellum, nerves, tracts, ventricles} -> false hides that group (focused structures stay visible)
-  setLayers(L) { this.layers = L || {}; if (this.layers.arteries) this.ensureArteries(); this.apply(); }
+  setLayers(L) {
+    // the page passes the same (mutated) layers object each time, so remember the spine state here
+    const was = !!this.spineOn; this.layers = L || {}; this.spineOn = !!this.layers.spine; if (this.layers.arteries) this.ensureArteries();
+    if (this.spineOn && !was) this.ensureSpine().then(() => { if (this.spineOn) { this.spineView(true); this.frameFocus(); } }); else if (!this.spineOn && was) this.spineView(false);
+    this.apply();
+  }
+  // v2.16 spine on: frame brain and spine together (no floor shadow, wider zoom range); off: back to the brain
+  spineView(on) {
+    if (on) {
+      this.shadowOn = false; this.fit('left'); this.controls.maxDistance = this.radius * 6;
+      // a tall subject: fit its height to the vertical field of view (plus a margin), seen from the left and slightly in front
+      const box = new THREE.Box3(); for (const m of this.meshes) if (m.userData.tw ? m.userData.tw.to.v : m.visible) box.union(new THREE.Box3().setFromBufferAttribute(m.geometry.attributes.position));
+      const sz = box.getSize(new THREE.Vector3()), fov = THREE.MathUtils.degToRad(this.camera.fov) / 2;
+      const dist = Math.max(sz.y / 2 / Math.tan(fov), sz.z / 2 / Math.tan(fov) / Math.max(0.5, this.camera.aspect)) * 1.12;
+      this.fly(box.getCenter(new THREE.Vector3()), dist, new THREE.Vector3(-1, 0.04, -0.28).normalize(), 1100);
+    }
+    else { this.shadowOn = true; if (this.fitted) this.unfit(); this.controls.maxDistance = this.radius * 6; }
+  }
+  ensureSpine() {
+    if (this.spn || !this.mf.spine) return Promise.resolve();
+    if (this.spnLoading) return this.spnLoading;
+    this.spnLoading = loadSpine(this.mf).then(S => {
+      if (!S || this.disposed) return;
+      this.spn = [];
+      for (const me of S.mf.meshes) {
+        const g = me.so !== undefined ? arteryGeometry(me, S.buf) : geometryFor(me, S.buf);
+        const m = new THREE.Mesh(g, spineMaterial(me)); m.userData = { id: me.id, side: me.side, spine: me.kind, art: me.kind === 'artery' };
+        if (me.kind === 'dura' || me.kind === 'muscle') m.renderOrder = 4;
+        m.visible = false; this.group.add(m); this.meshes.push(m); this.spn.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
+      }
+      if (S.mf.meshes.some(x => x.kind === 'artery')) { this.arts = this.arts || []; ART_U.uPulse.value = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1; }
+      this.apply(); if (this.opts.onSpine) this.opts.onSpine();
+    }).catch(() => { this.spnLoading = null; });
+    return this.spnLoading;
+  }
   // v2.9: load the artery meshes on first use (about 3 MB), then fade them in like any other structure
   ensureArteries() {
     if (this.arts || this.artLoading || !this.mf.arteries) return this.artLoading || Promise.resolve();
@@ -517,6 +625,7 @@ class Brain {
   // focus: {structureId: color}; empty = natural view
   setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null;
     if (Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).lobe === 'arteries')) this.ensureArteries();
+    if (Object.keys(this.focus).some(k => SPINE_LOBES[(this.info[k.split('@')[0]] || {}).lobe])) this.ensureSpine();
     this.apply();
     if (this.lab) this.setLabel(this.sel, this.sel ? (this.focus[this.sel] || this.focus[this.sel + '@L'] || this.focus[this.sel + '@R'] || this.focus[this.sel + '@M']) : null); }
   // apply() with a soft cross-fade: compute the new look, then animate colour and opacity from the old one
@@ -582,8 +691,16 @@ class Brain {
   }
   // frame the focused structures (atlas only)
   frameFocus() {
-    if (!this.opts.frame || this.fitted || !this.controls) return;
+    if (!this.opts.frame || !this.controls) return;
     const keys = Object.keys(this.focus), c0 = this.center0 || this.center, R = this.radius0 || this.radius;
+    if (this.fitted) { // v2.16 spine view: glide to a chosen spine structure, back to the whole column when cleared
+      if (!this.spineOn) return;
+      const box = new THREE.Box3(); let n = 0;
+      for (const k of keys) { const [id, side] = k.split('@'); for (const m of this.byId[id] || []) if (m.userData.spine && (!side || m.userData.side === side)) { box.expandByObject(m); n++; } }
+      if (!n) { if (this.framedSp) { this.framedSp = false; this.spineView(true); } return; }
+      const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2;
+      this.framedSp = true; this.fly(c, Math.max(110, Math.min(this.radius * 2.6, r * 3.2)), null, 1000); return;
+    }
     if (!keys.length) { if (this.framed) { this.framed = false; this.fly(c0, R * 2.6); } return; }
     const box = new THREE.Box3(); let n = 0;
     for (const k of keys) { const [id, side] = k.split('@'); for (const m of this.byId[id] || []) if (!side || m.userData.side === side) { box.expandByObject(m); n++; } }
@@ -624,6 +741,10 @@ class Brain {
       const isNerve = inf.lobe === 'cranial nerves', nm = this.nerveMode, isArt = m.userData.art;
       if (isNerve && nm === 'hide' && !f) { m.visible = false; continue; }
       if (isArt && !f && !Lz.arteries) { m.visible = false; continue; }
+      const sk = m.userData.spine;
+      if (sk && !f) { // v2.16 spine meshes: only with the Spine layer; bones and discs with Vertebrae; dura and grey matter only when chosen
+        if (!Lz.spine || nm === 'iso' || ((sk === 'bone' || sk === 'disc' || sk === 'cartilage') && Lz.bones === false) || sk === 'dura' || sk === 'grey') { m.visible = false; continue; }
+      }
       if (nm === 'iso' && !f && !(isNerve || ISO[id] || inf.nerveof || isArt)) { m.visible = false; continue; }
       const Ly = this.layers || {}, grp = LAYER_OF[inf.lobe];
       if (!f && nm !== 'iso' && grp && Ly[grp] === false) { m.visible = false; continue; }
@@ -660,6 +781,7 @@ class Brain {
         if (isCortex && this.cortexMode === 0) m.visible = false;
       }
       if (planeView && !cp.length && !f) { mat.transparent = true; mat.depthWrite = false; mat.opacity = Math.min(mat.opacity, isCortex ? 0.12 : 0.25); m.renderOrder = 3; }
+      if (mat.userData.glass && m.visible) { mat.opacity = Math.min(mat.opacity, f ? 0.42 : mat.userData.glass); mat.transparent = true; mat.depthWrite = false; m.renderOrder = 4; }
       if (m.userData.real) this.paintNet(m);
       if (this.net != null && m.userData.real && !any) { mat.color.set(isCortex ? '#ffffff' : (inf.tint || '#bbb')); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; m.visible = isCortex || inf.lobe === 'cerebellum'; }
       mat.needsUpdate = true;
@@ -710,7 +832,7 @@ window.NUBrain = {
   create: async (el, opts) => {
     const t = document.createElement('canvas');
     if (!(t.getContext('webgl2') || t.getContext('webgl'))) throw new Error('webgl');
-    return new Brain(el, opts).init();
+    const B = await new Brain(el, opts).init(); window.NUBrain.last = B; return B;
   }
 };
 window.dispatchEvent(new Event('nubrain-ready'));
