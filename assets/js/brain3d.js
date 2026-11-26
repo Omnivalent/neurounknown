@@ -343,6 +343,9 @@ class Brain {
     const c = this.controls = new OrbitControls(this.camera, r.domElement);
     c.enableDamping = true; c.dampingFactor = 0.08; c.target.copy(this.center); c.minDistance = this.radius * 0.7; c.maxDistance = this.radius * 6;
     c.rotateSpeed = 0.7; c.zoomSpeed = 0.9;
+    // v2.17 zoom towards the point under the cursor (the pivot follows), right-drag or two fingers to pan: any part of a tall
+    // subject (e.g. the brachial plexus with the spine shown) can be brought to the centre and examined closely
+    c.zoomToCursor = true; c.screenSpacePanning = true;
     // calm rotation while nobody touches the brain (off for reduced-motion users and where opts.autoRotate is false)
     const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.idleOK = this.opts.autoRotate !== false && !still; NV_U.uFlow.value = still ? 0 : 1; c.autoRotateSpeed = 0.55; this.lastTouch = performance.now();
@@ -361,11 +364,12 @@ class Brain {
       const bb = r.domElement.getBoundingClientRect(); this.ptr.set(((e.clientX - bb.left) / bb.width) * 2 - 1, -((e.clientY - bb.top) / bb.height) * 2 + 1);
       this.ray.setFromCamera(this.ptr, this.camera);
       const h = this.ray.intersectObjects(this.meshes.filter(m => m.visible && m.material.opacity > 0.05), false)[0];
-      if (h) this.fly(h.point, Math.max(c.minDistance, this.radius * 0.75), null, 900); else this.fly(this.center, this.radius * 2.6, null, 900);
+      if (h) this.fly(h.point, this.fitted ? Math.max(c.minDistance, 140) : Math.max(c.minDistance, this.radius * 0.75), null, 900);
+      else if (this.spineOn) this.spineView(true); else this.fly(this.center, this.radius * 2.6, null, 900);
     });
     // v2.11 keyboard: arrow keys turn the brain, + and - zoom, 0 returns to the start view (canvas must have focus)
     r.domElement.tabIndex = 0; r.domElement.setAttribute('role', 'img');
-    r.domElement.setAttribute('aria-label', '3D brain. Drag or use the arrow keys to turn it, scroll or + and - to zoom, double-click a structure to zoom in, 0 to reset.');
+    r.domElement.setAttribute('aria-label', '3D brain. Drag or use the arrow keys to turn it, scroll or + and - to zoom, double-click a structure to zoom in, right-drag or two fingers to move, 0 to reset.');
     r.domElement.addEventListener('keydown', e => {
       const k = e.key, cam = this.camera, t = c.target; let used = true;
       if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'ArrowUp' || k === 'ArrowDown') {
@@ -531,7 +535,7 @@ class Brain {
     if (!n) return; this.fitted = true;
     const c = box.getCenter(new THREE.Vector3()), r = Math.max(20, box.getSize(new THREE.Vector3()).length() / 2);
     this.center0 = this.center0 || this.center.clone(); this.radius0 = this.radius0 || this.radius;
-    this.center = c; this.radius = r; this.controls.minDistance = r * 0.6; this.view(name || 'front');
+    this.center = c; this.radius = r; this.controls.minDistance = Math.min(r * 0.6, 40); this.view(name || 'front');
   }
   unfit() { if (!this.center0) return; this.center = this.center0; this.radius = this.radius0; this.controls.minDistance = this.radius * 0.7; this.fitted = false; this.view('left'); }
   // centre of a structure (three coords); side 'L'/'R'/'M' or any
