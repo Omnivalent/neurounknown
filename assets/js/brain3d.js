@@ -198,7 +198,37 @@ async function loadSkull(m) {
   const r = await fetch('assets/brain3d/' + m.skull.file); if (!r.ok) throw new Error('skull ' + r.status);
   SKL = { mf: m.skull, buf: await r.arrayBuffer() }; return SKL;
 }
-const SKULL_COL = { sclera: '#f3efe6', cornea: '#dfeef5', iris: '#5e4630', pupil: '#0d0d0f', tooth: '#f4efe0' };
+// v2.19: bone of a varnished teaching skull (warm, darker than ivory, not caramel)
+const BONE_COL = '#a8916b';
+const SKULL_COL = { sclera: '#f3efe6', cornea: '#dfeef5', iris: '#5e4630', pupil: '#0d0d0f', tooth: '#e2d5b8', bone: BONE_COL };
+// v2.19 meninges: dura, arachnoid and pia mater, falx and tentorium, arachnoid granulations, CSF flow lines, and the needles of a
+// lumbar puncture and an epidural injection; separate file, loaded the first time the Meninges layer is shown
+let MEN = null;
+async function loadMeninges(m) {
+  if (MEN) return MEN;
+  if (!m.meninges) return null;
+  const r = await fetch('assets/brain3d/' + m.meninges.file); if (!r.ok) throw new Error('meninges ' + r.status);
+  MEN = { mf: m.meninges, buf: await r.arrayBuffer() }; return MEN;
+}
+// colour, opacity and draw order of each layer: dura a tough, pearly grey-white sheet; arachnoid a thin, glassy veil; pia a
+// delicate film with a pink vascular tint that follows the brain into its sulci
+const MEN_STYLE = { dura: { c: '#cfd3d6', o: 0.5, r: 6 }, fold: { c: '#c9cdd0', o: 0.55, r: 5 }, arachnoid: { c: '#eef3f6', o: 0.22, r: 5 },
+  pia: { c: '#e39a94', o: 0.38, r: 4 }, granulation: { c: '#efe8da', o: 1, r: 2 }, needle: { c: '#c9ced6', o: 1, r: 2 }, needlehub: { c: '#4a7fd0', o: 1, r: 2 } };
+export const CSFCOL = '#38b6ff';
+const MEN_MARK = { lumbar_puncture: 'Lumbar puncture: needle tip in the CSF (L3/L4)', epidural_injection: 'Epidural: needle tip outside the dura',
+  conus_medullaris: 'Conus medullaris (end of the cord, L1/L2)', dural_sac_end: 'End of the dural sac (S2)', foramen_monro: 'Foramen of Monro',
+  aqueduct: 'Cerebral aqueduct', foramen_magendie: 'Foramen of Magendie', foramen_luschka: 'Foramen of Luschka' };
+const MEN_SPINAL = new Set(['lumbar_puncture', 'epidural_injection', 'conus_medullaris', 'dural_sac_end']);
+function meningesMaterial(me) {
+  const k = me.kind, st = MEN_STYLE[k] || MEN_STYLE.dura;
+  if (k === 'needle') return new THREE.MeshPhysicalMaterial({ color: st.c, roughness: 0.22, metalness: 1, clearcoat: 0.3, transparent: true, opacity: 1 });
+  if (k === 'needlehub') return new THREE.MeshPhysicalMaterial({ color: me.id === 'epidural_injection' ? '#e0a23a' : st.c, roughness: 0.3, metalness: 0, clearcoat: 0.8, transparent: true, opacity: 1 });
+  const glass = st.o < 1, m = tissueMaterial(new THREE.MeshPhysicalMaterial({ color: st.c, roughness: k === 'arachnoid' ? 0.2 : 0.38, metalness: 0,
+    clearcoat: k === 'pia' ? 0.2 : 0.6, clearcoatRoughness: 0.25, sheen: 0.4, sheenColor: new THREE.Color(k === 'pia' ? '#ffd0c8' : '#ffffff'),
+    transparent: true, opacity: st.o, depthWrite: !glass, side: k === 'fold' || k === 'arachnoid' || k === 'dura' ? THREE.DoubleSide : THREE.FrontSide }),
+    { relief: k === 'dura' || k === 'fold' ? 0.12 : 0.05, scale: 0.9 });
+  return m;
+}
 function skullMaterial(me) {
   const k = me.kind;
   if (k === 'nerve') return nerveMaterial(me.id, me.dir || 0);
@@ -206,7 +236,7 @@ function skullMaterial(me) {
   if (k === 'iris' || k === 'pupil') return new THREE.MeshPhysicalMaterial({ color: SKULL_COL[k], roughness: 0.6, metalness: 0, transparent: true, opacity: 1, side: THREE.DoubleSide });
   if (k === 'sclera') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: SKULL_COL.sclera, roughness: 0.35, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.2, transparent: true, opacity: 1 }), { relief: 0.05, scale: 1.5 });
   if (k === 'tooth') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: SKULL_COL.tooth, roughness: 0.25, metalness: 0, clearcoat: 0.8, clearcoatRoughness: 0.15, transparent: true, opacity: 1 }), { relief: 0.05, scale: 2.0 });
-  return spineMaterial({ kind: 'bone' });
+  return boneMaterial(me.sdo !== undefined);
 }
 // v2.16 spine (cord, roots, spinal arteries, vertebrae, discs): separate file, loaded the first time the spine is shown
 let SPN = null;
@@ -219,13 +249,51 @@ async function loadSpine(m) {
 function spineMaterial(me) {
   const k = me.kind;
   if (k === 'artery') return arteryMaterial();
-  if (k.indexOf('root') === 0 || k === 'nerve' || k === 'plexus') return nerveMaterial(me.id, me.dir || 0);
+  if (k.indexOf('root') === 0 || k === 'nerve' || k === 'plexus' || k === 'ramus') return nerveMaterial(me.id, me.dir || 0);
   if (k === 'cartilage') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#bcd4dd', roughness: 0.32, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25, transparent: true, opacity: 1 }), { relief: 0.1, scale: 1.2 });
   if (k === 'muscle') { const m = tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#b5584a', roughness: 0.5, metalness: 0, clearcoat: 0.3, sheen: 0.3, sheenColor: new THREE.Color('#ffb0a0'), transparent: true, opacity: 0.4, depthWrite: false }), { relief: 0.25, scale: 1.6, tone: '1.0, 0.92, 0.9' }); m.userData.glass = 0.4; return m; }
-  if (k === 'bone') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#e7dcc4', roughness: 0.62, metalness: 0, clearcoat: 0.12, clearcoatRoughness: 0.6, sheen: 0.15, sheenColor: new THREE.Color('#fff6e8'), transparent: true, opacity: 1 }), { relief: 0.32, scale: 0.9, tone: '0.98, 0.95, 0.9' });
+  if (k === 'bone') return boneMaterial(false);
   if (k === 'disc') return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#c9dbe2', roughness: 0.38, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.3, sheen: 0.3, sheenColor: new THREE.Color('#f2fbff'), transparent: true, opacity: 1 }), { relief: 0.12, scale: 1.4 });
   if (k === 'dura') { const m = new THREE.MeshPhysicalMaterial({ color: '#cbd8e2', roughness: 0.35, metalness: 0, clearcoat: 0.5, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }); m.userData.glass = 0.22; return m; }
   return tissueMaterial(new THREE.MeshPhysicalMaterial({ color: '#e9dfd0', roughness: 0.55, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.45, sheen: 0.25, sheenRoughness: 0.5, sheenColor: new THREE.Color('#fff4ea'), transparent: true, opacity: 1 }), { relief: 0.14, scale: 0.7, tone: '0.95, 0.92, 0.88' });
+}
+// v2.19 prepared bone: the warm grey-ivory of a cleaned, varnished study skull (satin clear coat), fine porosity and soft
+// mottling; on the skull the sutures are drawn from baked per-vertex data (signed distance to the suture line and position along
+// it), serrated like real sutures: deeply interdigitated (sagittal, lambdoid), moderately (coronal), nearly straight (squamous, face)
+function boneMaterial(sut) {
+  const mat = new THREE.MeshPhysicalMaterial({ color: BONE_COL, roughness: 0.52, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.32, sheen: 0.12, sheenColor: new THREE.Color('#fff4e0'), transparent: true, opacity: 1 });
+  mat.userData.selAmp = { value: 0 }; mat.userData.bone = true;
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.uTime = TS_U.uTime; sh.uniforms.uSel = mat.userData.selAmp;
+    sh.vertexShader = 'varying vec3 vPosO;' + (sut ? ' attribute float aSd; attribute float aSt; attribute float aSk; varying float vSd; varying float vSt; varying float vSk;' : '') + '\n' +
+      sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vPosO = position;' + (sut ? ' vSd = aSd; vSt = aSt; vSk = aSk;' : ''));
+    sh.fragmentShader = 'uniform float uTime; uniform float uSel; varying vec3 vPosO;' + (sut ? ' varying float vSd; varying float vSt; varying float vSk;' : '') + '\n' + sh.fragmentShader
+      .replace('#include <common>', '#include <common>\n' + GLSL_NOISE)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+      float bm = nuVN(vPosO * 0.18) * 0.55 + nuVN(vPosO * 0.7) * 0.3 + nuVN(vPosO * 2.6) * 0.15;
+      float pore = smoothstep(0.62, 0.9, nuVN(vPosO * 4.2)) * (1.0 - smoothstep(0.0, 1.5, fwidth(vPosO.x * 4.2)));
+      diffuseColor.rgb *= (0.9 + 0.16 * bm) * (1.0 - 0.18 * pore);
+      diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.93, 0.9, 0.86), smoothstep(0.55, 0.85, nuVN(vPosO * 0.09)) * 0.6);
+      float bH = 0.6 * bm - 0.4 * pore;` + (sut ? `
+      // sutures: kinds 0 sagittal, 1 lambdoid, 2 coronal, 3 squamous, 4 face, 5 minor
+      int k = int(vSk + 0.5);
+      float amp = k == 0 ? 2.2 : k == 1 ? 2.6 : k == 2 ? 1.4 : k == 3 ? 0.35 : k == 4 ? 0.25 : 0.8;
+      float lam = k == 3 ? 9.0 : k == 4 ? 6.0 : 3.6;
+      float sr = sin(vSt * 6.2831853 / lam) * 0.62 + sin(vSt * 6.2831853 / (lam * 0.41) + 1.7) * 0.28 + (nuVN(vec3(vSt * 0.9, vSk, 0.0)) - 0.5) * 0.5;
+      float dz = abs(vSd - amp * sr), fw = max(fwidth(vSd), 0.02);
+      // no line where the nearest suture changes between vertices (kind not constant, or the signed distance jumps)
+      float jump = fwidth(vSd) / max(length(fwidth(vPosO)), 1e-4);
+      float ok = (1.0 - smoothstep(0.02, 0.08, abs(vSk - floor(vSk + 0.5)))) * (1.0 - smoothstep(1.8, 3.0, jump));
+      float line = (1.0 - smoothstep(0.12, 0.12 + 1.6 * fw + 0.18, dz)) * step(abs(vSd), 6.5) * ok;
+      diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.42, 0.36, 0.3), line * 0.9);
+      bH -= line * 1.4;` : ''))
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+      normal = nuBump(normal, bH, 0.35);`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      totalEmissiveRadiance += diffuseColor.rgb * uSel * (0.14 + 0.1 * sin(uTime * 2.2));`);
+  };
+  mat.customProgramCacheKey = () => 'bone-v2-' + (sut ? 's' : 'p');
+  return mat;
 }
 // v2.10 tissue look for every structure mesh (not arteries or nerves): a fine procedural micro-relief (bump from 3D noise in
 // millimetres), a slight colour mottling, a soft rim light (tissue looks a little translucent at grazing angles), and a gentle
@@ -435,6 +503,7 @@ class Brain {
       NV_U.uTime.value = now / 1000; TS_U.uTime.value = now / 1000;
       if (this.netTw) this.tickNet(now);
       if (this.lab) this.placeLabel();
+      if (this.menTags) this.placeTags();
       if (this.shadow) { const dy = this.camera.position.y - this.shadow.position.y, dd = this.camera.position.distanceTo(c.target) || 1;
         this.shadow.visible = dy > 0; this.shadow.material.opacity = 0.6 * THREE.MathUtils.clamp(dy / dd * 1.6, 0, 1) * (this.shadowOn === false ? 0 : 1); }
       r.render(s, this.camera);
@@ -461,7 +530,17 @@ class Brain {
   // stop the idle rotation for a while (e.g. after a programmatic view change)
   touch() { this.lastTouch = performance.now(); if (this.controls) this.controls.autoRotate = false; }
   setAutoRotate(on) { this.holdRotate = !on; this.touch(); }
-  setCut(on) { this.cut = on; this.apply(); if (on) this.view('medial'); }
+  setCut(on) { this.cut = on; this.apply(); if (on) this.view('medial'); if (this.cutFace) this.cutFace.visible = !!on && !(this.clipPlanes || []).length; }
+  // v2.19 cut face on the midline structures when the brain is cut in half (canvas drawn by the page from the 0.5 mm template)
+  setCutFace(cv, ext) {
+    if (this.cutFace) { this.scene.remove(this.cutFace); this.cutFace.material.map.dispose(); this.cutFace.material.dispose(); this.cutFace.geometry.dispose(); this.cutFace = null; }
+    if (!cv) return;
+    const W = ext.y1 - ext.y0, H = ext.z1 - ext.z0, g = new THREE.PlaneGeometry(W, H); g.rotateY(-Math.PI / 2);   // texture left = anterior
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const mat = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.5, roughness: 0.75, metalness: 0, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+    const o = this.cutFace = new THREE.Mesh(g, mat); o.position.set(0.02, (ext.z0 + ext.z1) / 2, -(ext.y0 + ext.y1) / 2); o.renderOrder = 2;
+    o.visible = !!this.cut && !(this.clipPlanes || []).length; this.scene.add(o);
+  }
   setCortex(mode) { this.cortexMode = mode; this.apply(); }
   setGhost(v) { this.ghost = v == null ? null : Math.max(0, Math.min(1, v)); this.apply(); }
   // MRI planes inside the 3D scene. planes: [{ax:'ax'|'co'|'sa', mm, canvas, flip}], ext: {x0,x1,y0,y1,z0,z1} (MNI mm),
@@ -510,8 +589,9 @@ class Brain {
   // layers: {cortex, deep, brainstem, cerebellum, nerves, tracts, ventricles} -> false hides that group (focused structures stay visible)
   setLayers(L) {
     // the page passes the same (mutated) layers object each time, so remember the spine state here
-    const was = !!this.spineOn; this.layers = L || {}; this.spineOn = !!this.layers.spine; if (this.layers.arteries) this.ensureArteries();
+    const was = !!this.spineOn; this.layers = L || {}; this.spineOn = !!(this.layers.spine || this.layers.peripheral); if (this.layers.arteries) this.ensureArteries();
     if (this.layers.skull) this.ensureSkull();
+    if (this.layers.meninges) this.ensureMeninges();
     if (this.spineOn && !was) this.ensureSpine().then(() => { if (this.spineOn) { this.spineView(true); this.frameFocus(); } }); else if (!this.spineOn && was) this.spineView(false);
     this.apply();
   }
@@ -574,7 +654,11 @@ class Brain {
       if (!S || this.disposed) return;
       this.skl = [];
       for (const me of S.mf.meshes) {
-        const m = new THREE.Mesh(geometryFor(me, S.buf), skullMaterial(me)); m.userData = { id: me.id, side: me.side, skull: me.kind };
+        const g = geometryFor(me, S.buf);
+        if (me.sdo !== undefined) { const a = new Int16Array(S.buf, me.sdo, me.nv), b = new Uint16Array(S.buf, me.sto, me.nv), c = new Uint8Array(S.buf, me.sko, me.nv);
+          const A = new Float32Array(me.nv), B = new Float32Array(me.nv), C = new Float32Array(me.nv); for (let i = 0; i < me.nv; i++) { A[i] = a[i] / 100; B[i] = b[i] / 10; C[i] = c[i]; }
+          g.setAttribute('aSd', new THREE.BufferAttribute(A, 1)); g.setAttribute('aSt', new THREE.BufferAttribute(B, 1)); g.setAttribute('aSk', new THREE.BufferAttribute(C, 1)); }
+        const m = new THREE.Mesh(g, skullMaterial(me)); m.userData = { id: me.id, side: me.side, skull: me.kind };
         if (me.kind === 'cornea') m.renderOrder = 5;
         m.visible = false; this.group.add(m); this.meshes.push(m); this.skl.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
       }
@@ -583,6 +667,46 @@ class Brain {
     return this.sklLoading;
   }
   setBones(mode) { this.boneMode = mode; this.apply(); }
+  ensureMeninges() {
+    if (this.men || !this.mf.meninges) return Promise.resolve();
+    if (this.menLoading) return this.menLoading;
+    this.menLoading = loadMeninges(this.mf).then(S => {
+      if (!S || this.disposed) return;
+      this.men = []; this.csf = [];
+      for (const me of S.mf.meshes) {
+        const m = new THREE.Mesh(geometryFor(me, S.buf), meningesMaterial(me)); m.userData = { id: me.id, side: me.side, men: me.kind };
+        m.renderOrder = (MEN_STYLE[me.kind] || {}).r || 4;
+        m.visible = false; this.group.add(m); this.meshes.push(m); this.men.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
+      }
+      for (const fe of S.mf.flow) {
+        const L = fiberObject(fe, S.buf), u = L.material.uniforms; u.uDec.value = 0; u.uCol.value.set(CSFCOL);
+        L.userData = { kind: 'csf', id: fe.id, tgt: 0, spinal: fe.id === 'csf_spinal' }; L.renderOrder = 7;
+        this.group.add(L); this.csf.push(L); this.fibs = this.fibs || []; this.fibs.push(L);
+      }
+      // labelled sites (HTML, so the page translator handles them): needle tips, conus, end of the dural sac, CSF openings
+      if (this.opts.labels) {
+        const box = this.menTagBox = document.createElement('div'); box.className = 'b3tags'; this.el.appendChild(box);
+        this.menTags = [];
+        for (const id in S.mf.marks) for (const p of S.mf.marks[id].slice(0, 1)) { // one label per site (left and right openings are mirror images)
+          const t = document.createElement('span'); t.className = 'b3tag' + (id === 'lumbar_puncture' || id === 'foramen_magendie' ? ' lo' : id === 'epidural_injection' ? ' hi' : ''); t.textContent = MEN_MARK[id] || id; box.appendChild(t);
+          this.menTags.push({ el: t, id, p: new THREE.Vector3(p[0], p[2], -p[1]), spinal: MEN_SPINAL.has(id) });
+        }
+      }
+      this.apply(); if (this.opts.onMeninges) this.opts.onMeninges();
+    }).catch(() => { this.menLoading = null; });
+    return this.menLoading;
+  }
+  placeTags() {
+    const W = this.el.clientWidth, H = this.el.clientHeight, v = new THREE.Vector3(), Lz = this.layers || {};
+    for (const t of this.menTags) {
+      const show = Lz.meninges && (!t.spinal || this.spineOn);
+      if (!show) { if (t.on) { t.el.style.opacity = 0; t.on = false; } continue; }
+      v.copy(t.p).project(this.camera);
+      if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) { t.el.style.opacity = 0; t.on = false; continue; }
+      t.el.style.transform = 'translate(' + ((v.x + 1) / 2 * W).toFixed(1) + 'px,' + ((1 - v.y) / 2 * H).toFixed(1) + 'px)';
+      t.el.style.opacity = 1; t.on = true;
+    }
+  }
   tickMarks(now) {
     for (const sp of this.pathMarks.children) { if (!sp.visible) continue; const k = sp.userData.on ? 1 : 0, o = sp.material.opacity + (k - sp.material.opacity) * 0.12;
       sp.material.opacity = o; const sc = 0.024 + 0.008 * Math.sin(now / 300 + sp.userData.ph); sp.scale.set(sc, sc, 1); if (!k && o < 0.02) sp.visible = false; }
@@ -816,6 +940,15 @@ class Brain {
       m.visible = !(this.cut && !cp.length && m.userData.side === 'R');
       mat.clippingPlanes = cp.length ? cp : (m.userData.side === 'M' ? planes : []); mat.clipIntersection = true;
       const Lz = this.layers || {}, showHidden = (Lz.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') || (Lz.ventricles && inf.lobe === 'ventricles');
+      const mk = m.userData.men;
+      if (mk) { // v2.19 meninges: with the Meninges layer (or when chosen); the needles only with the spine
+        const fm = this.focus[id + '@' + m.userData.side] || this.focus[id], st = MEN_STYLE[mk] || MEN_STYLE.dura;
+        if ((!fm && !Lz.meninges) || ((mk === 'needle' || mk === 'needlehub') && !fm && !this.spineOn)) { m.visible = false; continue; }
+        if (fm) { mat.color.set(fm); mat.opacity = Math.max(st.o, 0.55); }
+        else { if (mk !== 'needlehub') mat.color.set(st.c); mat.opacity = any ? Math.min(st.o, 0.1) : st.o; }
+        mat.transparent = mat.opacity < 1; mat.depthWrite = mat.opacity >= 1; m.renderOrder = st.r;
+        mat.emissive.set(id === this.sel && fm ? fm : '#000000'); mat.emissiveIntensity = 0.15; mat.needsUpdate = true; continue;
+      }
       if (HIDDEN[inf.lobe] && !showHidden && !(this.focus[id] || this.focus[id + '@' + m.userData.side])) { m.visible = false; continue; }
       const f = this.focus[id + '@' + m.userData.side] || this.focus[id];
       const isNerve = inf.lobe === 'cranial nerves', nm = this.nerveMode, isArt = m.userData.art;
@@ -823,7 +956,11 @@ class Brain {
       if (isArt && !f && !Lz.arteries) { m.visible = false; continue; }
       const sk = m.userData.spine, bm = this.boneMode == null ? 2 : this.boneMode;
       if (sk && !f) { // v2.16 spine meshes: only with the Spine layer; bones and discs follow the bone mode; dura and grey matter only when chosen
-        if (!Lz.spine || nm === 'iso' || ((sk === 'bone' || sk === 'disc' || sk === 'cartilage') && bm === 0) || sk === 'dura' || sk === 'grey') { m.visible = false; continue; }
+        // v2.19: the Spine layer shows the cord, its roots and ganglia, the spinal nerve trunks and the column; the rami,
+        // plexuses, limb nerves and psoas only with the Peripheral nerves layer; the spinal arteries only with Arteries
+        const periph = sk === 'ramus' || sk === 'plexus' || sk === 'muscle';
+        if ((!Lz.spine && !(periph && Lz.peripheral)) || nm === 'iso' || ((sk === 'bone' || sk === 'disc' || sk === 'cartilage') && bm === 0) || (sk === 'dura' && !Lz.meninges) || sk === 'grey'
+            || (periph && !Lz.peripheral) || (sk === 'artery' && !Lz.arteries)) { m.visible = false; continue; }
       }
       const kk = m.userData.skull;
       if (kk && !f) { // v2.18 skull and teeth with the Skull layer and the bone mode; eyes and orbital optic nerves with the nerves or the skull
@@ -869,6 +1006,7 @@ class Brain {
       if (m.visible && !f && ((kk && (kk === 'bone' || kk === 'tooth')) || (sk && (sk === 'bone' || sk === 'disc' || sk === 'cartilage'))) && (this.boneMode == null ? 2 : this.boneMode) === 1 && !any) {
         mat.opacity = 0.16; mat.transparent = true; mat.depthWrite = false; m.renderOrder = 4; }
       if (m.visible && kk && SKULL_COL[kk] && !f && !any) mat.color.set(SKULL_COL[kk]);
+      if (m.visible && sk === 'bone' && !f && !any) mat.color.set(BONE_COL); // v2.19 vertebrae, ribs and clavicles in the same bone colour as the skull
       if (mat.userData.glass && m.visible) { mat.opacity = Math.min(mat.opacity, f ? 0.42 : mat.userData.glass); mat.transparent = true; mat.depthWrite = false; m.renderOrder = 4; }
       if (m.userData.real) this.paintNet(m);
       if (this.net != null && m.userData.real && !any) { mat.color.set(isCortex ? '#ffffff' : (inf.tint || '#bbb')); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; m.renderOrder = 1; m.visible = isCortex || inf.lobe === 'cerebellum'; }
@@ -899,6 +1037,13 @@ class Brain {
         L.material.clippingPlanes = cp.length ? cp : []; L.material.clipIntersection = true; }
       for (const sp of this.pathMarks.children) { sp.userData.on = on(sp.userData.id); if (sp.userData.on) sp.visible = true; }
       if (this.pleg) this.pleg.classList.toggle('on', n > 0);
+    }
+    if (this.csf) { // v2.19 CSF circulation: from the choroid plexus through the ventricles to the subarachnoid space
+      const on = !!(Lyr.meninges || this.focus.csf_flow), anyF = Object.keys(this.focus).length > 0;
+      for (const L of this.csf) { const u = L.material.uniforms; u.uDark.value = dark ? 1 : 0; u.uCol.value.set(CSFCOL);
+        L.userData.tgt = on && (!L.userData.spinal || this.spineOn) ? (anyF && !this.focus.csf_flow ? 0.35 : 0.95) : 0;
+        L.material.clippingPlanes = cp.length ? cp : planes; L.material.clipIntersection = true; }
+      if (this.menTagBox) this.menTagBox.classList.toggle('on', !!Lyr.meninges);
     }
   }
   pick(e, click) {
