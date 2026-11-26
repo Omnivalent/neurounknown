@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-ncgtooppzI/LR7jwjIsdbW2pnDPwsumB0RebNmvJ0pU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cite &amp; data — NeuroUnknown</title>
 <meta name="description" content="How to cite NeuroUnknown, version history, data downloads and sources.">
 <style>
@@ -30,6 +30,10 @@
  d.setAttribute('data-layout',eff);
  if(l==='phone'&&!narrow) d.classList.add('frame');
  if(l==='desktop'&&narrow){var m=document.querySelector('meta[name=viewport]'); if(m) m.setAttribute('content','width=1240');}
+ var g=null,pl=d.getAttribute('data-page-lang');try{g=localStorage.getItem('nu-lang');}catch(e){}
+ if(!/^(de|fr|es|it|ar|zh)$/.test(g||''))g='en';
+ if(pl==='en'&&g!=='en'){location.replace('index.'+g+'.html'+location.hash);}
+ var L=pl||g; if(L!=='en'){d.classList.add('i18n-wait');d.lang=L==='zh'?'zh-Hans':L;d.dir=L==='ar'?'rtl':'ltr';}
 })();
 </script>
 <meta name="color-scheme" content="light dark">
@@ -41,22 +45,22 @@
 </head>
 <body class="cite">
 <header class="site"><div class="wrap hdr">
- <a class="brand" href="index.html#/"><i class="mark" aria-hidden="true"></i>Neuro<span>Unknown</span></a>
+ <a class="brand notranslate" href="index.html#/"><i class="mark" aria-hidden="true"></i>Neuro<span>Unknown</span></a>
  <nav class="mainnav" aria-label="Site"><a href="index.html#/" data-nav="Home">Home</a><a href="index.html#/atlas" data-nav="3D Neuroanatomy">3D Neuroanatomy</a><a href="index.html#/study" data-nav="Test yourself">Test yourself</a><a href="index.html#/diseases" data-nav="Diagnoses">Diagnoses</a><a href="index.html#/genome" data-nav="Gene atlas">Gene atlas</a><a href="index.html#/screen" data-nav="Our study">Our study</a><a href="index.html#/self" data-nav="Self-disorders">Self-disorders</a></nav><details class="more"><summary data-nav="More" aria-current="page">More</summary><div class="more-menu"><a href="findings.html" data-nav="Findings">Findings</a><a href="library.html" data-nav="Library">Library</a><a href="reviews.html" data-nav="Reviews">Reviews</a><a href="cite.html" data-nav="Cite & data" aria-current="page">Cite & data</a></div></details>
  <div class="hdr-tools"><div class="layout-seg" role="group" aria-label="Page layout"><button type="button" data-layout-set="auto" title="Layout: auto" aria-label="Layout: auto"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button><button type="button" data-layout-set="phone" title="Layout: phone" aria-label="Layout: phone"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button><button type="button" data-layout-set="desktop" title="Layout: desktop" aria-label="Layout: desktop"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.6"/><path d="M8.5 20h7M12 16.5V20"/></svg></button></div><button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button></div>
 </div><div class="ticker" id="nuTicker"><a class="tk-live" href="index.html#/">Today</a><div class="tk-track"><div class="tk-run" id="nuTickerRun">Daily literature watch: every day at 12:00 Central European Time we re-check PubMed for our genes and diseases.</div></div></div></header><div class="fb-bar" id="nuFb"><div class="wrap fb-row"><span class="fb-t">Help improve NeuroUnknown: tell us what is wrong, unclear or missing.</span><button type="button" class="fb-btn" id="fbOpen" aria-expanded="false" aria-controls="fbPanel">Give feedback</button></div><div class="wrap fb-panel" id="fbPanel" hidden><label class="fb-l" for="fbText">Your feedback</label><textarea id="fbText" rows="4" maxlength="2000" placeholder="What is wrong, unclear or missing? If something is incorrect, what should it say (with a source if you have one)?"></textarea><div class="fb-sel"><label class="fb-l">How useful is this page? <select id="fbRate"><option value="">Choose</option><option>5 - Very useful</option><option>4 - Useful</option><option>3 - OK</option><option>2 - Not very useful</option><option>1 - Not useful</option></select></label><label class="fb-l">You are (optional) <select id="fbRole"><option value="">Choose</option><option>Medical student</option><option>Physician</option><option>Researcher</option><option>Other student</option><option>Patient or family member</option><option>Other</option></select></label></div><p class="fb-note">Your feedback opens as a <b>public</b> GitHub issue (a free GitHub account is needed); you can review it before posting. Please do not include personal, health or patient information.</p><div class="fb-act"><button type="button" class="fb-btn" id="fbSend">Continue on GitHub &rarr;</button><button type="button" class="fb-x" id="fbCancel">Cancel</button></div></div></div>
 <main class="wrap">
-<span class="ver">Version 2.14 &middot; 23 November 2026</span>
+<span class="ver">Version 2.15 &middot; 23 November 2026</span>
 <h1>Cite &amp; data</h1>
 <p class="lede">NeuroUnknown is a <b>hypothesis-generating resource</b>: it ranks brain-disease genes that have strong genetic evidence but little research, and explains the diseases and treatments around them. It contains no laboratory data and makes no discovery claims. A flagged gene is a starting point for a question, not an answer.</p>
 
 <h2>How to cite</h2>
-<div class="box"><pre>NeuroUnknown project (2026). NeuroUnknown: an open educational 3D brain atlas, with a hypothesis-generating screen of under-studied brain-disease genes. Version 2.14. https://omnivalent.github.io/neurounknown/ (accessed DD Month YYYY).</pre></div>
+<div class="box"><pre>NeuroUnknown project (2026). NeuroUnknown: an open educational 3D brain atlas, with a hypothesis-generating screen of under-studied brain-disease genes. Version 2.15. https://omnivalent.github.io/neurounknown/ (accessed DD Month YYYY).</pre></div>
 <div class="box"><pre>@misc{neurounknown2026,
   title  = {NeuroUnknown: an open educational 3D brain atlas, with a hypothesis-generating screen of under-studied brain-disease genes},
   author = {{NeuroUnknown project}},
   year   = {2026},
-  note   = {Version 2.14},
+  note   = {Version 2.15},
   url    = {https://omnivalent.github.io/neurounknown/}
 }</pre></div>
 <p>Please also cite the original sources of any data you reuse (listed below and in every reference list on the site).</p>
@@ -68,12 +72,13 @@
 <li>7 diseases in 3 groups (neurological, psychiatric, neurodevelopmental) with treatment pathways and drug-site diagrams.</li>
 <li>A 3D brain with 127 structures and 20 systems.</li>
 <li>A daily literature watch at 12:00 Central European Time. "Selected journals" are: Nature, Science, Cell, N Engl J Med, Lancet, Lancet Neurol, Lancet Psychiatry, JAMA, JAMA Neurol, JAMA Psychiatry, Nat Med, Nat Neurosci, Neuron, Nat Genet, Mol Psychiatry, Am J Psychiatry, Brain and BMJ.</li>
-<li>Interface in English, German, French, Spanish, Italian, Arabic and Chinese (AI-drafted, not yet reviewed by native-speaker clinicians); scientific content in English.</li>
+<li>Interface in English, German, French, Spanish, Italian, Arabic and Chinese (translated with AI, not yet reviewed by native-speaker clinicians); the English version is the reference.</li>
 <li>Security: static site served over HTTPS; a Content-Security-Policy allows only this site's own scripts (inline scripts by hash), no third-party scripts, nothing sent to this site and no data collection. The feedback box only opens a GitHub issue page in a new tab; nothing is posted until you submit it there, publicly, under your GitHub account. The only stored data are your theme, layout, language and quiz score, kept on your own device.</li>
 </ul>
 
 <h2>Version history</h2>
 <div class="tw"><table><tr><th>Version</th><th>Date</th><th>Changes</th></tr>
+<tr><td>2.15</td><td>26 Nov 2026</td><td>Full translation: choosing a language now translates the whole site into German, French, Spanish, Italian, Arabic or Chinese: menus, the 3D atlas texts, diagnoses and treatments, both question banks with every explanation, the gene atlas, findings, protein library, reviews and this page. Each language has its own page, so nothing appears in English first. Gene symbols, protein names, database disease labels, paper titles and journal names stay as published. Translated with AI from the English reference version; not yet reviewed by native-speaker clinicians.</td></tr>
 <tr><td>2.14</td><td>25 Nov 2026</td><td>Questions on the 3D model are now live: turn and zoom the model inside the question, switch the viewpoint, cut it in half, and slide how see-through the rest of the brain is (from hidden to solid). 3D questions expanded from 26 to 54, now also covering the insula, the inferior surface (orbitofrontal, fusiform, parahippocampal and entorhinal cortex), the medial surface (calcarine cortex, supplementary motor area, cingulate), deep nuclei, ventricles, the internal capsule, midbrain nuclei, the optic chiasm and three cranial nerves. Structure names no longer appear on hover before you answer (also in Spot the lesion).</td></tr>
 <tr><td>2.13</td><td>25 Nov 2026</td><td>Slices in the 3D model: the cut now shows the full MRI slice on a framed plane cropped to the brain, and the brain always keeps its larger part (Flip keeps the other). Before, the cut face showed only labelled pixels, which near the edges of the brain floated outside the model as small plates, and after the 0.5 mm slices finished loading the plane could keep showing an old image. Picture questions: 98 new questions with an image. 46 ask you to name a structure outlined on an MRI slice; 26 are MRI clinical cases with a simulated lesion drawn on the template brain; 26 ask you to name a structure highlighted on the 3D model. They appear in practice and in timed exams.</td></tr>
 <tr><td>2.12</td><td>25 Nov 2026</td><td>Timed exams in Test yourself: choose clinical, anatomy or both, 10 to 60 questions and 40, 60 or 90 seconds per question; no feedback until the end; flag questions and jump between them; then your score, a breakdown by topic and every question explained. Enter your name (optional, it stays on your device) and save a score card image. Question bank expanded to 1,038: 10 new clinical questions on recent trials and criteria, each checked in PubMed (tenecteplase, thrombectomy for large core and basilar occlusion, dual antiplatelet therapy up to 72 hours, donanemab and ARIA, the alpha-synuclein seed amplification assay, foslevodopa-foscarbidopa, the 2024 McDonald criteria, atogepant, zuranolone), 23 on neurotransmitter pathways and 17 on cranial nerve nuclei. 43 artery questions are added as a preview for practice only: they are not used in timed exams until a clinician has reviewed them.</td></tr>
@@ -126,7 +131,7 @@
 <li>No laboratory validation yet.</li>
 </ul>
 </main>
-<footer class="site"><div class="wrap">NeuroUnknown 2.14 &middot; a computational, hypothesis-generating resource. Not medical advice.</div></footer>
+<footer class="site"><div class="wrap">NeuroUnknown 2.15 &middot; a computational, hypothesis-generating resource. Not medical advice.</div></footer>
 <script>
 (function(){ var o=document.getElementById('fbOpen'), p=document.getElementById('fbPanel'); if(!o||!p) return;
  function tog(show){ p.hidden=!show; o.setAttribute('aria-expanded',show); if(show) document.getElementById('fbText').focus(); }

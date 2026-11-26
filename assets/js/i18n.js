@@ -1,189 +1,223 @@
-// NeuroUnknown interface translations. Translates navigation, headings, introductions and buttons; scientific content
-// (disease pages, gene tables, questions, references) stays in English for accuracy. Translations: AI-drafted, not yet
-// reviewed by native-speaker clinicians (stated on the page). Language choice is stored on this device only.
+// NeuroUnknown page translation (v2.15). The English page is the reference; every other language is applied in the browser
+// from a dictionary (assets/i18n/<lang>.json) built from the site's own text. The main app page also exists per language
+// (index.<lang>.html) with the atlas data already translated, and the questions come from quiz.<lang>.json.
+// How it works: each element whose own text is a sentence (with links or bold words inside) is looked up as one unit, so the
+// word order can change between languages; numbers are kept and written the local way; text that the app builds from
+// pieces is matched by patterns. Gene symbols, protein names from HGNC, database disease labels and paper titles are
+// identifiers and stay as published. Language choice is stored on this device only.
 (function () {
   'use strict';
   var LANGS = { en: 'English', de: 'Deutsch', fr: 'Français', es: 'Español', it: 'Italiano', ar: 'العربية', zh: '中文' };
-  var NAV = ['Home', 'Our study', 'Self-disorders', '3D Neuroanatomy', 'Diagnoses', 'Gene atlas', 'Test yourself', 'Findings', 'Library', 'Reviews', 'Cite & data', 'More'];
-  
-  var T = {
-    de: {
-      nav: ["Start", "Unsere Studie", "Ich-Störungen", "3D-Neuroanatomie", "Diagnosen", "Genatlas", "Teste dich", "Ergebnisse", "Bibliothek", "Reviews", "Zitieren & Daten", "Mehr"],
-      tabs: {"home": "Start", "screen": "Studie", "atlas": "3D-Anatomie", "diseases": "Diagnosen", "genome": "Gene", "study": "Teste dich"},
-      today: 'Heute',
-      note: 'Die Benutzeroberfläche ist übersetzt; die wissenschaftlichen Inhalte (Krankheitsseiten, Gentabellen, Fragen) sind derzeit auf Englisch. Übersetzung KI-erstellt, noch nicht fachlich geprüft. Maßgeblich ist die englische Fassung. (Machine translation, not yet reviewed. English is the reference version.)',
-      fb_t: 'Helfen Sie, NeuroUnknown zu verbessern: Was ist falsch, unklar oder fehlt?', fb_open: 'Feedback geben',
-      hero_eyebrow: 'Offene computergestützte Forschung · aktualisiert Nov. 2026',
-      hero_h1: 'Die <em>übersehenen</em> Gene des Gehirns.',
-      hero_aside: 'Manche Gene sind eindeutig mit Erkrankungen des Gehirns verbunden, doch kaum jemand hat untersucht, was ihre Proteine tun. Wir finden sie, prüfen sie anhand der Literatur und ordnen sie dem Gehirn zu.',
-      big: 'Wir suchen Gene mit <em>starker Verbindung zu Gehirnerkrankungen</em> und <em>fast keiner Forschung</em>. Zu verstehen, was das Protein eines solchen Gens tut, ist der erste Schritt von der Behandlung der Symptome hin zur Behandlung der Ursachen.',
-      doors: [["Unser Screening", "Wie wir alle 19.299 menschlichen proteinkodierenden Gene bewertet und auf einen ersten Kandidaten eingegrenzt haben: das Protein TMEM222, in 3D."], ["3D-Neuroanatomie", "58 Strukturen und 13 Systeme. Die Substantia nigra einzeln zeigen, das limbische System hervorheben oder die Areale einer Krankheit sehen."], ["Diagnosen", "Neurologisch, psychiatrisch und neuroentwicklungsbedingt: Ursachen, Hirnareale, leitliniengerechte Behandlungswege und wo jedes Medikament wirkt."], ["Genatlas", "Jedes Chromosom mit seinen Genen für Gehirnerkrankungen. Chromosom antippen, dann ein Gen: Krankheiten und Folgen seines Verlusts."], ["Teste dich", "Über 780 Prüfungsfragen in zwei Fragenbanken (klinisch und Neuroanatomie) plus ein 3D-Läsionsspiel, jede Antwort erklärt."], ["Das Selbst bei Schizophrenie", "Gibt es ein „Zentrum des Ich“? Was bei Ich-Störungen gestört ist, Schritt für Schritt am 3D-Gehirn."]],
-      views: {
-        screen: ["Unsere Studie", 'Von allen Genen zu einem ersten Kandidaten', 'Jedes Gen wurde nach drei Fragen bewertet: Ist es ein Gehirnspezialist (N), ist es mit Krankheit verbunden (D), ist es noch ein Rätsel (U)? Dann haben wir Schritt für Schritt eingegrenzt. Tippe auf einen Schritt.'],
-        self: ["Unser Fokus · Ich-Störungen", 'Gibt es ein Zentrum des „Ich“?', 'Menschen mit Schizophrenie können erleben, dass ihre Gedanken eingegeben, ihre Handlungen gesteuert werden oder sie von außen beobachtet werden. Was sagt die Hirnforschung, und was bedeutet das für die Behandlung?'],
-        diseases: ["Diagnosen", 'Diagnosen, Behandlungen und was übersehen wird', 'Wähle eine Gruppe (neurologisch, psychiatrisch, neuroentwicklungsbedingt), dann eine Krankheit: Ursachen, beteiligte Hirnareale, Behandlungsweg nach europäischen und amerikanischen Leitlinien, wo jedes Medikament wirkt, und die Gene, die niemand untersucht. Aussagen sind nummeriert und belegt wie in einem Review.'],
-        atlas: ["3D-Neuroanatomie", 'Ein 3D-Gehirn zum Erkunden', '58 Strukturen aus einem MRT-Forschungsatlas: ein Durchschnitt vieler Gehirne im Standardraum (MNI). Wähle eine Struktur, ein ganzes System wie das limbische System oder eine Krankheit. Die Auswahl leuchtet farbig, alles andere wird durchsichtig. Auch als axiale, koronare und sagittale Schnitte.'],
-        genome: ['Genatlas', 'Jedes Gen an seinem Platz', 'Deine DNA ist in 23 Chromosomenpaare verpackt. Jedes Chromosom trägt Hunderte bis Tausende Gene, die Baupläne für Proteine. Wähle ein Chromosom, um seine Gene für Gehirnerkrankungen zu sehen, und dann ein Gen.'],
-        study: ["Teste dich", 'Teste dich selbst', 'Klinische Fallfragen im Stil medizinischer Staatsexamina (z. B. USMLE), für diese Seite geschrieben. Wähle ein Thema, antworte und bestätige: Jede Option wird erklärt. Die Fragen selbst sind auf Englisch.']
-      }
-    },
-    fr: {
-      nav: ["Accueil", "Notre étude", "Troubles du soi", "Neuroanatomie 3D", "Diagnostics", "Atlas des gènes", "Testez-vous", "Résultats", "Bibliothèque", "Revues", "Citer & données", "Plus"],
-      tabs: {"home": "Accueil", "screen": "Étude", "atlas": "Anatomie 3D", "diseases": "Diagnostics", "genome": "Gènes", "study": "Testez-vous"},
-      today: "Aujourd'hui",
-      note: "L'interface est traduite ; le contenu scientifique (pages des maladies, tableaux de gènes, questions) est pour l'instant en anglais. Traduction rédigée par IA, pas encore relue par des spécialistes. La version anglaise fait foi. (Machine translation, not yet reviewed. English is the reference version.)",
-      fb_t: 'Aidez-nous à améliorer NeuroUnknown : qu\'est-ce qui est faux, flou ou manquant ?', fb_open: 'Donner un avis',
-      hero_eyebrow: 'Recherche computationnelle ouverte · mise à jour nov. 2026',
-      hero_h1: 'Les gènes <em>négligés</em> du cerveau.',
-      hero_aside: "Certains gènes sont clairement liés aux maladies du cerveau, mais presque personne n'a étudié ce que font leurs protéines. Nous les identifions, les vérifions dans la littérature et les situons dans le cerveau.",
-      big: "Nous cherchons des gènes <em>fortement liés aux maladies du cerveau</em> et <em>presque pas étudiés</em>. Comprendre ce que fait la protéine d'un tel gène est le premier pas pour passer du traitement des symptômes au traitement des causes.",
-      doors: [["Notre criblage", "Comment nous avons évalué les 19 299 gènes humains codant des protéines pour retenir un premier candidat : la protéine TMEM222, en 3D."], ["Neuroanatomie 3D", "58 structures et 13 systèmes. Isoler la substance noire, éclairer le système limbique ou voir les régions d’une maladie."], ["Diagnostics", "Neurologiques, psychiatriques et neurodéveloppementales : causes, régions cérébrales, parcours de soins selon les recommandations et lieu d’action de chaque médicament."], ["Atlas des gènes", "Chaque chromosome et ses gènes liés aux maladies du cerveau. Touchez un chromosome, puis un gène."], ["Testez-vous", "Plus de 780 questions de type examen en deux banques (clinique et neuroanatomie) et un jeu de lésions en 3D, chaque réponse expliquée."], ["Le soi dans la schizophrénie", "Existe-t-il un « centre du moi » ? Ce qui se dérègle dans les troubles du soi, étape par étape sur le cerveau en 3D."]],
-      views: {
-        screen: ["Notre étude", "De tous les gènes à un premier candidat", "Chaque gène a été évalué selon trois questions : est-il spécialiste du cerveau (N), est-il lié à une maladie (D), reste-t-il un mystère (U) ? Puis nous avons affiné étape par étape. Touchez une étape."],
-        self: ["Notre priorité · troubles du soi", 'Existe-t-il un centre du « moi » ?', "Les personnes atteintes de schizophrénie peuvent sentir que leurs pensées sont imposées, leurs actes contrôlés ou qu'elles sont observées de l'extérieur. Que dit la recherche sur le cerveau, et qu'est-ce que cela signifie pour le traitement ?"],
-        diseases: ["Diagnostics", 'Diagnostics, traitements et ce qui est négligé', "Choisissez un groupe (neurologique, psychiatrique ou neurodéveloppemental), puis une maladie : causes, régions cérébrales, parcours de traitement selon les recommandations européennes et américaines, lieu d'action de chaque médicament et gènes peu étudiés. Les affirmations sont numérotées et référencées."],
-        atlas: ["Neuroanatomie 3D", 'Un cerveau en 3D à explorer', "58 structures issues d'un atlas IRM de recherche : la moyenne de nombreux cerveaux dans l'espace standard (MNI). Choisissez une structure, un système comme le système limbique, ou une maladie. La sélection s'éclaire, le reste devient transparent. Aussi en coupes axiales, coronales et sagittales."],
-        genome: ['Atlas des gènes', 'Chaque gène à sa place', "Votre ADN est réparti en 23 paires de chromosomes, chacun portant des centaines à des milliers de gènes, les recettes des protéines. Choisissez un chromosome pour voir ses gènes liés aux maladies du cerveau, puis un gène."],
-        study: ["Testez-vous", 'Testez-vous', "Questions cliniques dans le style des examens de médecine (comme l'USMLE), écrites pour ce site. Choisissez un thème, répondez et confirmez : chaque option est expliquée. Les questions sont en anglais."]
-      }
-    },
-    es: {
-      nav: ["Inicio", "Nuestro estudio", "Trastornos del yo", "Neuroanatomía 3D", "Diagnósticos", "Atlas de genes", "Ponte a prueba", "Resultados", "Biblioteca", "Revisiones", "Citar y datos", "Más"],
-      tabs: {"home": "Inicio", "screen": "Estudio", "atlas": "Anatomía 3D", "diseases": "Diagnósticos", "genome": "Genes", "study": "Ponte a prueba"},
-      today: 'Hoy',
-      note: 'La interfaz está traducida; el contenido científico (páginas de enfermedades, tablas de genes, preguntas) está por ahora en inglés. Traducción hecha con IA, aún no revisada por especialistas. La versión en inglés es la de referencia. (Machine translation, not yet reviewed. English is the reference version.)',
-      fb_t: 'Ayude a mejorar NeuroUnknown: ¿qué está mal, poco claro o falta?', fb_open: 'Enviar comentarios',
-      hero_eyebrow: 'Investigación computacional abierta · actualizado nov. 2026',
-      hero_h1: 'Los genes <em>olvidados</em> del cerebro.',
-      hero_aside: 'Algunos genes están claramente ligados a enfermedades del cerebro, pero casi nadie ha estudiado qué hacen sus proteínas. Los encontramos, los contrastamos con la literatura y los situamos en el cerebro.',
-      big: 'Buscamos genes con <em>fuerte relación con enfermedades del cerebro</em> y <em>casi ninguna investigación</em>. Entender qué hace la proteína de ese gen es el primer paso para pasar de tratar síntomas a tratar causas.',
-      doors: [["Nuestro cribado", "Cómo puntuamos los 19.299 genes humanos que codifican proteínas hasta elegir un primer candidato: la proteína TMEM222, en 3D."], ["Neuroanatomía 3D", "58 estructuras y 13 sistemas. Aislar la sustancia negra, iluminar el sistema límbico o ver las áreas de una enfermedad."], ["Diagnósticos", "Neurológicas, psiquiátricas y del neurodesarrollo: causas, áreas cerebrales, pautas de tratamiento según guías y dónde actúa cada fármaco."], ["Atlas de genes", "Cada cromosoma con sus genes ligados a enfermedades cerebrales. Toca un cromosoma y luego un gen."], ["Ponte a prueba", "Más de 780 preguntas tipo examen en dos bancos (clínico y neuroanatomía) y un juego de lesiones en 3D, cada respuesta explicada."], ["El yo en la esquizofrenia", "¿Existe un «centro del yo»? Qué falla en los trastornos del yo, paso a paso sobre el cerebro en 3D."]],
-      views: {
-        screen: ["Nuestro estudio", 'De todos los genes a un primer candidato', 'Cada gen se puntuó con tres preguntas: ¿es especialista del cerebro (N), está ligado a enfermedad (D), sigue siendo un misterio (U)? Luego filtramos paso a paso. Toca un paso.'],
-        self: ["Nuestro enfoque · trastornos del yo", '¿Existe un centro del «yo»?', 'Las personas con esquizofrenia pueden sentir que sus pensamientos son impuestos, sus actos controlados o que son observadas desde fuera. ¿Qué dice la investigación cerebral y qué significa para el tratamiento?'],
-        diseases: ["Diagnósticos", 'Diagnósticos, tratamientos y lo que se pasa por alto', 'Elige un grupo (neurológico, psiquiátrico o del neurodesarrollo) y luego una enfermedad: causas, áreas cerebrales, pauta de tratamiento según guías europeas y americanas, dónde actúa cada fármaco y los genes poco estudiados. Las afirmaciones están numeradas y referenciadas.'],
-        atlas: ["Neuroanatomía 3D", 'Un cerebro 3D para explorar', '58 estructuras de un atlas de resonancia de investigación: la media de muchos cerebros en espacio estándar (MNI). Elige una estructura, un sistema como el límbico o una enfermedad. Lo elegido se ilumina y el resto se vuelve transparente. También en cortes axiales, coronales y sagitales.'],
-        genome: ['Atlas de genes', 'Cada gen en su lugar', 'Tu ADN está empaquetado en 23 pares de cromosomas, cada uno con cientos o miles de genes, las recetas de las proteínas. Elige un cromosoma para ver sus genes ligados a enfermedades cerebrales y luego un gen.'],
-        study: ["Ponte a prueba", 'Ponte a prueba', 'Preguntas de casos clínicos al estilo de los exámenes médicos (como el USMLE), escritas para este sitio. Elige un tema, responde y confirma: cada opción se explica. Las preguntas están en inglés.']
-      }
-    },
-    it: {
-      nav: ["Home", "Il nostro studio", "Disturbi del sé", "Neuroanatomia 3D", "Diagnosi", "Atlante dei geni", "Mettiti alla prova", "Risultati", "Biblioteca", "Revisioni", "Cita & dati", "Altro"],
-      tabs: {"home": "Home", "screen": "Studio", "atlas": "Anatomia 3D", "diseases": "Diagnosi", "genome": "Geni", "study": "Mettiti alla prova"},
-      today: 'Oggi',
-      note: "L'interfaccia è tradotta; i contenuti scientifici (pagine delle malattie, tabelle dei geni, domande) sono per ora in inglese. Traduzione redatta con IA, non ancora revisionata da specialisti. La versione inglese è quella di riferimento. (Machine translation, not yet reviewed. English is the reference version.)",
-      fb_t: 'Aiutaci a migliorare NeuroUnknown: cosa è sbagliato, poco chiaro o mancante?', fb_open: 'Lascia un commento',
-      hero_eyebrow: 'Ricerca computazionale aperta · aggiornato nov. 2026',
-      hero_h1: 'I geni <em>trascurati</em> del cervello.',
-      hero_aside: 'Alcuni geni sono chiaramente legati alle malattie del cervello, eppure quasi nessuno ha studiato cosa fanno le loro proteine. Li troviamo, li verifichiamo nella letteratura e li collochiamo nel cervello.',
-      big: 'Cerchiamo geni <em>fortemente legati alle malattie del cervello</em> e <em>quasi mai studiati</em>. Capire cosa fa la proteina di un tale gene è il primo passo per passare dalla cura dei sintomi alla cura delle cause.',
-      doors: [["Il nostro screening", "Come abbiamo valutato tutti i 19.299 geni umani codificanti proteine fino a un primo candidato: la proteina TMEM222, in 3D."], ["Neuroanatomia 3D", "58 strutture e 13 sistemi. Isolare la sostanza nera, illuminare il sistema limbico o vedere le aree di una malattia."], ["Diagnosi", "Neurologiche, psichiatriche e del neurosviluppo: cause, aree cerebrali, percorsi di cura secondo le linee guida e dove agisce ogni farmaco."], ["Atlante dei geni", "Ogni cromosoma con i suoi geni legati alle malattie del cervello. Tocca un cromosoma, poi un gene."], ["Mettiti alla prova", "Oltre 780 domande in stile esame in due banche (clinica e neuroanatomia) e un gioco delle lesioni in 3D, ogni risposta spiegata."], ["Il sé nella schizofrenia", "Esiste un «centro dell’io»? Cosa si altera nei disturbi del sé, passo dopo passo sul cervello in 3D."]],
-      views: {
-        screen: ["Il nostro studio", 'Da tutti i geni a un primo candidato', "Ogni gene è stato valutato con tre domande: è uno specialista del cervello (N), è legato a malattie (D), è ancora un mistero (U)? Poi abbiamo ristretto passo dopo passo. Tocca un passaggio."],
-        self: ["Il nostro focus · disturbi del sé", 'Esiste un centro dell’«io»?', 'Le persone con schizofrenia possono sentire che i loro pensieri sono inseriti, le loro azioni controllate o di essere osservate dall’esterno. Cosa dice la ricerca sul cervello e cosa significa per la terapia?'],
-        diseases: ["Diagnosi", 'Diagnosi, terapie e ciò che viene trascurato', 'Scegli un gruppo (neurologico, psichiatrico o del neurosviluppo), poi una malattia: cause, aree cerebrali, percorso terapeutico secondo le linee guida europee e americane, dove agisce ogni farmaco e i geni poco studiati. Le affermazioni sono numerate e citate.'],
-        atlas: ["Neuroanatomia 3D", 'Un cervello 3D da esplorare', '58 strutture da un atlante di risonanza per la ricerca: la media di molti cervelli nello spazio standard (MNI). Scegli una struttura, un sistema come il limbico o una malattia. La selezione si illumina, il resto diventa trasparente. Anche in sezioni assiali, coronali e sagittali.'],
-        genome: ['Atlante dei geni', 'Ogni gene al suo posto', 'Il tuo DNA è racchiuso in 23 coppie di cromosomi, ognuno con centinaia o migliaia di geni, le ricette delle proteine. Scegli un cromosoma per vedere i suoi geni legati alle malattie del cervello, poi un gene.'],
-        study: ["Mettiti alla prova", 'Mettiti alla prova', 'Domande su casi clinici nello stile degli esami di medicina (come l’USMLE), scritte per questo sito. Scegli un argomento, rispondi e conferma: ogni opzione è spiegata. Le domande sono in inglese.']
-      }
-    },
-    ar: {
-      nav: ["الرئيسية", "دراستنا", "اضطرابات الذات", "التشريح العصبي ثلاثي الأبعاد", "التشخيصات", "أطلس الجينات", "اختبر نفسك", "النتائج", "المكتبة", "المراجعات", "الاستشهاد والبيانات", "المزيد"],
-      tabs: {"home": "الرئيسية", "screen": "دراستنا", "atlas": "التشريح 3D", "diseases": "التشخيصات", "genome": "الجينات", "study": "اختبر نفسك"},
-      today: 'اليوم',
-      note: 'تمت ترجمة الواجهة؛ أما المحتوى العلمي (صفحات الأمراض وجداول الجينات والأسئلة) فهو حاليًا بالإنجليزية. الترجمة مُعدّة بالذكاء الاصطناعي ولم يراجعها مختصون بعد. النسخة الإنجليزية هي المرجع. (Machine translation, not yet reviewed. English is the reference version.)',
-      fb_t: 'ساعدنا في تحسين NeuroUnknown: ما الخطأ أو غير الواضح أو الناقص؟', fb_open: 'أرسل ملاحظاتك',
-      hero_eyebrow: 'بحث حاسوبي مفتوح · تحديث نوفمبر 2026',
-      hero_h1: 'الجينات <em>المُهمَلة</em> في الدماغ.',
-      hero_aside: 'بعض الجينات مرتبطة بوضوح بأمراض الدماغ، ومع ذلك لم يدرس أحد تقريبًا ما تفعله بروتيناتها. نحن نجدها ونتحقق منها في الأدبيات العلمية ونحدد موقعها في الدماغ.',
-      big: 'نبحث عن جينات <em>مرتبطة بقوة بأمراض الدماغ</em> و<em>شبه غائبة عن الأبحاث</em>. إن فهم ما يفعله بروتين هذا الجين هو الخطوة الأولى من علاج الأعراض نحو علاج الأسباب.',
-      doors: [["فحصنا الجيني", "كيف قيّمنا جميع الجينات البشرية المشفِّرة للبروتين وعددها 19,299 حتى وصلنا إلى أول مرشح: بروتين TMEM222 بالأبعاد الثلاثية."], ["التشريح العصبي ثلاثي الأبعاد", "58 بنية و13 جهازًا. اعزل المادة السوداء، أو أبرز الجهاز الحوفي، أو شاهد مناطق مرض ما."], ["التشخيصات", "عصبية ونفسية ونمائية عصبية: الأسباب، مناطق الدماغ، مسارات العلاج وفق الإرشادات، وأين يعمل كل دواء."], ["أطلس الجينات", "كل كروموسوم وجيناته المرتبطة بأمراض الدماغ. اضغط على كروموسوم ثم على جين."], ["اختبر نفسك", "أكثر من 780 سؤالًا بأسلوب الامتحانات في بنكين (سريري وتشريح عصبي) ولعبة ثلاثية الأبعاد لتحديد الآفة، مع شرح كل إجابة."], ["الذات في الفصام", "هل يوجد «مركز للأنا»؟ ما الذي يختل في اضطرابات الذات، خطوة بخطوة على دماغ ثلاثي الأبعاد."]],
-      views: {
-        screen: ["دراستنا", 'من كل الجينات إلى مرشح أول', 'قُيِّم كل جين بثلاثة أسئلة: هل هو متخصص في الدماغ (N)، هل يرتبط بالمرض (D)، هل ما زال لغزًا (U)؟ ثم ضيّقنا الاختيار خطوة بخطوة. اضغط على خطوة.'],
-        self: ["محور اهتمامنا · اضطرابات الذات", 'هل يوجد مركز لـ«الأنا»؟', 'قد يشعر المصابون بالفصام بأن أفكارهم مُدخَلة، أو أن أفعالهم مُسيطَر عليها، أو أنهم مراقَبون من الخارج. ماذا تقول أبحاث الدماغ، وماذا يعني ذلك للعلاج؟'],
-        diseases: ["التشخيصات", 'التشخيصات والعلاجات وما يُهمَل', 'اختر مجموعة (عصبية أو نفسية أو نمائية عصبية) ثم مرضًا: الأسباب، ومناطق الدماغ، ومسار العلاج وفق الإرشادات الأوروبية والأمريكية، وأين يعمل كل دواء، والجينات التي لا يدرسها أحد. العبارات مرقّمة ومُوثّقة كما في مقالة مراجعة.'],
-        atlas: ["التشريح العصبي ثلاثي الأبعاد", 'دماغ ثلاثي الأبعاد للاستكشاف', '58 بنية مأخوذة من أطلس رنين مغناطيسي بحثي: متوسط أدمغة كثيرة في الفضاء القياسي (MNI). اختر بنية، أو جهازًا كاملًا مثل الجهاز الحوفي، أو مرضًا. يُضاء ما تختاره بالألوان ويصبح الباقي شفافًا. ويتوفر أيضًا بمقاطع محورية وإكليلية وسهمية.'],
-        genome: ['أطلس الجينات', 'كل جين في مكانه', 'حمضك النووي معبأ في 23 زوجًا من الكروموسومات، يحمل كل منها مئات إلى آلاف الجينات، وهي وصفات صنع البروتينات. اختر كروموسومًا لترى جيناته المرتبطة بأمراض الدماغ، ثم اختر جينًا.'],
-        study: ["اختبر نفسك", 'اختبر نفسك', 'أسئلة حالات سريرية بأسلوب امتحانات الترخيص الطبي (مثل USMLE)، كُتبت لهذا الموقع. اختر موضوعًا، وأجب، ثم أكّد: يُشرح كل خيار. الأسئلة نفسها بالإنجليزية.']
-      }
-    },
-    zh: {
-      nav: ["首页", "我们的研究", "自我障碍", "三维神经解剖", "诊断", "基因图谱", "自我测试", "研究发现", "资料库", "综述", "引用与数据", "更多"],
-      tabs: {"home": "首页", "screen": "研究", "atlas": "三维解剖", "diseases": "诊断", "genome": "基因", "study": "自测"},
-      today: '今日',
-      note: '界面已翻译；科学内容（疾病页面、基因表格、题目）目前为英文。译文由人工智能生成，尚未经专业人员审校。以英文版本为准。 (Machine translation, not yet reviewed. English is the reference version.)',
-      fb_t: '帮助改进 NeuroUnknown：哪些内容有误、不清楚或缺失？', fb_open: '提交反馈',
-      hero_eyebrow: '开放的计算研究 · 2026年11月更新',
-      hero_h1: '大脑中<em>被忽视</em>的基因。',
-      hero_aside: '有些基因与脑部疾病明确相关，却几乎没有人研究它们编码的蛋白质有什么功能。我们找出这些基因，对照文献加以核查，并将它们定位到大脑中。',
-      big: '我们寻找<em>与脑部疾病密切相关</em>却<em>几乎无人研究</em>的基因。了解这类基因的蛋白质作用，是从治疗症状走向治疗病因的第一步。',
-      doors: [["我们的筛选", "我们如何评估全部 19,299 个人类蛋白编码基因，并缩小到第一个候选：TMEM222 蛋白（3D 展示）。"], ["三维神经解剖", "58 个结构和 13 个系统。单独显示黑质、点亮边缘系统，或查看某种疾病涉及的脑区。"], ["诊断", "神经系统、精神科与神经发育疾病：病因、相关脑区、指南推荐的治疗路径，以及每种药物的作用部位。"], ["基因图谱", "每条染色体及其与脑部疾病相关的基因。点击染色体，再点击基因。"], ["自我测试", "超过 780 道考试风格题目，分为两个题库（临床与神经解剖），外加三维病灶识别游戏，每个答案均有解析。"], ["精神分裂症中的自我", "存在“自我中枢”吗？在三维大脑上一步步了解自我障碍中出了什么问题。"]],
-      views: {
-        screen: ["我们的研究", '从所有基因到第一个候选', '每个基因按三个问题评分：它是否为大脑特异（N）？是否与疾病相关（D）？是否仍是未解之谜（U）？然后逐步缩小范围。点击某一步查看说明。'],
-        self: ["我们的重点 · 自我障碍", '存在“我”的中枢吗？', '精神分裂症患者可能感到自己的思想被插入、行为被控制，或正被外界观察。脑科学研究怎么说？这对治疗意味着什么？'],
-        diseases: ["诊断", '诊断、治疗以及被忽视的部分', '先选择类别（神经系统、精神科或神经发育），再选择疾病：病因、相关脑区、依据欧美指南的治疗路径、每种药物的作用部位，以及无人研究的基因。所有陈述均按综述论文方式编号并附参考文献。'],
-        atlas: ["三维神经解剖", '可探索的三维大脑', '58 个结构来自研究用 MRI 图谱：标准空间（MNI）中多人大脑的平均。选择一个结构、一个完整系统（如边缘系统）或一种疾病，所选部分以彩色显示，其余变为透明。也可查看轴位、冠状位和矢状位切面。'],
-        genome: ['基因图谱', '每个基因各就其位', '你的 DNA 分装在 23 对染色体中，每条染色体携带数百到数千个基因，即制造蛋白质的“配方”。选择一条染色体，查看其中与脑部疾病相关的基因，再选择一个基因。'],
-        study: ["自我测试", '自我测试', '仿照医学执照考试（如 USMLE）风格、为本网站编写的临床病例题。选择主题、作答并确认：每个选项都有解析。题目本身为英文。']
-      }
+  var root = document.documentElement;
+  var pageLang = root.getAttribute('data-page-lang');           // set on index.html (en) and index.<lang>.html
+  var lang = 'en';
+  try { lang = localStorage.getItem('nu-lang') || 'en'; } catch (e) {}
+  if (pageLang) lang = pageLang;
+  if (!LANGS[lang]) lang = 'en';
+  try { localStorage.setItem('nu-lang', lang); } catch (e) {}
+
+  var INLINE = { A: 1, B: 1, STRONG: 1, EM: 1, I: 1, SPAN: 1, CODE: 1, SMALL: 1, SUP: 1, SUB: 1, ABBR: 1, MARK: 1, U: 1, BR: 1, KBD: 1,
+    TIME: 1, CITE: 1, Q: 1, S: 1, VAR: 1, TSPAN: 1, WBR: 1, DFN: 1, INS: 1, DEL: 1, BUTTON: 1 };
+  var SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1, TEMPLATE: 1, CANVAS: 1, IFRAME: 1 };
+  var ATTRS = ['placeholder', 'title', 'aria-label', 'alt'];
+  // a number standing alone (not part of 5-HT1A, A1, 22q11.2, v2.15, 60-80); ISO dates count as one number and keep their form
+  var NUM = /\d{4}-\d{2}-\d{2}|(?<![\w.\-+\/<])\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\w\-+\/>]|\.\d)|(?<![\w.\-+\/<])\d+(?:\.\d+)?(?![\w\-+\/>]|\.\d)/g;
+
+  // an English month name next to a number is kept apart as {M} and written in the page language
+  var MON = /\b(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept|Sep|Oct|Nov|Dec)\b(?=\s+\d)|(?<=\d\s)(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept|Sep|Oct|Nov|Dec)\b/g;
+  var MIDX = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Sept: 8, Oct: 9, Nov: 10, Dec: 11 };
+  var MONTHS = {
+    de: [['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'], ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sept.', 'Okt.', 'Nov.', 'Dez.']],
+    fr: [['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'], ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']],
+    es: [['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'], ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sept.', 'oct.', 'nov.', 'dic.']],
+    it: [['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'], ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic']],
+    ar: [['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'], null],
+    zh: [['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'], null] };
+  function monL(m) { var T = MONTHS[lang]; if (!T || !m) return m || ''; var i = MIDX[m.slice(0, 3)]; return m.length > 4 || !T[1] ? T[0][i] : T[1][i]; }
+  function ws(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function keyOf(s) {
+    var nums = [], mons = [], i = 0;
+    var k = ws(s).replace(MON, function (m) { mons.push(m); return '{M}'; }).replace(NUM, function (m) { nums.push(m); return '{' + (++i) + '}'; });
+    return { k: k, n: nums, m: mons };
+  }
+  function fmtNum(m) {
+    if (lang === 'en' || lang === 'zh' || lang === 'ar' || /^\d{4}-\d{2}-\d{2}$/.test(m)) return m;
+    var grouped = m.indexOf(',') >= 0, p = m.replace(/,/g, '').split('.'), int = p[0], dec = p[1];
+    var sep = { de: '.', it: '.', fr: ' ', es: ' ' }[lang];
+    if (grouped && !(lang === 'es' && int.length < 5)) int = int.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+    return dec != null ? int + ',' + dec : int;
+  }
+  function fill(t, nums, mons) { var q = 0; return t.replace(/\{(\d+)\}/g, function (_, j) { var v = nums[+j - 1]; return v == null ? '' : fmtNum(v); }).replace(/\{M\}/g, function () { return monL((mons || [])[q++]); }); }
+
+  var D = null, PAT = [];                   // D.t: key -> translation; D.p: patterns with {s} -> translation
+  function esc(s) { return s.replace(/[.*+?^$()|[\]\\{}]/g, '\\$&'); }
+  function compile() {
+    PAT = [];
+    Object.keys(D.p || {}).forEach(function (k) {
+      PAT.push([new RegExp('^' + k.split('{s}').map(esc).join('(.+?)') + '$'), D.p[k], k.length]);
+    });
+    PAT.sort(function (a, b) { return b[2] - a[2]; });   // longest (most specific) pattern first
+  }
+  // translate a key (numbers already replaced by {i}); returns null if unknown
+  // look up a captured piece of a pattern; its number markers are renumbered from {1} for the lookup and mapped back
+  function sub(g) {
+    var map = [], k = ws(g).replace(/\{(\d+)\}/g, function (_, j) { map.push(j); return '{' + map.length + '}'; });
+    var x = D.t[k];
+    if (x == null) return g;
+    return x.replace(/\{(\d+)\}/g, function (_, j) { return '{' + (map[+j - 1] || j) + '}'; });
+  }
+  function look(k) {
+    if (!D) return null;
+    var v = D.t[k];
+    if (v != null) return v;
+    for (var i = 0; i < PAT.length; i++) {
+      var m = PAT[i][0].exec(k);
+      if (m) { var j = 0; return PAT[i][1].replace(/\{s\}/g, function () { j++; return sub(m[j] || ''); }); }
     }
-  };
-  var ORIG = null;
-  function grab() {
-    ORIG = { html: new Map() };
-    document.querySelectorAll('[data-i18n-k]').forEach(function (el) { ORIG.html.set(el, el.innerHTML); });
+    return null;
   }
-  function q(sel) { return document.querySelector(sel); }
-  function mark() { // tag translatable elements once
-    function tag(el, k) { if (el && !el.dataset.i18nK) el.dataset.i18nK = k; }
-    document.querySelectorAll('header.site nav.mainnav a, header.site details.more summary, header.site .more-menu a').forEach(function (a) { var i = NAV.indexOf(a.dataset.nav); if (i >= 0) tag(a, 'nav.' + i); });
-    document.querySelectorAll('#tabbar a').forEach(function (a) { tag(a.lastChild && a.lastChild.nodeType === 3 ? a : null, 'tab.' + a.dataset.tab); });
-    tag(q('.ticker .tk-live'), 'today'); tag(q('.fb-bar .fb-t'), 'fb_t'); tag(q('#fbOpen'), 'fb_open');
-    tag(q('[data-view=home] .hero .eyebrow'), 'hero_eyebrow'); tag(q('[data-view=home] h1.display'), 'hero_h1');
-    tag(q('[data-view=home] .hero-aside'), 'hero_aside'); tag(q('[data-view=home] .mission .big'), 'big');
-    document.querySelectorAll('.doors .door').forEach(function (d, i) { tag(d.querySelector('h3'), 'door.' + i + '.0'); tag(d.querySelector('p'), 'door.' + i + '.1'); });
-    ['screen', 'self', 'diseases', 'atlas', 'genome', 'study'].forEach(function (v) {
-      var s = q('[data-view=' + v + ']'); if (!s) return;
-      tag(s.querySelector('.vhead .eyebrow'), 'view.' + v + '.0'); tag(s.querySelector('.vhead h2.title'), 'view.' + v + '.1'); tag(s.querySelector('.vhead .lede'), 'view.' + v + '.2');
+  function tr(s) {          // public: translate a plain string (used by the app for canvas text, alerts and the score card)
+    if (lang === 'en' || !D || !s) return s;
+    var o = keyOf(s), v = look(o.k);
+    return v == null ? s : fill(v, o.n, o.m);
+  }
+
+  var MISS = Object.create(null), collecting = false;
+  function miss(k) { if (collecting && /[A-Za-z]{2}/.test(k)) MISS[k] = (MISS[k] || 0) + 1; }
+  var DONE = new WeakMap();                  // element -> text we wrote (skip if unchanged)
+  function skipEl(el) {
+    if (SKIP[el.tagName]) return true;
+    if (el.getAttribute && (el.getAttribute('translate') === 'no' || (el.classList && el.classList.contains('notranslate')))) return true;
+    if (el.isContentEditable) return true;
+    return false;
+  }
+  function onlyInline(el) {
+    for (var c = el.firstChild; c; c = c.nextSibling) if (c.nodeType === 1 && !INLINE[c.tagName.toUpperCase()]) return false;
+    return true;
+  }
+  function ownText(el) { for (var c = el.firstChild; c; c = c.nextSibling) if (c.nodeType === 3 && /[A-Za-z]/.test(c.nodeValue)) return true; return false; }
+  function doEl(el) {
+    if (!ownText(el)) return;
+    if (onlyInline(el)) {
+      var els = [], raw = '';
+      for (var c = el.firstChild; c; c = c.nextSibling) {
+        if (c.nodeType === 3) raw += c.nodeValue;
+        else if (c.nodeType === 1) { els.push(c); raw += '<' + els.length + '>'; }
+      }
+      if (DONE.get(el) === raw) return;
+      var o = keyOf(raw), v = look(o.k);
+      if (v == null) { miss(o.k); return; }
+      var out = fill(v, o.n, o.m), lead = /^\s/.test(raw) ? ' ' : '', tail = /\s$/.test(raw) ? ' ' : '';
+      var pieces = out.split(/<(\d+)>/), frag = document.createDocumentFragment(), used = {};
+      for (var i = 0; i < pieces.length; i++) {
+        if (i % 2 === 0) { var t = (i === 0 ? lead : '') + pieces[i] + (i === pieces.length - 1 ? tail : ''); if (t) frag.appendChild(document.createTextNode(t)); }
+        else { var e = els[+pieces[i] - 1]; if (e && !used[pieces[i]]) { frag.appendChild(e); used[pieces[i]] = 1; } }
+      }
+      els.forEach(function (e, j) { if (!used[j + 1]) frag.appendChild(e); });   // never lose a link or control
+      while (el.firstChild) el.removeChild(el.firstChild);
+      el.appendChild(frag);
+      var now = '', n2 = 0;
+      for (var c2 = el.firstChild; c2; c2 = c2.nextSibling) now += c2.nodeType === 3 ? c2.nodeValue : '<' + (++n2) + '>';
+      DONE.set(el, now);
+      return;
+    }
+    for (var c3 = el.firstChild; c3; c3 = c3.nextSibling) {           // block children: each loose text run on its own
+      if (c3.nodeType !== 3 || !/[A-Za-z]/.test(c3.nodeValue)) continue;
+      var o3 = keyOf(c3.nodeValue), v3 = look(o3.k);
+      if (v3 == null) { miss(o3.k); continue; }
+      var l3 = /^\s/.test(c3.nodeValue) ? ' ' : '', t3 = /\s$/.test(c3.nodeValue) ? ' ' : '';
+      c3.nodeValue = l3 + fill(v3, o3.n, o3.m) + t3;
+    }
+  }
+  function doAttrs(el) {
+    for (var i = 0; i < ATTRS.length; i++) {
+      var a = ATTRS[i], v = el.getAttribute(a);
+      if (!v || !/[A-Za-z]/.test(v)) continue;
+      var mark = '_i18n_' + a;
+      if (el[mark] === v) continue;
+      var o = keyOf(v), t = look(o.k);
+      if (t == null) { miss(o.k); continue; }
+      var out = fill(t, o.n, o.m); el.setAttribute(a, out); el[mark] = out;
+    }
+    if (el.tagName === 'INPUT' && /^(button|submit|reset)$/i.test(el.type) && el.value) {
+      var o2 = keyOf(el.value), t2 = look(o2.k); if (t2 != null) el.value = fill(t2, o2.n, o2.m); else miss(o2.k);
+    }
+    if (el.tagName === 'A' && lang !== 'en') {                // stay in the same language on the main app page
+      var h = el.getAttribute('href');
+      if (h && /^index\.html(#|$)/.test(h)) el.setAttribute('href', 'index.' + lang + '.html' + h.slice(10));
+    }
+  }
+  function walk(node) {
+    if (node.nodeType === 3) { if (node.parentElement) walk(node.parentElement); return; }
+    if (node.nodeType !== 1) return;
+    for (var p = node; p && p !== root; p = p.parentElement) if (skipEl(p)) return;
+    var it = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, { acceptNode: function (e) { return skipEl(e) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
+    var e = node;
+    while (e) { doAttrs(e); doEl(e); e = it.nextNode(); }
+  }
+  function doTitle() {
+    var t = document.title; if (!t || doTitle.last === t) return;
+    var o = keyOf(t), v = look(o.k);
+    if (v == null) { miss(o.k); return; }
+    document.title = doTitle.last = fill(v, o.n, o.m);
+  }
+
+  var obs = null, OPT = { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS.concat(['href']) };
+  function observe() {
+    obs = new MutationObserver(function (recs) {
+      obs.disconnect();
+      var seen = new Set();
+      recs.forEach(function (r) {
+        if (r.type === 'childList') r.addedNodes.forEach(function (a) { if (a.nodeType === 1) seen.add(a); else if (a.parentElement) seen.add(a.parentElement); });
+        var n = r.type === 'characterData' ? r.target.parentElement : r.target;
+        if (n && n.nodeType === 1) seen.add(n);
+      });
+      seen.forEach(function (n) { if (n.isConnected) walk(n); });
+      doTitle();
+      obs.observe(root, OPT);
     });
+    obs.observe(root, OPT);
   }
-  function value(L, k) {
-    var p = k.split('.');
-    if (p[0] === 'nav') return L.nav[+p[1]];
-    if (p[0] === 'tab') return L.tabs[p[1]];
-    if (p[0] === 'door') return L.doors[+p[1]] && L.doors[+p[1]][+p[2]];
-    if (p[0] === 'view') return L.views[p[1]] && L.views[p[1]][+p[2]];
-    return L[k];
+  function note() {
+    if (lang === 'en' || document.getElementById('i18nNote')) return;
+    var n = document.createElement('div'); n.id = 'i18nNote'; n.className = 'i18n-note';
+    n.textContent = 'Translated with AI from the English reference version; not yet reviewed by native-speaker clinicians. Gene symbols, protein names, database disease labels and paper titles stay as published.';
+    var m = document.querySelector('main') || document.body; m.insertBefore(n, m.firstChild);
   }
-  function apply(lang) {
-    if (!ORIG) { mark(); grab(); }
-    var L = T[lang], r = document.documentElement;
-    r.lang = lang === 'zh' ? 'zh-Hans' : lang; r.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    ORIG.html.forEach(function (orig, el) {
-      var k = el.dataset.i18nK, v = L ? value(L, k) : null;
-      if (!v) { el.innerHTML = orig; return; }
-      if (k.indexOf('tab.') === 0) { el.lastChild.nodeValue = v; return; }
-      if (/\.0$/.test(k) && k.indexOf('view.') === 0) { var b = el.querySelector('b'); el.innerHTML = (b ? b.outerHTML + ' ' : '') + v; return; }
-      if (k === 'hero_eyebrow') { var b2 = el.querySelector('b'); el.innerHTML = (b2 ? b2.outerHTML + ' ' : '') + v; return; }
-      el.innerHTML = v;
-    });
-    var n = document.getElementById('i18nNote');
-    if (!n) { n = document.createElement('div'); n.id = 'i18nNote'; n.className = 'i18n-note'; var m = document.querySelector('main') || document.body; m.insertBefore(n, m.firstChild); }
-    n.textContent = L ? L.note : ''; n.hidden = !L;
-    var sel = document.getElementById('langSel'); if (sel) sel.value = lang;
-    try { localStorage.setItem('nu-lang', lang); } catch (e) {}
-  }
-  function init() {
+  function selector() {
     var tools = document.querySelector('header.site .hdr-tools');
-    if (tools && !document.getElementById('langSel')) {
-      var s = document.createElement('select'); s.id = 'langSel'; s.className = 'lang-sel'; s.setAttribute('aria-label', 'Language');
-      Object.keys(LANGS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = LANGS[k]; s.appendChild(o); });
-      s.addEventListener('change', function () { apply(s.value); });
-      tools.insertBefore(s, tools.firstChild);
-    }
-    var lang = 'en'; try { lang = localStorage.getItem('nu-lang') || 'en'; } catch (e) {}
-    if (!T[lang] && lang !== 'en') lang = 'en';
-    if (lang !== 'en') apply(lang); else { var sel = document.getElementById('langSel'); if (sel) sel.value = 'en'; }
+    if (!tools || document.getElementById('langSel')) return;
+    var s = document.createElement('select'); s.id = 'langSel'; s.className = 'lang-sel notranslate'; s.setAttribute('aria-label', 'Language');
+    Object.keys(LANGS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = LANGS[k]; s.appendChild(o); });
+    s.value = lang;
+    s.addEventListener('change', function () {
+      var v = s.value; try { localStorage.setItem('nu-lang', v); } catch (e) {}
+      if (pageLang) location.href = (v === 'en' ? 'index.html' : 'index.' + v + '.html') + location.hash;
+      else location.reload();
+    });
+    tools.insertBefore(s, tools.firstChild);
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  function show() { root.classList.remove('i18n-wait'); }
+  function start() {
+    selector();
+    if (lang === 'en') { show(); return; }
+    note();
+    var x = new XMLHttpRequest();
+    x.open('GET', 'assets/i18n/' + lang + '.json');
+    x.onload = function () {
+      try { D = JSON.parse(x.responseText); compile(); } catch (e) { D = null; }
+      if (D) { walk(document.body); doTitle(); observe(); }
+      show();
+    };
+    x.onerror = show;
+    x.send();
+    setTimeout(show, 4000);
+  }
+  // for the build's checks: walk the page and return every text key that has no translation (keys(): as if nothing were translated)
+  window.NUi18n = { lang: lang, t: tr, ready: function () { return !!D || lang === 'en'; },
+    collect: function () { collecting = true; MISS = Object.create(null); DONE = new WeakMap(); walk(document.body); doTitle.last = null; doTitle(); collecting = false; return MISS; },
+    keys: function () {
+      var d0 = D; D = { t: {}, p: {} }; PAT = []; collecting = true; MISS = Object.create(null); DONE = new WeakMap();
+      walk(document.body); doTitle.last = null; doTitle(); collecting = false; D = d0; if (D) compile(); return MISS; } };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

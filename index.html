@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-page-lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-RWc3DX+pqkbB5lneN2lYx6mj/pIO8vdiFGhh8qVfTCw=' 'sha256-gnAndayEDujl4nwn3gxAAjRyRWiNs3eRT09SEQiPEC8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4otKpZKk/SF9NEXvYis4GBYXSrxqgvIPtbQQ/3rltJ8=' 'sha256-7PnjrRWuYQiF4g9ni999CuoT4I1fvy2MnAIzaz9/LTA=' 'sha256-BgqtUVYlsv3SuogVjnjbm+WbbPk60EkD3qhUKVaZ6Lk=' 'sha256-Lr0nZIgznHyEoPo37BfO03HPnjTj0WyxCV3OS5JRvYc=' 'sha256-ncgtooppzI/LR7jwjIsdbW2pnDPwsumB0RebNmvJ0pU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeuroUnknown — learn the brain in 3D, from symptom to lesion</title>
 <meta name="description" content="A free, open 3D brain atlas for medical students and trainees: 127 structures, arteries and cranial nerves in one MRI space, MRI slices, diagnoses and exam-style questions. Educational only, not medical advice. With a separate open research screen for overlooked brain-disease genes.. No discovery claims.">
@@ -738,6 +738,10 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
  d.setAttribute('data-layout',eff);
  if(l==='phone'&&!narrow) d.classList.add('frame');
  if(l==='desktop'&&narrow){var m=document.querySelector('meta[name=viewport]'); if(m) m.setAttribute('content','width=1240');}
+ var g=null,pl=d.getAttribute('data-page-lang');try{g=localStorage.getItem('nu-lang');}catch(e){}
+ if(!/^(de|fr|es|it|ar|zh)$/.test(g||''))g='en';
+ if(pl==='en'&&g!=='en'){location.replace('index.'+g+'.html'+location.hash);}
+ var L=pl||g; if(L!=='en'){d.classList.add('i18n-wait');d.lang=L==='zh'?'zh-Hans':L;d.dir=L==='ar'?'rtl':'ltr';}
 })();
 </script>
 <meta name="color-scheme" content="light dark">
@@ -751,7 +755,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
 </head>
 <body class="app">
 <header class="site"><div class="wrap hdr">
- <a class="brand" href="index.html#/"><i class="mark" aria-hidden="true"></i>Neuro<span>Unknown</span></a>
+ <a class="brand notranslate" href="index.html#/"><i class="mark" aria-hidden="true"></i>Neuro<span>Unknown</span></a>
  <nav class="mainnav" aria-label="Site"><a href="index.html#/" data-nav="Home" aria-current="page">Home</a><a href="index.html#/atlas" data-nav="3D Neuroanatomy">3D Neuroanatomy</a><a href="index.html#/study" data-nav="Test yourself">Test yourself</a><a href="index.html#/diseases" data-nav="Diagnoses">Diagnoses</a><a href="index.html#/genome" data-nav="Gene atlas">Gene atlas</a><a href="index.html#/screen" data-nav="Our study">Our study</a><a href="index.html#/self" data-nav="Self-disorders">Self-disorders</a></nav><details class="more"><summary data-nav="More">More</summary><div class="more-menu"><a href="findings.html" data-nav="Findings">Findings</a><a href="library.html" data-nav="Library">Library</a><a href="reviews.html" data-nav="Reviews">Reviews</a><a href="cite.html" data-nav="Cite & data">Cite & data</a></div></details>
  <div class="hdr-tools"><div class="layout-seg" role="group" aria-label="Page layout"><button type="button" data-layout-set="auto" title="Layout: auto" aria-label="Layout: auto"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></button><button type="button" data-layout-set="phone" title="Layout: phone" aria-label="Layout: phone"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg></button><button type="button" data-layout-set="desktop" title="Layout: desktop" aria-label="Layout: desktop"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="12.5" rx="1.6"/><path d="M8.5 20h7M12 16.5V20"/></svg></button></div><button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button></div>
 </div><div class="ticker" id="nuTicker"><a class="tk-live" href="index.html#/">Today</a><div class="tk-track"><div class="tk-run" id="nuTickerRun">Daily literature watch: every day at 12:00 Central European Time we re-check PubMed for our genes and diseases.</div></div></div></header><div class="fb-bar" id="nuFb"><div class="wrap fb-row"><span class="fb-t">Help improve NeuroUnknown: tell us what is wrong, unclear or missing.</span><button type="button" class="fb-btn" id="fbOpen" aria-expanded="false" aria-controls="fbPanel">Give feedback</button></div><div class="wrap fb-panel" id="fbPanel" hidden><label class="fb-l" for="fbText">Your feedback</label><textarea id="fbText" rows="4" maxlength="2000" placeholder="What is wrong, unclear or missing? If something is incorrect, what should it say (with a source if you have one)?"></textarea><div class="fb-sel"><label class="fb-l">How useful is this page? <select id="fbRate"><option value="">Choose</option><option>5 - Very useful</option><option>4 - Useful</option><option>3 - OK</option><option>2 - Not very useful</option><option>1 - Not useful</option></select></label><label class="fb-l">You are (optional) <select id="fbRole"><option value="">Choose</option><option>Medical student</option><option>Physician</option><option>Researcher</option><option>Other student</option><option>Patient or family member</option><option>Other</option></select></label></div><p class="fb-note">Your feedback opens as a <b>public</b> GitHub issue (a free GitHub account is needed); you can review it before posting. Please do not include personal, health or patient information.</p><div class="fb-act"><button type="button" class="fb-btn" id="fbSend">Continue on GitHub &rarr;</button><button type="button" class="fb-x" id="fbCancel">Cancel</button></div></div></div>
@@ -991,6 +995,7 @@ html[data-layout="phone"] .b3wrap.lzb{height:320px}
 <script>
 (function(){
 'use strict';
+var LANG=document.documentElement.getAttribute('data-page-lang')||'en';
 var D=JSON.parse(document.getElementById('appdata').textContent), A=D.atlas;
 var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 var root=document.documentElement;
@@ -1549,7 +1554,7 @@ var FNC={}; (A.func_groups||[]).forEach(function(g){ FNC[g.id]=g.c; });
 function atlasFunc(id){ setMode('func',true); at.fn=id; at.sel=[]; atlasApply();
  if(id==='all') info('<div class="mono">Functional map</div><h3>What each part mainly does</h3><p>Every structure is coloured by its main function. Most structures do several things; this is a simplified teaching map.</p>'+A.func_groups.map(function(g){ return '<button type="button" class="chip" data-gofn="'+g.id+'" style="margin:0 4px 6px 0"><span class="dot" style="background:'+g.c+'"></span>'+esc(g.n)+'</button>'; }).join(''));
  else { var g=A.func_groups.filter(function(x){ return x.id===id; })[0], ids=Object.keys(A.structures).filter(function(k){ return A.structures[k].fn===id; });
-  info('<div class="mono" style="color:'+g.c+'">Function</div><h3>'+esc(g.n)+'</h3><p>Structures whose main role is '+esc(g.n.toLowerCase())+'. Tap one to read about it.</p><div class="slist">'+ids.map(function(x){ return '<button type="button" class="chip" data-gos="'+x+'"><span class="dot" style="background:'+g.c+'"></span>'+esc(sname(x).replace(' (approximate)',''))+'</button>'; }).join('')+'</div><p class="mono" style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)">Simplified: most structures do several things.</p>'); }
+  info('<div class="mono" style="color:'+g.c+'">Function</div><h3>'+esc(g.n)+'</h3><p>Structures whose main role is '+esc(lw(g.n))+'. Tap one to read about it.</p><div class="slist">'+ids.map(function(x){ return '<button type="button" class="chip" data-gos="'+x+'"><span class="dot" style="background:'+g.c+'"></span>'+esc(sname(x).replace(' (approximate)',''))+'</button>'; }).join('')+'</div><p class="mono" style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)">Simplified: most structures do several things.</p>'); }
  [].forEach.call(document.querySelectorAll('#regionInfo [data-gofn]'),function(b){ b.addEventListener('click',function(){ atlasFunc(b.dataset.gofn); }); }); }
 function atlasInit(){
  [].forEach.call(document.querySelectorAll('[data-amode]'),function(b){ b.addEventListener('click',function(){ setMode(b.dataset.amode); }); });
@@ -1870,9 +1875,9 @@ function genomeInit(){ var st=document.getElementById('gnStats'); st.textContent
 
 /* ---------------- STUDY ---------------- */
 var QZ={d:null,bank:'clinical',topic:'all',round:[],i:0,sel:null,done:false,score:0,wrong:[],lz:null};
-function qLoad(cb){ if(QZ.d) return cb(); fetch('assets/data/quiz.json').then(function(r){ return r.json(); }).then(function(d){ QZ.d=d; cb(); }).catch(function(){ document.getElementById('qCard').textContent='The questions could not be loaded.'; }); }
+function qLoad(cb){ if(QZ.d) return cb(); fetch('assets/data/quiz'+(LANG==='en'?'':'.'+LANG)+'.json').then(function(r){ return r.json(); }).then(function(d){ QZ.d=d; cb(); }).catch(function(){ document.getElementById('qCard').textContent='The questions could not be loaded.'; }); }
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
-function qBank(b){ if(EX.on&&!EX.done&&b!=='exam'){ if(!confirm('Leave the exam? Your answers will be lost.')){ [].forEach.call(document.querySelectorAll('[data-bank]'),function(x){ x.setAttribute('aria-selected',x.dataset.bank==='exam'); }); return; } exStop(); }
+function qBank(b){ if(EX.on&&!EX.done&&b!=='exam'){ if(!confirm(T('Leave the exam? Your answers will be lost.'))){ [].forEach.call(document.querySelectorAll('[data-bank]'),function(x){ x.setAttribute('aria-selected',x.dataset.bank==='exam'); }); return; } exStop(); }
  QZ.bank=b; [].forEach.call(document.querySelectorAll('[data-bank]'),function(x){ x.setAttribute('aria-selected',x.dataset.bank===b); });
  document.getElementById('lzBrain').hidden=b!=='lesion'; if(QZ.lz&&QZ.lz.b) QZ.lz.b.pause(b!=='lesion');
  if(b==='lesion'){ if(!QZ.lz){ QZ.lz=make3D('lzBrain','lzMsg','lzTip',function(){},'lzFallback','lateral'); QZ.lz.onReady=function(){ QZ.lz.ready=true; if(QZ.bank==='lesion') lzStart(); };
@@ -1901,7 +1906,10 @@ function qRefs(ps){ return (ps||[]).map(function(p){ var r=QZ.d.refs[p]; return 
 var LZDZ={sn:['pd',['migraine','adhd','ocd','ptsd']],precentral:['als',['ocd','ptsd','migraine','adhd']],entorhinal:['ad',['als','tourette','adhd','migraine']],
  hippocampus:['ad',['als','tourette','migraine','adhd']],basal_forebrain:['ad',['als','migraine','tourette','ocd']],caudate:['hd',['als','migraine','ptsd','epilepsy']],
  temporal_pole:['ftd',['tourette','adhd','migraine','ocd']],amygdala:['ptsd',['als','migraine','tourette']]};
-function lc(n){ return /^[A-Z]{2}/.test(n)?n:n.charAt(0).toLowerCase()+n.slice(1); }
+function T(s){ return window.NUi18n&&NUi18n.t?NUi18n.t(s):s; }
+function lc(n){ return LANG==='de'||/^[A-Z]{2}/.test(n)?n:n.charAt(0).toLowerCase()+n.slice(1); }  /* German nouns keep their capital */
+function lw(n){ return LANG==='de'?n:n.toLowerCase(); }
+var CORRECT_RE=/^(Correct|Richtig|Exact|Correcto|Esatto|صحيح|正确)\s*[.:。：]\s*/;
 function lzQuestion(){ var S=A.structures, CL=QZ.d.clash||{}, hasB=!!(QZ.lz&&QZ.lz.b), ids=Object.keys(S).filter(function(k){ return S[k].lobe!=='white matter'&&S[k].lobe!=='ventricles'; });
  var sid=ids[Math.floor(Math.random()*ids.length)], st=S[sid], nm=function(k){ return S[k].n.replace(' (approximate)',''); }, REL=(QZ.d.rel||{})[sid]||[];
  var it='the '+lc(nm(sid)), hl=hasB?'the highlighted structure':it;
@@ -1929,7 +1937,7 @@ function qRender(){ var c=document.getElementById('qCard'), n=QZ.round.length;
  var tlabel=QZ.bank==='lesion'?'Spot the lesion':QZ.bank==='anatomy'?(QZ.d.atopics[q.topic]||'Anatomy'):QZ.bank==='review'?'Arteries · preview, not yet reviewed':(QZ.d.topics[q.topic]||'')+(q.upd?' · new':'');
  c.innerHTML='<div class="qmeta"><span>Question '+(QZ.i+1)+' of '+n+'</span><span>'+esc(tlabel)+' &middot; score '+QZ.score+'</span></div><div class="qbar"><i style="width:'+(100*QZ.i/n)+'%"></i></div>'+
   '<p class="stem">'+esc(q.stem)+'</p>'+qFig(q)+it.ord.map(function(k,j){ var cls=QZ.done?(k===q.a?' ok':(k===QZ.sel?' bad':'')):'';
-   return '<button type="button" class="qopt'+cls+'" data-k="'+k+'" aria-pressed="'+(QZ.sel===k)+'"'+(QZ.done?' disabled':'')+'><span class="k">'+'ABCDE'[j]+'</span><span>'+esc(q.o[k])+'</span>'+(QZ.done?'<span class="why">'+(k===q.a?'<b>Correct.</b> ':'')+esc(String(q.e[k]).replace(/^Correct[.:]\s*/,''))+'</span>':'')+'</button>'; }).join('')+
+   return '<button type="button" class="qopt'+cls+'" data-k="'+k+'" aria-pressed="'+(QZ.sel===k)+'"'+(QZ.done?' disabled':'')+'><span class="k">'+'ABCDE'[j]+'</span><span>'+esc(q.o[k])+'</span>'+(QZ.done?'<span class="why">'+(k===q.a?'<b>Correct.</b> ':'')+esc(String(q.e[k]).replace(CORRECT_RE,''))+'</span>':'')+'</button>'; }).join('')+
   (QZ.done?'<div class="qobj"><b>Educational objective</b>'+esc(q.obj)+'</div>'+(q.refs.length?'<p style="font-size:13px;color:var(--muted)">Sources: '+qRefs(q.refs)+'</p>':'<p style="font-size:13px;color:var(--muted)">Source: '+(q.kind&&q.kind.indexOf('dz-')===0?'this site&rsquo;s disease pages (see their references).':'standard textbook neuroanatomy, as summarised in this site&rsquo;s atlas.')+'</p>'):'')+
   '<div class="qnav">'+(q.s?'<button type="button" class="chip" id="qBrain">Show the '+esc(lc(sname(q.s).replace(' (approximate)','')))+' in 3D and slices</button>':'<span></span>')+
   (QZ.done?'<button class="btn" type="button" id="qNext">'+(QZ.i+1<n?'Next question &rarr;':'See my score &rarr;')+'</button>':'<button class="btn" type="button" id="qOk"'+(QZ.sel==null?' disabled style="opacity:.4"':'')+'>Confirm answer</button>')+'</div>';
@@ -1965,7 +1973,7 @@ function exSetup(){ var c=document.getElementById('qCard'), C=EX.cfg, H=exHist()
  sum();
  [].forEach.call(c.querySelectorAll('[data-ex]'),function(b){ b.addEventListener('click',function(){ var k=b.dataset.ex; C[k]=k==='src'?b.dataset.v:+b.dataset.v; [].forEach.call(c.querySelectorAll('[data-ex='+k+']'),function(x){ x.setAttribute('aria-pressed',x===b); }); sum(); }); });
  document.getElementById('exGo').onclick=function(){ C.name=document.getElementById('exName').value.replace(/[\u0000-\u001f]/g,'').trim().slice(0,60); try{ localStorage.setItem('nu-exam-cfg',JSON.stringify(C)); }catch(_){} exStart(); };
- var cl=document.getElementById('exClr'); if(cl) cl.onclick=function(){ if(confirm('Delete the list of your recent exams on this device?')){ try{ localStorage.removeItem('nu-exams'); }catch(_){} exSetup(); } }; }
+ var cl=document.getElementById('exClr'); if(cl) cl.onclick=function(){ if(confirm(T('Delete the list of your recent exams on this device?'))){ try{ localStorage.removeItem('nu-exams'); }catch(_){} exSetup(); } }; }
 function exStart(){ var C=EX.cfg, pool=shuffle(exPool(C.src).slice()), seen={}, list=[];
  for(var i=0;i<pool.length&&list.length<C.n;i++){ var k=pool[i].stem.slice(0,70); if(seen[k]) continue; seen[k]=1; list.push({q:pool[i],ord:shuffle(pool[i].o.map(function(_,j){ return j; })),sel:null,flag:false}); }
  EX.list=list; EX.i=0; EX.on=true; EX.done=false; EX.dur=list.length*C.sec; EX.t0=Date.now(); clearInterval(EX.tm); EX.tm=setInterval(exTick,1000); exRender(); }
@@ -1987,7 +1995,7 @@ function exRender(){ var c=document.getElementById('qCard'), it=EX.list[EX.i], q
  document.getElementById('exFlag').onclick=function(){ it.flag=!it.flag; exRender(); };
  var pv=document.getElementById('exPrev'); if(pv&&EX.i) pv.onclick=function(){ EX.i--; exRender(); };
  var nx=document.getElementById('exNext'); if(nx) nx.onclick=function(){ EX.i++; exRender(); c.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'}); };
- function fin(){ var un=EX.list.filter(function(x){ return x.sel==null; }).length; if(un&&!confirm(un+' question'+(un>1?'s are':' is')+' not answered yet. Finish anyway?')) return; exFinish(false); }
+ function fin(){ var un=EX.list.filter(function(x){ return x.sel==null; }).length; if(un&&!confirm(T(un+' question'+(un>1?'s are':' is')+' not answered yet. Finish anyway?'))) return; exFinish(false); }
  q3dMount(q); var e1=document.getElementById('exEnd'); if(e1) e1.onclick=fin; var e2=document.getElementById('exEnd2'); if(e2) e2.onclick=fin; }
 document.addEventListener('keydown',function(e){ if(!EX.on||EX.done||QZ.bank!=='exam'||!document.querySelector('[data-view=study].on')) return; var tg=e.target&&e.target.tagName; if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'||e.ctrlKey||e.metaKey||e.altKey) return;
  var it=EX.list[EX.i], k=e.key.toUpperCase(), j='ABCDE'.indexOf(k); if(j<0&&/^[1-5]$/.test(k)) j=+k-1;
@@ -2007,7 +2015,7 @@ function exResult(){ var c=document.getElementById('qCard'), R=EX.res, C=EX.cfg,
   '<p class="exnote" style="margin:10px 0 0">A self-assessment on an educational website. It is not a certificate of competence and gives no CME/CPD credit.</p>'+
   '<div class="exrev"><div class="mono" style="margin-bottom:8px">Review every question</div>'+EX.list.map(function(x,j){ var q=x.q, ok=x.sel===q.a;
    return '<details><summary><b class="'+(ok?'okt':'badt')+'">'+(j+1)+(ok?' ✓':' ✗')+'</b>'+esc(q.stem)+'</summary>'+qFig(q,1)+'<p class="ans">Your answer: <b class="'+(ok?'okt':'badt')+'">'+(x.sel==null?'none':esc(q.o[x.sel]))+'</b>'+(ok?'':'<br>Correct answer: <b class="okt">'+esc(q.o[q.a])+'</b>')+'</p>'+
-    '<p class="ans">'+esc(String(q.e[q.a]).replace(/^Correct[.:]\s*/,''))+'</p>'+(x.sel!=null&&!ok?'<p class="ans" style="color:var(--muted)">About your answer: '+esc(q.e[x.sel])+'</p>':'')+'<div class="qobj"><b>Educational objective</b>'+esc(q.obj)+'</div>'+(q.refs.length?'<p style="font-size:13px;color:var(--muted)">Sources: '+qRefs(q.refs)+'</p>':'')+'</details>'; }).join('')+'</div></div>';
+    '<p class="ans">'+esc(String(q.e[q.a]).replace(CORRECT_RE,''))+'</p>'+(x.sel!=null&&!ok?'<p class="ans" style="color:var(--muted)">About your answer: '+esc(q.e[x.sel])+'</p>':'')+'<div class="qobj"><b>Educational objective</b>'+esc(q.obj)+'</div>'+(q.refs.length?'<p style="font-size:13px;color:var(--muted)">Sources: '+qRefs(q.refs)+'</p>':'')+'</details>'; }).join('')+'</div></div>';
  q3dMount(null);
  document.getElementById('exNew').onclick=function(){ EX.on=false; EX.done=false; exSetup(); };
  document.getElementById('exCard').onclick=function(){ var u=exCardURL(); var a=document.createElement('a'); a.href=u; a.download='neurounknown-exam-'+new Date(R.d).toISOString().slice(0,10)+'.png'; document.body.appendChild(a); a.click(); a.remove();
@@ -2020,14 +2028,14 @@ function exCardURL(){ var R=EX.res, C=EX.cfg, W=1200, H=675, cv=document.createE
  g.fillStyle='#f7f4ee'; g.fillRect(0,0,W,H); g.fillStyle=ACC; g.fillRect(0,0,W,10);
  g.strokeStyle=LINE; g.lineWidth=2; g.strokeRect(30,40,W-60,H-80);
  g.fillStyle=INK; g.font='600 30px '+SER; g.fillText('Neuro', 70, 105); var w1=g.measureText('Neuro ').width; g.fillStyle=ACC; g.font='italic 600 30px '+SER; g.fillText('Unknown', 70+w1, 105);
- g.fillStyle=MUT; g.font='500 16px '+MON; g.fillText('TIMED EXAM  ·  SELF-ASSESSMENT', 70, 140);
- g.fillStyle=INK; var nm=C.name||'Score card'; var fs=54; g.font='600 '+fs+'px '+SER; while(g.measureText(nm).width>W-140&&fs>26){ fs-=2; g.font='600 '+fs+'px '+SER; } g.fillText(nm, 70, 225);
+ g.fillStyle=MUT; g.font='500 16px '+MON; g.fillText(T('TIMED EXAM · SELF-ASSESSMENT'), 70, 140);
+ g.fillStyle=INK; var nm=C.name||T('Score card'); var fs=54; g.font='600 '+fs+'px '+SER; while(g.measureText(nm).width>W-140&&fs>26){ fs-=2; g.font='600 '+fs+'px '+SER; } g.fillText(nm, 70, 225);
  g.font='600 120px '+SER; g.fillText(R.s+' / '+R.N, 70, 370); var sw=g.measureText(R.s+' / '+R.N+'  ').width; g.fillStyle=ACC; g.font='600 64px '+SAN; g.fillText(R.p+'%', 70+sw, 362);
- g.fillStyle=MUT; g.font='400 21px '+SAN; g.fillText(exSrcN(C.src)+' questions  ·  '+C.sec+' s per question  ·  finished in '+exFmt(EX.used)+' of '+exFmt(EX.dur), 70, 420);
+ g.fillStyle=MUT; g.font='400 21px '+SAN; g.fillText(T(exSrcN(C.src)+' questions · '+C.sec+' s per question · finished in '+exFmt(EX.used)+' of '+exFmt(EX.dur)), 70, 420);
  var keys=Object.keys(R.by).sort(function(a,b){ return R.by[b][1]-R.by[a][1]; }).slice(0,4), y=452;
- keys.forEach(function(k){ var v=R.by[k]; g.fillStyle=INK; g.font='400 18px '+SAN; var lab=k.length>34?k.slice(0,33)+'…':k; g.fillText(lab, 70, y+14); g.fillStyle=LINE; g.fillRect(420,y,360,12); g.fillStyle=ACC; g.fillRect(420,y,360*v[0]/v[1],12); g.fillStyle=MUT; g.font='500 16px '+MON; g.fillText(v[0]+'/'+v[1], 800, y+12); y+=30; });
- g.fillStyle=MUT; g.font='400 16px '+SAN; g.fillText(new Date(R.d).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})+'  ·  omnivalent.github.io/neurounknown', 70, H-78);
- g.font='400 14px '+SAN; g.fillText('Self-assessment on an educational website. Not a certificate of competence; no CME/CPD credit.', 70, H-54);
+ keys.forEach(function(k){ var v=R.by[k]; g.fillStyle=INK; g.font='400 18px '+SAN; var lab=T(k); lab=lab.length>34?lab.slice(0,33)+'…':lab; g.fillText(lab, 70, y+14); g.fillStyle=LINE; g.fillRect(420,y,360,12); g.fillStyle=ACC; g.fillRect(420,y,360*v[0]/v[1],12); g.fillStyle=MUT; g.font='500 16px '+MON; g.fillText(v[0]+'/'+v[1], 800, y+12); y+=30; });
+ g.fillStyle=MUT; g.font='400 16px '+SAN; g.fillText(new Date(R.d).toLocaleDateString(LANG==='zh'?'zh-CN':LANG,{year:'numeric',month:'long',day:'numeric'})+'  ·  omnivalent.github.io/neurounknown', 70, H-78);
+ g.font='400 14px '+SAN; g.fillText(T('Self-assessment on an educational website. Not a certificate of competence; no CME/CPD credit.'), 70, H-54);
  return cv.toDataURL('image/png'); }
 
 /* ---------------- v2.14 live 3D model for picture questions: turn, zoom, cut in half, set how see-through the rest of the brain is ---------------- */

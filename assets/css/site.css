@@ -54,6 +54,7 @@ header.site .more-menu a[aria-current="page"]{color:var(--signal)}
 header.site .more-menu a:hover{background:var(--bg-soft)}
 
 .lang-sel{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:5px 6px;font:500 12.5px var(--sans);max-width:96px;cursor:pointer}
+html.i18n-wait body{visibility:hidden}
 .i18n-note{max-width:1180px;margin:10px auto 0;padding:8px 14px;border:1px dashed var(--line-strong);border-radius:10px;font-size:13px;color:var(--muted);background:var(--surface)}
 html[data-layout="phone"] .i18n-note{margin:8px 16px 0}
 html[dir="rtl"] .tk-track,html[dir="rtl"] .brand{direction:ltr}
