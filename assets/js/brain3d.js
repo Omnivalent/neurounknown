@@ -181,6 +181,15 @@ function arteryMaterial() {
   mat.customProgramCacheKey = () => 'artery-v1';
   return mat;
 }
+// v2.17 long pathways (brain to cord): fibre lines coloured by the side they start on, so each crossing shows as a colour swap
+let PTH = null;
+async function loadPaths(m) {
+  if (PTH) return PTH;
+  if (!m.paths) return null;
+  const r = await fetch('assets/brain3d/' + m.paths.file); if (!r.ok) throw new Error('paths ' + r.status);
+  PTH = { mf: m.paths, buf: await r.arrayBuffer() }; return PTH;
+}
+export const PATHCOL = { L: '#2f7cf6', R: '#f08c12' };
 // v2.16 spine (cord, roots, spinal arteries, vertebrae, discs): separate file, loaded the first time the spine is shown
 let SPN = null;
 async function loadSpine(m) {
@@ -291,7 +300,7 @@ function css(v) { return getComputedStyle(document.documentElement).getPropertyV
 const CORTEX = { frontal: 1, parietal: 1, temporal: 1, occipital: 1, limbic: 1, insula: 1 };
 const HIDDEN = { 'white matter': 1, ventricles: 1 }; // shown only when selected
 // structures kept in the 'cranial nerves + brainstem' view
-const SPINE_LOBES = { 'spinal cord': 1, 'spinal nerves': 1, 'vertebral column': 1, 'spinal arteries': 1, plexuses: 1 };
+const SPINE_LOBES = { 'spinal cord': 1, 'spinal nerves': 1, 'vertebral column': 1, 'spinal arteries': 1, plexuses: 1, 'long pathways': 1 };
 const LAYER_OF = { frontal: 'cortex', parietal: 'cortex', temporal: 'cortex', occipital: 'cortex', limbic: 'cortex', insula: 'cortex', 'basal ganglia': 'deep', subcortical: 'deep', brainstem: 'brainstem', cerebellum: 'cerebellum', 'cranial nerves': 'nerves', arteries: 'arteries' };
 const ISO = { midbrain: 1, pons: 1, medulla: 1, ventral_dc: 1, optic_chiasm: 1, lgn: 1 };
 
@@ -400,6 +409,7 @@ class Brain {
       if (this.assembling) this.tickAssemble(now);
       if (this.flight) this.tickFly(now);
       if (this.nodeGroup) this.tickNodes(now);
+      if (this.pathMarks) this.tickMarks(now);
       if (this.fibs) this.tickFibs(now, dt);
       if (this.arts || this.spn) ART_U.uTime.value = now / 1000;
       NV_U.uTime.value = now / 1000; TS_U.uTime.value = now / 1000;
@@ -512,6 +522,33 @@ class Brain {
       this.apply(); if (this.opts.onSpine) this.opts.onSpine();
     }).catch(() => { this.spnLoading = null; });
     return this.spnLoading;
+  }
+  ensurePaths() {
+    if (this.pths || !this.mf.paths) return Promise.resolve();
+    if (this.pthLoading) return this.pthLoading;
+    this.pthLoading = loadPaths(this.mf).then(P => {
+      if (!P || this.disposed) return;
+      this.pths = [];
+      for (const fe of P.mf.entries) {
+        const L = fiberObject(fe, P.buf), u = L.material.uniforms;
+        u.uDec.value = 0; u.uCol.value.set(PATHCOL[fe.side] || '#ffffff');
+        L.userData = { kind: 'path', id: fe.id, side: fe.side, tgt: 0 }; L.renderOrder = 7;
+        this.group.add(L); this.pths.push(L); this.fibs = this.fibs || []; this.fibs.push(L);
+      }
+      const G = this.pathMarks = new THREE.Group(); this.group.add(G);
+      for (const id in P.mf.marks) for (const p of P.mf.marks[id]) {
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex('#ffffff'), depthTest: false, transparent: true, sizeAttenuation: false, opacity: 0 }));
+        sp.position.set(p[0], p[2], -p[1]); sp.scale.set(0.03, 0.03, 1); sp.renderOrder = 9; sp.userData = { id, ph: Math.random() * 6.28 }; sp.visible = false; G.add(sp);
+      }
+      if (this.opts.labels && !this.pleg) { const d = this.pleg = document.createElement('div'); d.className = 'b3pleg';
+        d.innerHTML = '<span><i style="background:' + PATHCOL.L + '"></i>Starts on the left</span><span><i style="background:' + PATHCOL.R + '"></i>Starts on the right</span><span><i class="x"></i>Crossing</span>'; this.el.appendChild(d); }
+      this.apply();
+    }).catch(() => { this.pthLoading = null; });
+    return this.pthLoading;
+  }
+  tickMarks(now) {
+    for (const sp of this.pathMarks.children) { if (!sp.visible) continue; const k = sp.userData.on ? 1 : 0, o = sp.material.opacity + (k - sp.material.opacity) * 0.12;
+      sp.material.opacity = o; const sc = 0.024 + 0.008 * Math.sin(now / 300 + sp.userData.ph); sp.scale.set(sc, sc, 1); if (!k && o < 0.02) sp.visible = false; }
   }
   // v2.9: load the artery meshes on first use (about 3 MB), then fade them in like any other structure
   ensureArteries() {
@@ -630,6 +667,7 @@ class Brain {
   setFocus(map, sel) { this.focus = map || {}; this.sel = sel || null;
     if (Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).lobe === 'arteries')) this.ensureArteries();
     if (Object.keys(this.focus).some(k => SPINE_LOBES[(this.info[k.split('@')[0]] || {}).lobe])) this.ensureSpine();
+    if (Object.keys(this.focus).some(k => (this.info[k.split('@')[0]] || {}).lobe === 'long pathways')) this.ensurePaths();
     this.apply();
     if (this.lab) this.setLabel(this.sel, this.sel ? (this.focus[this.sel] || this.focus[this.sel + '@L'] || this.focus[this.sel + '@R'] || this.focus[this.sel + '@M']) : null); }
   // apply() with a soft cross-fade: compute the new look, then animate colour and opacity from the old one
@@ -805,6 +843,16 @@ class Brain {
       }
       L.userData.tgt = tgt;
       if (tgt > 0) { mat.transparent = true; mat.depthWrite = false; m.renderOrder = 3; mat.opacity = isNerve ? 0.34 : (f ? 0.16 : 0.07); if (!f && !isNerve) mat.color.set(dark ? '#8a8f99' : '#cfc8b8'); mat.needsUpdate = true; }
+    }
+    // v2.17 long pathways: both sides of a chosen pathway, in the colour of the side each fibre starts on; crossing markers
+    if (this.pths) {
+      const on = id => !!(this.focus[id] || this.focus[id + '@L'] || this.focus[id + '@R'] || this.focus[id + '@M']);
+      let n = 0;
+      for (const L of this.pths) { const u = L.material.uniforms, v = on(L.userData.id);
+        L.userData.tgt = v ? (dark ? 0.95 : 0.9) : 0; u.uDark.value = dark ? 1 : 0; u.uCol.value.set(PATHCOL[L.userData.side]); if (v) n++;
+        L.material.clippingPlanes = cp.length ? cp : []; L.material.clipIntersection = true; }
+      for (const sp of this.pathMarks.children) { sp.userData.on = on(sp.userData.id); if (sp.userData.on) sp.visible = true; }
+      if (this.pleg) this.pleg.classList.toggle('on', n > 0);
     }
   }
   pick(e, click) {
