@@ -441,7 +441,7 @@ class Brain {
     this.el.appendChild(r.domElement); r.domElement.style.touchAction = 'none';
     if (this.opts.labels) { const lb = this.lab = document.createElement('div'); lb.className = 'b3lab'; lb.innerHTML = '<i></i><b></b><span></span>'; this.el.appendChild(lb); }
     const s = this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(30, W / H, 1, 3000);
+    this.camera = new THREE.PerspectiveCamera(30, W / H, 1, 14000);
     // soft studio lighting: image-based light from a neutral room + a key light that follows the camera
     try { const pm = new THREE.PMREMGenerator(r); s.environment = pm.fromScene(new RoomEnvironment(r), 0.04).texture; s.environmentIntensity = 0.4; pm.dispose(); } catch (e) { /* older GPUs: lights only */ }
     s.add(new THREE.HemisphereLight(0xfffaf2, 0x5a5550, 0.9));
@@ -475,9 +475,9 @@ class Brain {
     c.enableDamping = true; c.dampingFactor = 0.08; c.target.copy(this.center);
     // v2.19.1 navigation limits: never exactly above or below (at the pole a drag only spins the picture and the view feels
     // stuck), the pivot always stays inside the model (zooming towards empty space or panning could carry it away, after which
-    // the brain swung out of the window), zoom in to 8 mm, zoom out only so far that the whole subject stays visible
+    // the brain swung out of the window), zoom in to 8 mm, zoom out far (v2.20.1: 15 times the brain's size) while the subject stays in the middle
     c.minPolarAngle = 0.12; c.maxPolarAngle = Math.PI - 0.12;
-    this.setLimits(this.center, this.radius, this.radius * 4.5);
+    this.setLimits(this.center, this.radius, this.radius * 15);
     c.rotateSpeed = 0.7; c.zoomSpeed = 0.9;
     // v2.19.1 touch screens: a small canvas made a short swipe turn the model ~100 degrees (straight to the top or bottom)
     if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) c.rotateSpeed = 0.45;
@@ -657,7 +657,7 @@ class Brain {
       const box = new THREE.Box3(); for (const m of this.meshes) if (m.userData.tw ? m.userData.tw.to.v : m.visible) box.union(new THREE.Box3().setFromBufferAttribute(m.geometry.attributes.position));
       const sz = box.getSize(new THREE.Vector3()), fov = THREE.MathUtils.degToRad(this.camera.fov) / 2;
       const dist = Math.max(sz.y / 2 / Math.tan(fov), sz.z / 2 / Math.tan(fov) / Math.max(0.5, this.camera.aspect)) * 1.12;
-      this.setLimits(this.center, this.radius, Math.max(this.radius * 7, dist * 1.3));
+      this.setLimits(this.center, this.radius, Math.max(this.radius * 14, dist * 3));
       this.fly(box.getCenter(new THREE.Vector3()), dist, new THREE.Vector3(-1, 0.04, -0.28).normalize(), 1100);
     }
     else { this.shadowOn = true; if (this.fitted) this.unfit(); }
@@ -820,9 +820,9 @@ class Brain {
     if (!n) return; this.fitted = true;
     const c = box.getCenter(new THREE.Vector3()), r = Math.max(20, box.getSize(new THREE.Vector3()).length() / 2);
     this.center0 = this.center0 || this.center.clone(); this.radius0 = this.radius0 || this.radius;
-    this.center = c; this.radius = r; this.setLimits(c, r, r * 7); this.view(name || 'front');
+    this.center = c; this.radius = r; this.setLimits(c, r, r * 14); this.view(name || 'front');
   }
-  unfit() { if (!this.center0) return; this.center = this.center0; this.radius = this.radius0; this.setLimits(this.center, this.radius, this.radius * 4.5); this.fitted = false; this.view('left'); }
+  unfit() { if (!this.center0) return; this.center = this.center0; this.radius = this.radius0; this.setLimits(this.center, this.radius, this.radius * 15); this.fitted = false; this.view('left'); }
   // centre of a structure (three coords); side 'L'/'R'/'M' or any
   centroid(id, side) {
     const box = new THREE.Box3(); let n = 0;
