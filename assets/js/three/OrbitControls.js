@@ -995,6 +995,16 @@ class OrbitControls extends EventDispatcher {
 
 			if ( scope.enabled === false ) return;
 
+			// NeuroUnknown v2.19.1: the first finger of a new touch means no other finger is down; drop any pointer whose
+			// pointerup/pointercancel never arrived (otherwise a one-finger drag is taken for a pinch and the view feels stuck)
+			if ( event.pointerType === 'touch' && event.isPrimary && pointers.length > 0 ) {
+
+				for ( const id of pointers ) delete pointerPositions[ id ];
+				pointers.length = 0;
+				state = STATE.NONE;
+
+			}
+
 			if ( pointers.length === 0 ) {
 
 				scope.domElement.setPointerCapture( event.pointerId );
@@ -1042,16 +1052,27 @@ class OrbitControls extends EventDispatcher {
 
 			if ( pointers.length === 0 ) {
 
-				scope.domElement.releasePointerCapture( event.pointerId );
+				try { scope.domElement.releasePointerCapture( event.pointerId ); } catch ( e ) { /* capture already lost */ }
 
 				scope.domElement.removeEventListener( 'pointermove', onPointerMove );
 				scope.domElement.removeEventListener( 'pointerup', onPointerUp );
 
+				scope.dispatchEvent( _endEvent );
+
+				state = STATE.NONE;
+
+			} else if ( pointers.length === 1 && pointerPositions[ pointers[ 0 ] ] !== undefined ) {
+
+				// NeuroUnknown v2.19.1 (as in later three.js): one finger lifted after a pinch, the other keeps turning the view
+				const pointerId = pointers[ 0 ];
+				const position = pointerPositions[ pointerId ];
+				onTouchStart( { pointerId: pointerId, pageX: position.x, pageY: position.y } );
+
+			} else {
+
+				state = STATE.NONE;
+
 			}
-
-			scope.dispatchEvent( _endEvent );
-
-			state = STATE.NONE;
 
 		}
 

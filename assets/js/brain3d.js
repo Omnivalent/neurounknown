@@ -437,8 +437,15 @@ class Brain {
       const sh = this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(sz.x * 1.5, sz.z * 1.35), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false, opacity: 0.6, toneMapped: false }));
       sh.rotation.x = -Math.PI / 2; sh.position.set(this.center.x, box.min.y - this.radius * 0.06, this.center.z); sh.renderOrder = -1; s.add(sh); }
     const c = this.controls = new OrbitControls(this.camera, r.domElement);
-    c.enableDamping = true; c.dampingFactor = 0.08; c.target.copy(this.center); c.minDistance = this.radius * 0.7; c.maxDistance = this.radius * 6;
+    c.enableDamping = true; c.dampingFactor = 0.08; c.target.copy(this.center);
+    // v2.19.1 navigation limits: never exactly above or below (at the pole a drag only spins the picture and the view feels
+    // stuck), the pivot always stays inside the model (zooming towards empty space or panning could carry it away, after which
+    // the brain swung out of the window), zoom in to 8 mm, zoom out only so far that the whole subject stays visible
+    c.minPolarAngle = 0.12; c.maxPolarAngle = Math.PI - 0.12;
+    this.setLimits(this.center, this.radius, this.radius * 4.5);
     c.rotateSpeed = 0.7; c.zoomSpeed = 0.9;
+    // v2.19.1 touch screens: a small canvas made a short swipe turn the model ~100 degrees (straight to the top or bottom)
+    if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) c.rotateSpeed = 0.45;
     // v2.17 zoom towards the point under the cursor (the pivot follows), right-drag or two fingers to pan: any part of a tall
     // subject (e.g. the brachial plexus with the spine shown) can be brought to the centre and examined closely
     c.zoomToCursor = true; c.screenSpacePanning = true;
@@ -456,13 +463,19 @@ class Brain {
     r.domElement.addEventListener('pointermove', e => { if (!down && e.pointerType === 'mouse') this.pick(e, false); });
     r.domElement.addEventListener('pointerleave', () => { this.hover(null); });
     // v2.11 double-click a structure: glide in close to it; double-click empty space: back to the whole brain
-    r.domElement.addEventListener('dblclick', e => {
+    let lastTap = null, tapDone = 0;
+    const dbl = e => {
       const bb = r.domElement.getBoundingClientRect(); this.ptr.set(((e.clientX - bb.left) / bb.width) * 2 - 1, -((e.clientY - bb.top) / bb.height) * 2 + 1);
       this.ray.setFromCamera(this.ptr, this.camera);
       const h = this.ray.intersectObjects(this.meshes.filter(m => m.visible && m.material.opacity > 0.05), false)[0];
       if (h) this.fly(h.point, this.fitted ? Math.max(c.minDistance, 140) : Math.max(c.minDistance, this.radius * 0.75), null, 900);
-      else if (this.spineOn) this.spineView(true); else this.fly(this.center, this.radius * 2.6, null, 900);
-    });
+      else this.reset();
+    };
+    r.domElement.addEventListener('dblclick', e => { if (performance.now() - tapDone > 600) dbl(e); });
+    // phones: a double tap (two quick taps in the same place) does the same, so a lost view can always be brought back
+    r.domElement.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') return; const now = performance.now();
+      if (lastTap && now - lastTap.t < 350 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap = null; tapDone = now; const ev = { clientX: e.clientX, clientY: e.clientY }; setTimeout(() => dbl(ev), 0); } // after the controls' own end-of-touch handling, which would cancel the glide
+      else lastTap = { t: now, x: e.clientX, y: e.clientY }; });
     // v2.11 keyboard: arrow keys turn the brain, + and - zoom, 0 returns to the start view (canvas must have focus)
     r.domElement.tabIndex = 0; r.domElement.setAttribute('role', 'img');
     r.domElement.setAttribute('aria-label', '3D brain. Drag or use the arrow keys to turn it, scroll or + and - to zoom, double-click a structure to zoom in, right-drag or two fingers to move, 0 to reset.');
@@ -471,12 +484,12 @@ class Brain {
       if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'ArrowUp' || k === 'ArrowDown') {
         const off = cam.position.clone().sub(t), sp = new THREE.Spherical().setFromVector3(off), a = 0.12;
         if (k === 'ArrowLeft') sp.theta -= a; if (k === 'ArrowRight') sp.theta += a;
-        if (k === 'ArrowUp') sp.phi = Math.max(0.05, sp.phi - a); if (k === 'ArrowDown') sp.phi = Math.min(Math.PI - 0.05, sp.phi + a);
+        if (k === 'ArrowUp') sp.phi = Math.max(0.12, sp.phi - a); if (k === 'ArrowDown') sp.phi = Math.min(Math.PI - 0.12, sp.phi + a);
         cam.position.copy(t).add(new THREE.Vector3().setFromSpherical(sp)); cam.lookAt(t);
       } else if (k === '+' || k === '=' || k === '-' || k === '_') {
         const off = cam.position.clone().sub(t), d = THREE.MathUtils.clamp(off.length() * (k === '+' || k === '=' ? 0.85 : 1.18), c.minDistance, c.maxDistance);
         cam.position.copy(t).add(off.setLength(d));
-      } else if (k === '0') this.view('left');
+      } else if (k === '0') this.reset();
       else used = false;
       if (used) { e.preventDefault(); this.touch(); this.flight = k === '0' ? this.flight : null; }
     });
@@ -513,8 +526,9 @@ class Brain {
   }
   resize() { const W = this.el.clientWidth, H = this.el.clientHeight; if (!W || !H) return; this.renderer.setSize(W, H); this.camera.aspect = W / H; this.camera.updateProjectionMatrix(); }
   view(name) {
+    if (name === 'reset') return this.reset();
     const d = this.radius * 2.6, c = this.center;
-    const v = { left: [-d, 0, 0], right: [d, 0, 0], top: [0, d, 0.01], front: [0, 0, -d], back: [0, 0, d], below: [0, -d, -0.01], medial: [d, 0, 0] }[name] || [-d, 0, 0];
+    const v = { left: [-d, 0, 0], right: [d, 0, 0], top: [0, d * 0.99, d * 0.13], front: [0, 0, -d], back: [0, 0, d], below: [0, -d * 0.99, -d * 0.13], medial: [d, 0, 0] }[name] || [-d, 0, 0];
     const off = new THREE.Vector3(v[0], v[1] + (name === 'left' || name === 'right' || name === 'medial' ? d * 0.1 : 0), v[2]);
     this.camera.up.set(0, 1, 0);
     if (this.ready && this.controls) { this.fly(c, off.length(), off, 1000); this.framed = false; return; }
@@ -523,12 +537,16 @@ class Brain {
   }
   // turn to a named viewing direction while keeping the current (or planned) target and distance
   look(name) {
-    const v = { left: [-1, 0.1, 0], right: [1, 0.1, 0], top: [0, 1, 0.01], front: [0, 0, -1], back: [0, 0, 1], below: [0, -1, -0.01] }[name]; if (!v || !this.controls) return;
+    const v = { left: [-1, 0.1, 0], right: [1, 0.1, 0], top: [0, 0.99, 0.13], front: [0, 0, -1], back: [0, 0, 1], below: [0, -0.99, -0.13] }[name]; if (!v || !this.controls) return;
     const t = this.flight ? this.flight.tt : this.controls.target.clone(), d = this.flight ? this.flight.dist : this.camera.position.distanceTo(this.controls.target);
     this.fly(t, d, new THREE.Vector3(v[0], v[1], v[2]).normalize(), 1100);
   }
   // stop the idle rotation for a while (e.g. after a programmatic view change)
   touch() { this.lastTouch = performance.now(); if (this.controls) this.controls.autoRotate = false; }
+  // the pivot may move anywhere inside a sphere around the subject (radius r); camera distance between 8 mm and far
+  setLimits(center, r, far) { const c = this.controls; if (!c) return; c.cursor.copy(center); c.maxTargetRadius = r * 0.9; c.minDistance = 8; c.maxDistance = far; }
+  // back to the whole subject from wherever the camera is
+  reset() { this.framed = false; this.flight = null; if (this.spineOn) this.spineView(true); else this.view('left'); }
   setAutoRotate(on) { this.holdRotate = !on; this.touch(); }
   setCut(on) { this.cut = on; this.apply(); if (on) this.view('medial'); if (this.cutFace) this.cutFace.visible = !!on && !(this.clipPlanes || []).length; }
   // v2.19 cut face on the midline structures when the brain is cut in half (canvas drawn by the page from the 0.5 mm template)
@@ -598,14 +616,15 @@ class Brain {
   // v2.16 spine on: frame brain and spine together (no floor shadow, wider zoom range); off: back to the brain
   spineView(on) {
     if (on) {
-      this.shadowOn = false; this.fit('left'); this.controls.maxDistance = this.radius * 6;
+      this.shadowOn = false; this.fit('left');
       // a tall subject: fit its height to the vertical field of view (plus a margin), seen from the left and slightly in front
       const box = new THREE.Box3(); for (const m of this.meshes) if (m.userData.tw ? m.userData.tw.to.v : m.visible) box.union(new THREE.Box3().setFromBufferAttribute(m.geometry.attributes.position));
       const sz = box.getSize(new THREE.Vector3()), fov = THREE.MathUtils.degToRad(this.camera.fov) / 2;
       const dist = Math.max(sz.y / 2 / Math.tan(fov), sz.z / 2 / Math.tan(fov) / Math.max(0.5, this.camera.aspect)) * 1.12;
+      this.setLimits(this.center, this.radius, Math.max(this.radius * 7, dist * 1.3));
       this.fly(box.getCenter(new THREE.Vector3()), dist, new THREE.Vector3(-1, 0.04, -0.28).normalize(), 1100);
     }
-    else { this.shadowOn = true; if (this.fitted) this.unfit(); this.controls.maxDistance = this.radius * 6; }
+    else { this.shadowOn = true; if (this.fitted) this.unfit(); }
   }
   ensureSpine() {
     if (this.spn || !this.mf.spine) return Promise.resolve();
@@ -733,9 +752,9 @@ class Brain {
     if (!n) return; this.fitted = true;
     const c = box.getCenter(new THREE.Vector3()), r = Math.max(20, box.getSize(new THREE.Vector3()).length() / 2);
     this.center0 = this.center0 || this.center.clone(); this.radius0 = this.radius0 || this.radius;
-    this.center = c; this.radius = r; this.controls.minDistance = Math.min(r * 0.6, 40); this.view(name || 'front');
+    this.center = c; this.radius = r; this.setLimits(c, r, r * 7); this.view(name || 'front');
   }
-  unfit() { if (!this.center0) return; this.center = this.center0; this.radius = this.radius0; this.controls.minDistance = this.radius * 0.7; this.fitted = false; this.view('left'); }
+  unfit() { if (!this.center0) return; this.center = this.center0; this.radius = this.radius0; this.setLimits(this.center, this.radius, this.radius * 4.5); this.fitted = false; this.view('left'); }
   // centre of a structure (three coords); side 'L'/'R'/'M' or any
   centroid(id, side) {
     const box = new THREE.Box3(); let n = 0;
@@ -882,6 +901,7 @@ class Brain {
   }
   // camera glide to a target point and distance (keeps the viewing direction unless one is given)
   fly(target, dist, dir, ms) {
+    if (this.controls) dist = THREE.MathUtils.clamp(dist, this.controls.minDistance, this.controls.maxDistance);
     const c = this.controls, cam = this.camera, ft = c.target.clone(), d0 = cam.position.clone().sub(ft);
     this.flight = { t0: performance.now(), ms: ms || 900, ft, tt: target.clone(), dist, d0: d0.length(), u0: d0.clone().normalize(), u1: (dir ? dir.clone() : d0.clone()).normalize() };
     this.touch();
