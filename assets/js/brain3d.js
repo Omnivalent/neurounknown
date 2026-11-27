@@ -181,6 +181,37 @@ function arteryMaterial() {
   mat.customProgramCacheKey = () => 'artery-v1';
   return mat;
 }
+// v2.20 veins and dural sinuses: separate file; a slow, steady light drifts towards the jugular veins (venous flow does not pulse)
+let VEN = null;
+async function loadVeins(m) {
+  if (VEN) return VEN;
+  if (!m.veins) return null;
+  const r = await fetch('assets/brain3d/' + m.veins.file); if (!r.ok) throw new Error('veins ' + r.status);
+  VEN = { mf: m.veins, buf: await r.arrayBuffer() }; return VEN;
+}
+const VEIN_COL = { sinus: '#2e4a86', vein_deep: '#3a5ea8', vein_sup: '#3f63b0', vein_neck: '#2e4a86' };
+function veinMaterial(me) {
+  const glass = me.id === 'cavernous_sinus';
+  const mat = new THREE.MeshPhysicalMaterial({ color: VEIN_COL[me.kind] || '#3a5ea8', roughness: 0.36, metalness: 0, clearcoat: 0.55, clearcoatRoughness: 0.3,
+    sheen: 0.25, sheenColor: new THREE.Color('#9fb8ff'), transparent: true, opacity: glass ? 0.5 : 1, depthWrite: !glass, side: glass ? THREE.DoubleSide : THREE.FrontSide });
+  if (glass) mat.userData.glass = 0.5;
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.uTime = ART_U.uTime; sh.uniforms.uPulse = ART_U.uPulse;
+    sh.vertexShader = 'attribute float aFlow; varying float vFlow;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vFlow = aFlow;');
+    sh.fragmentShader = 'uniform float uTime; uniform float uPulse; varying float vFlow;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
+      `#include <emissivemap_fragment>
+      float ph = fract(vFlow / 60.0 - uTime * 0.12);
+      float band = smoothstep(0.0, 0.5, ph) * (1.0 - smoothstep(0.5, 1.0, ph));
+      totalEmissiveRadiance += diffuseColor.rgb * (0.06 + 0.22 * band) * uPulse;`);
+  };
+  mat.customProgramCacheKey = () => 'vein-v1';
+  return mat;
+}
+// v2.20 peel mode: layers come off from the outside in (skull, dura with the sinuses, arachnoid, subarachnoid space, pia, cerebral
+// hemispheres, deep structures and cerebellum), leaving the brainstem and cranial nerves
+const PEEL_ON = { skull: k => k <= 0, dura: k => k <= 1, arachnoid: k => k <= 2, csf: k => k === 3, pia: k => k <= 4, vsup: k => k >= 2 && k <= 5,
+  art: k => k >= 2 && k <= 6, cortex: k => k <= 5, deep: k => k <= 6, vdeep: k => k >= 5 && k <= 6, stem: () => true };
+const PEEL_DEEP = { 'basal ganglia': 1, subcortical: 1, ventricles: 1, cerebellum: 1 };
 // v2.17 long pathways (brain to cord): fibre lines coloured by the side they start on, so each crossing shows as a colour swap
 let PTH = null;
 async function loadPaths(m) {
@@ -212,12 +243,16 @@ async function loadMeninges(m) {
 }
 // colour, opacity and draw order of each layer: dura a tough, pearly grey-white sheet; arachnoid a thin, glassy veil; pia a
 // delicate film with a pink vascular tint that follows the brain into its sulci
+const PEEL_OP = { dura: 0.8, fold: 0.8, arachnoid: 0.62, csf: 0.5, pia: 0.55 }; // in peel mode each top layer reads as a sheet
 const MEN_STYLE = { dura: { c: '#cfd3d6', o: 0.5, r: 6 }, fold: { c: '#c9cdd0', o: 0.55, r: 5 }, arachnoid: { c: '#eef3f6', o: 0.22, r: 5 },
-  pia: { c: '#e39a94', o: 0.38, r: 4 }, granulation: { c: '#efe8da', o: 1, r: 2 }, needle: { c: '#c9ced6', o: 1, r: 2 }, needlehub: { c: '#4a7fd0', o: 1, r: 2 } };
+  pia: { c: '#e39a94', o: 0.38, r: 4 }, csf: { c: '#6fbfe8', o: 0.32, r: 5 }, granulation: { c: '#efe8da', o: 1, r: 2 }, needle: { c: '#c9ced6', o: 1, r: 2 }, needlehub: { c: '#4a7fd0', o: 1, r: 2 } };
 export const CSFCOL = '#38b6ff';
 const MEN_MARK = { lumbar_puncture: 'Lumbar puncture: needle tip in the CSF (L3/L4)', epidural_injection: 'Epidural: needle tip outside the dura',
   conus_medullaris: 'Conus medullaris (end of the cord, L1/L2)', dural_sac_end: 'End of the dural sac (S2)', foramen_monro: 'Foramen of Monro',
-  aqueduct: 'Cerebral aqueduct', foramen_magendie: 'Foramen of Magendie', foramen_luschka: 'Foramen of Luschka' };
+  aqueduct: 'Cerebral aqueduct', foramen_magendie: 'Foramen of Magendie', foramen_luschka: 'Foramen of Luschka',
+  cisterna_magna: 'Cisterna magna', prepontine_cistern: 'Prepontine cistern', interpeduncular_cistern: 'Interpeduncular cistern', chiasmatic_cistern: 'Chiasmatic cistern',
+  quadrigeminal_cistern: 'Quadrigeminal cistern', ambient_cistern: 'Ambient cistern', cerebellopontine_angle_cistern: 'Cerebellopontine angle cistern', sylvian_cistern: 'Sylvian cistern' };
+const MEN_CIST = new Set(['cisterna_magna', 'prepontine_cistern', 'interpeduncular_cistern', 'chiasmatic_cistern', 'quadrigeminal_cistern', 'ambient_cistern', 'cerebellopontine_angle_cistern', 'sylvian_cistern']);
 const MEN_SPINAL = new Set(['lumbar_puncture', 'epidural_injection', 'conus_medullaris', 'dural_sac_end']);
 function meningesMaterial(me) {
   const k = me.kind, st = MEN_STYLE[k] || MEN_STYLE.dura;
@@ -610,6 +645,7 @@ class Brain {
     const was = !!this.spineOn; this.layers = L || {}; this.spineOn = !!(this.layers.spine || this.layers.peripheral); if (this.layers.arteries) this.ensureArteries();
     if (this.layers.skull) this.ensureSkull();
     if (this.layers.meninges) this.ensureMeninges();
+    if (this.layers.veins) this.ensureVeins();
     if (this.spineOn && !was) this.ensureSpine().then(() => { if (this.spineOn) { this.spineView(true); this.frameFocus(); } }); else if (!this.spineOn && was) this.spineView(false);
     this.apply();
   }
@@ -686,6 +722,37 @@ class Brain {
     return this.sklLoading;
   }
   setBones(mode) { this.boneMode = mode; this.apply(); }
+  ensureVeins() {
+    if (this.vns || !this.mf.veins) return Promise.resolve();
+    if (this.vnsLoading) return this.vnsLoading;
+    this.vnsLoading = loadVeins(this.mf).then(V => {
+      if (!V || this.disposed) return;
+      this.vns = [];
+      for (const me of V.mf.meshes) {
+        const m = new THREE.Mesh(arteryGeometry(me, V.buf), veinMaterial(me)); m.userData = { id: me.id, side: me.side, vein: me.kind };
+        if (me.id === 'cavernous_sinus') m.renderOrder = 5;
+        m.visible = false; this.group.add(m); this.meshes.push(m); this.vns.push(m); (this.byId[me.id] = this.byId[me.id] || []).push(m);
+      }
+      ART_U.uPulse.value = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1; this.arts = this.arts || [];
+      this.apply(); if (this.opts.onVeins) this.opts.onVeins();
+    }).catch(() => { this.vnsLoading = null; });
+    return this.vnsLoading;
+  }
+  // k = null: off; 0..7: how many layers are off (see PEEL_ON)
+  setPeel(k) { this.peel = k; if (k != null) { this.ensureSkull(); this.ensureMeninges(); this.ensureVeins(); } this.apply(); }
+  peelCat(m, inf) {
+    const u = m.userData;
+    if (u.skull) return u.skull === 'bone' || u.skull === 'tooth' ? 'skull' : null;
+    if (u.men) return u.men === 'dura' || u.men === 'fold' || u.men === 'granulation' ? 'dura' : u.men === 'arachnoid' ? 'arachnoid' : u.men === 'csf' ? 'csf' : u.men === 'pia' ? 'pia' : null;
+    if (u.vein) return u.vein === 'sinus' ? 'dura' : u.vein === 'vein_sup' ? 'vsup' : u.vein === 'vein_deep' ? 'vdeep' : null;
+    if (u.spine) return null;
+    if (u.art) return 'art';
+    const lb = inf.lobe;
+    if (lb === 'brainstem' || lb === 'cranial nerves') return 'stem';
+    if (PEEL_DEEP[lb]) return 'deep';
+    if (CORTEX[lb] || lb === 'white matter') return 'cortex';
+    return null;
+  }
   ensureMeninges() {
     if (this.men || !this.mf.meninges) return Promise.resolve();
     if (this.menLoading) return this.menLoading;
@@ -718,7 +785,8 @@ class Brain {
   placeTags() {
     const W = this.el.clientWidth, H = this.el.clientHeight, v = new THREE.Vector3(), Lz = this.layers || {};
     for (const t of this.menTags) {
-      const show = Lz.meninges && (!t.spinal || this.spineOn);
+      // cistern names only while the subarachnoid space is the top layer of the peel; the other sites with the Meninges layer
+      const show = MEN_CIST.has(t.id) ? this.peel === 3 : Lz.meninges && this.peel == null && (!t.spinal || this.spineOn);
       if (!show) { if (t.on) { t.el.style.opacity = 0; t.on = false; } continue; }
       v.copy(t.p).project(this.camera);
       if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) { t.el.style.opacity = 0; t.on = false; continue; }
@@ -959,13 +1027,23 @@ class Brain {
       const id = m.userData.id, mat = m.material, inf = this.info[id] || {}, isCortex = CORTEX[inf.lobe];
       m.visible = !(this.cut && !cp.length && m.userData.side === 'R');
       mat.clippingPlanes = cp.length ? cp : (m.userData.side === 'M' ? planes : []); mat.clipIntersection = true;
-      const Lz = this.layers || {}, showHidden = (Lz.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') || (Lz.ventricles && inf.lobe === 'ventricles');
+      const Lz = this.layers || {}, showHidden = (Lz.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') || (Lz.ventricles && inf.lobe === 'ventricles') || (this.peel === 6 && inf.lobe === 'ventricles');
+      if (this.peel != null && !(this.focus[id + '@' + m.userData.side] || this.focus[id])) {
+        const pc = this.peelCat(m, inf); if (pc && !PEEL_ON[pc](this.peel)) { m.visible = false; continue; } }
+      const vk = m.userData.vein;
+      if (vk) { // v2.20 veins: with the Veins layer, in peel mode, or when chosen
+        const fv = this.focus[id + '@' + m.userData.side] || this.focus[id], gl = id === 'cavernous_sinus';
+        if (!fv && !Lz.veins && this.peel == null) { m.visible = false; continue; }
+        mat.color.set(fv || VEIN_COL[vk] || '#3a5ea8'); mat.opacity = any && !fv ? 0.1 : gl ? 0.5 : 1;
+        mat.transparent = mat.opacity < 1; mat.depthWrite = mat.opacity >= 1; m.renderOrder = gl ? 5 : 1;
+        mat.emissive.set(id === this.sel && fv ? fv : '#000000'); mat.emissiveIntensity = 0.15; mat.needsUpdate = true; continue;
+      }
       const mk = m.userData.men;
       if (mk) { // v2.19 meninges: with the Meninges layer (or when chosen); the needles only with the spine
         const fm = this.focus[id + '@' + m.userData.side] || this.focus[id], st = MEN_STYLE[mk] || MEN_STYLE.dura;
-        if ((!fm && !Lz.meninges) || ((mk === 'needle' || mk === 'needlehub') && !fm && !this.spineOn)) { m.visible = false; continue; }
+        if ((!fm && !Lz.meninges && this.peel == null) || ((mk === 'needle' || mk === 'needlehub') && !fm && !this.spineOn)) { m.visible = false; continue; }
         if (fm) { mat.color.set(fm); mat.opacity = Math.max(st.o, 0.55); }
-        else { if (mk !== 'needlehub') mat.color.set(st.c); mat.opacity = any ? Math.min(st.o, 0.1) : st.o; }
+        else { if (mk !== 'needlehub') mat.color.set(st.c); mat.opacity = any ? Math.min(st.o, 0.1) : this.peel != null ? (PEEL_OP[mk] || st.o) : st.o; }
         mat.transparent = mat.opacity < 1; mat.depthWrite = mat.opacity >= 1; m.renderOrder = st.r;
         mat.emissive.set(id === this.sel && fm ? fm : '#000000'); mat.emissiveIntensity = 0.15; mat.needsUpdate = true; continue;
       }
@@ -984,14 +1062,14 @@ class Brain {
       }
       const kk = m.userData.skull;
       if (kk && !f) { // v2.18 skull and teeth with the Skull layer and the bone mode; eyes and orbital optic nerves with the nerves or the skull
-        if (kk === 'bone' || kk === 'tooth') { if (!Lz.skull || bm === 0) { m.visible = false; continue; } }
+        if (kk === 'bone' || kk === 'tooth') { if ((!Lz.skull && this.peel == null) || bm === 0) { m.visible = false; continue; } }
         else if (nm === 'hide' && !Lz.skull) { m.visible = false; continue; }
       }
       if (nm === 'iso' && !f && !(isNerve || ISO[id] || inf.nerveof || isArt)) { m.visible = false; continue; }
       const Ly = this.layers || {}, grp = LAYER_OF[inf.lobe];
       if (!f && nm !== 'iso' && grp && Ly[grp] === false) { m.visible = false; continue; }
       if (!f && !any && nm !== 'iso' && Ly.tracts && inf.lobe === 'white matter' && id !== 'cerebral_wm' && id !== 'cerebellar_wm') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#e6e0d2'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.clippingPlanes = cp.length ? cp : mat.clippingPlanes; mat.needsUpdate = true; continue; }
-      if (!f && nm !== 'iso' && Ly.ventricles && inf.lobe === 'ventricles') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#8fb3c9'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.needsUpdate = true; continue; }
+      if (!f && nm !== 'iso' && (Ly.ventricles || this.peel === 6) && inf.lobe === 'ventricles') { m.visible = !(this.cut && m.userData.side === 'R'); mat.color.set(inf.tint || '#8fb3c9'); mat.opacity = 1; mat.transparent = false; mat.depthWrite = true; mat.emissive.set('#000000'); mat.needsUpdate = true; continue; }
       if (nm === 'iso' && !any) { // nerve view: nerves and nuclei in matching colours, see-through brainstem
         m.visible = !(this.cut && m.userData.side === 'R') || isNerve;
         let c = isArt ? (inf.tint || '#b3262e') : inf.ncol || (id === 'optic_chiasm' || id === 'lgn' ? '#e9c46a' : null);
@@ -1059,11 +1137,11 @@ class Brain {
       if (this.pleg) this.pleg.classList.toggle('on', n > 0);
     }
     if (this.csf) { // v2.19 CSF circulation: from the choroid plexus through the ventricles to the subarachnoid space
-      const on = !!(Lyr.meninges || this.focus.csf_flow), anyF = Object.keys(this.focus).length > 0;
+      const on = !!((Lyr.meninges && (this.peel == null || this.peel >= 3)) || this.focus.csf_flow), anyF = Object.keys(this.focus).length > 0;
       for (const L of this.csf) { const u = L.material.uniforms; u.uDark.value = dark ? 1 : 0; u.uCol.value.set(CSFCOL);
         L.userData.tgt = on && (!L.userData.spinal || this.spineOn) ? (anyF && !this.focus.csf_flow ? 0.35 : 0.95) : 0;
         L.material.clippingPlanes = cp.length ? cp : planes; L.material.clipIntersection = true; }
-      if (this.menTagBox) this.menTagBox.classList.toggle('on', !!Lyr.meninges);
+      if (this.menTagBox) this.menTagBox.classList.toggle('on', !!Lyr.meninges || this.peel === 3);
     }
   }
   pick(e, click) {
